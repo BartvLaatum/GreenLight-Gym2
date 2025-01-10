@@ -36,25 +36,27 @@ class GreenLightEnv(gym.Env):
     gl_model: GreenLight
     growth_year: int
     start_day: int
+    reward_function: BaseReward
     def __init__(
-                self,
-                weather_data_dir: str,          # path to weather data
-                location: str,                  # location of the recorded weather data
-                data_source: str,               # source of the weather data
-                nx: int,                        # number of states 
-                nd: int,                        # number of disturbances
-                h: float,                       # [s] time step for the underlying GreenLight solver
-                time_interval: int,             # [s] time interval in between observations
-                pred_horizon: int,              # [days] number of future weather predictions
-                n_setpoints: int,               # number of setpoints we control
-                season_length: int = 60,       # season length
-                start_train_year: int = 2023,   # start year for training
-                end_train_year: int = 2023,     # end year for training
-                start_train_day: int = 265, 	# start day of the year for training
-                end_train_day: int = 284,       # end day of the year for training
-                training: bool = True,          # whether we are training or testing
-                options: Optional[Dict[str, Any]] = {}, # options for the GreenLight model
-                ) -> None:
+        self,
+        weather_data_dir: str,          # path to weather data
+        location: str,                  # location of the recorded weather data
+        data_source: str,               # source of the weather data
+        nx: int,                        # number of states
+        nu: int,                        # number of control inputs
+        nd: int,                        # number of disturbances
+        dt: float,                      # [s] time step for the underlying GreenLight solver
+        u_min: List[float],             # min bound for the control inputs
+        u_max: List[float],             # max for the control inputs
+        delta_u_max: float,             # max change for the control inputs
+        pred_horizon: int,              # [days] number of future weather predictions
+        season_length: int = 60,        # season length
+        start_train_year: int = 2023,   # start year for training
+        end_train_year: int = 2023,     # end year for training
+        start_train_day: int = 265, 	# start day of the year for training
+        end_train_day: int = 284,       # end day of the year for training
+        training: bool = True,          # whether we are training or testing
+    ) -> None:
         super(GreenLightEnv, self).__init__()
 
         # number of seconds in the day
@@ -62,16 +64,16 @@ class GreenLightEnv(gym.Env):
 
         # arguments that are kept the same over various simulations
         self.nx = nx
+        self.nu = nu
         self.nd = nd
+        self.u_min = np.array(u_min, dtype=np.float32)
+        self.u_max = np.array(u_max, dtype=np.float32)
+        self.delta_u_max = np.ones(self.nu, dtype=np.float32) * delta_u_max
         self.weather_data_dir = weather_data_dir
         self.location = location
         self.data_source = data_source
-        self.h = h
+        self.dt = dt
         self.pred_horizon = pred_horizon
-        self.time_interval = time_interval
-
-        self.reward_function = None
-        self.solver_steps = int(time_interval/self.h)       # number of steps the solver takes between time_interval
 
         self.train_years = list(range(start_train_year, end_train_year+1))
         self.train_days = list(range(start_train_day, end_train_day+1))
@@ -80,7 +82,7 @@ class GreenLightEnv(gym.Env):
         self.eval_idx = 0
 
         self.season_length = season_length
-        self.N = int(self.season_length * self.c/self.time_interval)    # number of timesteps to take for python wrapper
+        self.N = int(self.season_length * self.c/self.dt)
 
         # lower and upper bounds for air temperature, co2 concentration, humidity
         self.obs_low = None

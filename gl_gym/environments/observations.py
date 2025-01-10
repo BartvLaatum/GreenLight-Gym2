@@ -38,22 +38,22 @@ class StateObservations(BaseObservations):
     The model observations are computed in GreenLight,
     the weather observations are extracted from the weather data array.
     """
-    def __init__(self,
-                obs_names) -> None:
-        self.obs_names = obs_names
-        self.n_obs = len(obs_names)
+    def __init__(self) -> None:
+        self.model_obs_names = ["co2_air", "co2_top", "temp_air", "temp_top", "can_temp", "covin_temp", "covex_temp",
+                                "thScr_temp", "flr_temp", "pipe_temp", "soil1_temp", "soil2_temp", "soil3_temp", "soil4_temp", "soil5_temp", 
+                                "vp_air", "vp_top", "lamp_temp", "intlamp_temp", "grow_pipe_temp", "blscr_temp", "24_can_temp",
+                                "cBuf", "cleaves", "cstem", "cFruit", "tsum"]
+        self.n_obs = len(self.model_obs_names)
 
     def observation_space(self) -> spaces.Box:
-        return spaces.Box(low=-1e-4, high=1e4, shape=(self.n_obs,), dtype=np.float32)
+        return spaces.Box(low=-np.inf, high=np.inf, shape=(self.n_obs,), dtype=np.float32)
 
-    def compute_obs(self,
-                    gl_model: GreenLight,
-                    ) -> np.ndarray:
+    def compute_obs(self) -> np.ndarray:
         """
         Compute, and retrieve observations from GreenLight and the weather.
         """
         # all states except the last one which corresponds to time.
-        return gl_model.get_state()[:-1]
+        return np.random.rand(self.n_obs)
 
 class WeatherObservations(BaseObservations):
     """

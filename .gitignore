@@ -2,4 +2,4 @@ __pycache__/
 *.pyc
 *.so
 build/
-
+gl_gym.egg-info/

@@ -87,13 +87,11 @@ inline SX airMv(const SX& f12, const SX& vp1, const SX& vp2, const SX& t1, const
     return a * fabs(f12) * (vp1 / (t1 + c2k) - vp2 / (t2 + c2k));
 }
 
-
 inline SX airMc(const SX& f12, const SX& c1, const SX& c2) {
     // Co2 flux accompanying an air flux [kg m^{-2} s^{-1}]
     // Equation 45 [1]
     return fabs(f12) * (c1 - c2);
 }
-
 
 // Update function for auxiliary variables
 SX update(const SX& x, const SX& u, const SX& d, const SX& p) {
@@ -113,14 +111,14 @@ SX update(const SX& x, const SX& u, const SX& d, const SX& p) {
     a[9] = rhoDn(a[5], p(65), a[6], a[6]);
 
     // Blackout screen and Roof
-    a[10] = 1 - u(7) * (1 - p(90));
-    a[11] = u(7) * p(88);
+    a[10] = 1 - u(5) * (1 - p(90));
+    a[11] = u(5) * p(88);
     a[12] = tau12(a[2], a[10], a[4], a[11]);
     a[13] = rhoUp(a[2], a[3], a[4], a[11]);
     a[14] = rhoDn(a[10], a[4], a[11], a[11]);
 
-    a[15] = 1 - u(7) * (1 - p(89));
-    a[16] = u(7) * p(87);
+    a[15] = 1 - u(5) * (1 - p(89));
+    a[16] = u(5) * p(87);
     a[17] = tau12(a[7], a[15], a[9], a[16]);
     a[18] = rhoUp(a[7], a[8], a[9], a[16]);
     a[19] = rhoDn(a[15], a[9], a[16], a[16]);
@@ -149,7 +147,8 @@ SX update(const SX& x, const SX& u, const SX& d, const SX& p) {
 
     // Global, PAR, and NIR heat fluxes
     a[37] = p(172) * u(4);                      // qLampIn;         p.thetaLampMax * u[4];
-    a[38] = p(196) * u(5);
+    // a[38] = p(196) * u(5);
+    a[38] = 0; // Excluded the inter lights from the model
     a[39] = (1 - p(44)) * a[20] * p(6) * d(0);  // rParGhSun
     a[40] = p(174) * a[37];                     // rParGhLamp;      p.etaLampPar * a.qLampIn;
     a[41] = p(192) * a[38];
@@ -208,7 +207,7 @@ SX update(const SX& x, const SX& u, const SX& d, const SX& p) {
     a[81] = 1 - u(2) * (1 - p(81));
 
     // FIR transmission coefficient of the blackout screen
-    a[82] = 1 - u(7) * (1 - p(91));
+    a[82] = 1 - u(5) * (1 - p(91));
 
     // Surface of canopy per floor area
     a[83] = 1 - exp(-p(35) * a[31]);
@@ -280,25 +279,25 @@ SX update(const SX& x, const SX& u, const SX& d, const SX& p) {
     a[105] = fir(p(169), p(165), p(3), 1, x(19), x(4), p(2));
 
     // FIR between blackout screen and floor [W m^{-2}]	
-    a[106] = fir(1, p(95), p(85), p(199) * p(178) * u(7) * (1 - 0.49 * M_PI * p(107) * p(105)) * exp(-p(35) * a[31]), x(8), x(20), p(2));
+    a[106] = fir(1, p(95), p(85), p(199) * p(178) * u(5) * (1 - 0.49 * M_PI * p(107) * p(105)) * exp(-p(35) * a[31]), x(8), x(20), p(2));
 
     // FIR between blackout screen and pipe [W m^{-2}]
-    a[107] = fir(p(124), p(104), p(85), p(199) * p(178) * u(7) * 0.49 * exp(-p(35) * a[31]), x(9), x(20), p(2));
+    a[107] = fir(p(124), p(104), p(85), p(199) * p(178) * u(5) * 0.49 * exp(-p(35) * a[31]), x(9), x(20), p(2));
 
     // FIR between blackout screen and canopy [W m^{-2}]
-    a[108] = fir(a[83], p(3), p(85), p(178) * u(7), x(4), x(20), p(2));
+    a[108] = fir(a[83], p(3), p(85), p(178) * u(5), x(4), x(20), p(2));
 
     // FIR between blackout screen and thermal screen [W m^{-2}]
-    a[109] = fir(u(7), p(85), p(74), u(2), x(20), x(7), p(2));
+    a[109] = fir(u(5), p(85), p(74), u(2), x(20), x(7), p(2));
 
     // FIR between blackout screen and cover [W m^{-2}]
-    a[110] = fir(u(7), p(85), a[29], a[81], x(20), x(5), p(2));
+    a[110] = fir(u(5), p(85), a[29], a[81], x(20), x(5), p(2));
 
     // FIR between blackout screen and sky [W m^{-2}]
-    a[111] = fir(u(7), p(85), p(4), a[24] * a[81], x(20), d(5), p(2));
+    a[111] = fir(u(5), p(85), p(4), a[24] * a[81], x(20), d(5), p(2));
 
     // FIR between blackout screen and lamps [W m^{-2}]
-    a[112] = fir(p(181), p(182), p(85), u(7), x(17), x(20), p(2));
+    a[112] = fir(p(181), p(182), p(85), u(5), x(17), x(20), p(2));
 
     // Fraction of radiation going up from the interlight to the canopy [-]
     a[113] = 1 - exp(-p(203) * (1 - p(189)) * a[31]);
@@ -319,7 +318,7 @@ SX update(const SX& x, const SX& u, const SX& d, const SX& p) {
     a[118] = fir(p(194), p(195), p(183), (1 - a[113]) * p(181), x(18), x(17), p(2));
     
     // FIR between interlights and blackout screen [W m^{-2}]
-    a[119] = fir(p(194), p(195), p(85), u(7) * p(178) * (1 - a[113]), x(18), x(20), p(2));
+    a[119] = fir(p(194), p(195), p(85), u(5) * p(178) * (1 - a[113]), x(18), x(20), p(2));
     
     // FIR between interlights and thermal screen [W m^{-2}]
     a[120] = fir(p(194), p(195), p(74), u(2) * a[82] * p(178) * (1 - a[113]), x(18), x(7), p(2));
@@ -395,7 +394,7 @@ SX update(const SX& x, const SX& u, const SX& d, const SX& p) {
     a[136] = if_else(
                 a[127] >= p(8),
                 p(57) * a[132] + p(204) * a[135],
-                p(57) * (fmax(u(2), u(7)) * a[132] + (1 - fmax(u(2), u(7))) * a[133] * a[127]) + p(204) * a[135]
+                p(57) * (fmax(u(2), u(5)) * a[132] + (1 - fmax(u(2), u(5))) * a[133] * a[127]) + p(204) * a[135]
             );
 
     
@@ -403,7 +402,7 @@ SX update(const SX& x, const SX& u, const SX& d, const SX& p) {
     a[137] = if_else(
                 a[127] >= p(8),
                 p(57) * a[134] + (1 - p(204)) * a[135],
-                p(57) * (fmax(u(2), u(7)) * a[134] + (1 - fmax(u(2), u(7))) * a[133] * a[129]) + (1 - p(204)) * a[135]
+                p(57) * (fmax(u(2), u(5)) * a[134] + (1 - fmax(u(2), u(5))) * a[133] * a[129]) + (1 - p(204)) * a[135]
             );
 
 
@@ -422,8 +421,8 @@ SX update(const SX& x, const SX& u, const SX& d, const SX& p) {
         ((1. - u(2)) / a[141]) * sqrt(0.5 * a[141] * (1. - u(2)) * p(26) * fabs(a[140] - a[139]) + 1e-6);
 
     // Air flux through the blackout screen [m s^{-1}]
-    a[143] = u(7) * p(94) * pow(fabs(x(2) - x(3) + 1e-6), 0.66) + \
-        ((1. - u(7)) / a[141]) * sqrt(0.5 * a[141] * (1. - u(7)) * p(26) * fabs(a[140] - a[139]) + 1e-6);
+    a[143] = u(5) * p(94) * pow(fabs(x(2) - x(3) + 1e-6), 0.66) + \
+        ((1. - u(5)) / a[141]) * sqrt(0.5 * a[141] * (1. - u(5)) * p(26) * fabs(a[140] - a[139]) + 1e-6);
 
 
     // Air flux through the screens [m s^{-1}]
@@ -451,7 +450,7 @@ SX update(const SX& x, const SX& u, const SX& d, const SX& p) {
     a[148] = sensible(1.7 * u(2) * pow(fabs(x(2) - x(7) + 1e-6), 1.0/3.), x(2), x(7));
 
     // Between air in main compartment and blackout screen [W m^{-2}]
-    a[149] = sensible(1.7 * u(7) * pow(fabs(x(2) - x(20) + 1e-6), 1./3.), x(2), x(20));
+    a[149] = sensible(1.7 * u(5) * pow(fabs(x(2) - x(20) + 1e-6), 1./3.), x(2), x(20));
 
     // Between air in main compartment and outside air [W m^{-2}]
     a[150] = sensible(p(111) * p(23) * (a[137] + a[145]), x(2), d(1));
@@ -463,7 +462,7 @@ SX update(const SX& x, const SX& u, const SX& d, const SX& p) {
     a[152] = sensible(1.7 * u(2) * pow(fabs(x(7) - x(3) + 1e-6), 1./3.), x(7), x(3));
 
     // Between blackout screen and top compartment [W m^{-2}]
-    a[153] = sensible(1.7 * u(7) * pow(fabs(x(20) - x(3) + 1e-6), 1./3.), x(20), x(3));
+    a[153] = sensible(1.7 * u(5) * pow(fabs(x(20) - x(3) + 1e-6), 1./3.), x(20), x(3));
 
     // Between top compartment and cover [W m^{-2}]
     a[154] = sensible(p(50) * pow(fabs(x(3) - x(5) + 1e-6), 1./3.) * p(47) / p(46), x(3), x(5));
@@ -560,7 +559,7 @@ SX update(const SX& x, const SX& u, const SX& d, const SX& p) {
 
     // Condensation from main compartment on blackout screen [kg m^{-2} s^{-1}]
     // Equatio A39 [5], Equation 7.39 [7]
-    a[182] = cond(1.7 * u(7) * pow(fabs(x(2) - x(20) + 1e-6), (1./3.)), \
+    a[182] = cond(1.7 * u(5) * pow(fabs(x(2) - x(20) + 1e-6), (1./3.)), \
         x(15), satVP(x(20)));
 
     // Condensation from top compartment to cover [kg m^{-2} s^{-1}]
@@ -729,7 +728,8 @@ SX update(const SX& x, const SX& u, const SX& d, const SX& p) {
     a[221] = u(0) * p(108);
 
     // Heat from boiler to grow pipes [W m^{-2}]
-    a[222] = u(6) * p(170);
+    a[222] = 0; // Excluded the grow pipes from the model
+    // a[222] = u(6) * p(170);
 
     //  CO2 injection [mg m^{-2} s^{-1}]
     a[223] = u(1) * p(109);

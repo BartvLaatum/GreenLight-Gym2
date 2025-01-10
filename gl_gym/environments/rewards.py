@@ -57,8 +57,6 @@ class EconomicReward(BaseReward):
                 dmfm: float,
                 max_fruit_weight_pot: float,
                 resolution: str,
-                gl_model: GreenLight,
-                timesteps_in_day: int,
                 ) -> None:
         super(EconomicReward, self).__init__()
 
@@ -78,19 +76,11 @@ class EconomicReward(BaseReward):
         self.fruit_price = fruit_price/max_fruit_weight_pot # (€/pot) / (g/pot) * (pot/m2) = €.g^{-1}.m^{-2}
         self.red_fruit_fraction = 1./3.         # Fraction of red fruit in the total fruit production; Assumption
         self.dmfm = dmfm                        # ration of dry matter to fresh matte; Assumption
-        self.timesteps_in_day = timesteps_in_day
 
         self.resolution = resolution
 
         self.yearly_fixed_costs = sum([self.fixed_greenhouse_cost, self.fixed_co2_cost, self.fixed_lamp_cost, self.fixed_screen_cost, self.fixed_spacing_cost])
 
-        self.reward_fns = {
-            'daily': self.daily_reward,
-            'hourly': self.hourly_reward
-        }
-
-        # self.rmin = self._min_reward(gl_model)
-        # self.rmax = self._max_reward(gl_model)
 
         self._init_costs()
 
@@ -118,7 +108,7 @@ class EconomicReward(BaseReward):
         These costs refelct the hourly fixed costs for the greenhouse, co2, lamps, screens and spacing.
         The unit is converted from €/m2/year to €/m2/hour.
         """
-        return self.yearly_fixed_costs/365./self.timesteps_in_day
+        return self.yearly_fixed_costs/365.
 
     def _variable_costs(self, gl_model):
         """
@@ -147,7 +137,8 @@ class EconomicReward(BaseReward):
         2. Converts the fruit DW to fruit fresh weight (FFW) using dmfm conversion factor
         3. Multiplies the daily FFW growth by the fruit price, which resembles €/g.
         """
-        return max(gl_model.fruit_growth, 0) * 1e-3 / self.dmfm * self.fruit_price * self.red_fruit_fraction
+        # return max(gl_model.fruit_growth, 0) * 1e-3 / self.dmfm * self.fruit_price * self.red_fruit_fraction
+
 
     def _max_reward(self, gl_model):
         """
@@ -164,42 +155,15 @@ class EconomicReward(BaseReward):
             - (gl_model.get_max_elec() * (self.off_peak_price/3 + self.on_peak_price*2/3))
         return (min_var_costs - self._fixed_costs_hourly())
 
-    # def compute_reward(self, gl_model) -> SupportsFloat:
-    #     self.fixed_costs = self._fixed_costs()
-    #     self.variable_costs = self._variable_costs(gl_model)
-    #     self.gains = self._gains(gl_model)
-    #     self.profit = self.gains - self.variable_costs - self.fixed_costs
-    #     return self.profit
-
-
-
-    def daily_reward(self, gl_model) -> SupportsFloat:
-        if gl_model.timestep % self.timesteps_in_day== 0:
-            self.fixed_costs = self._fixed_costs_daily()
-            self.variable_costs = self._variable_costs(gl_model)
-            self.gains = self._gains(gl_model)
-            self.profit = self.gains - self.variable_costs - self.fixed_costs
-            gl_model.reset_consumptions()
-            gl_model.reset_dli()
-        else:
-            self.fixed_costs = 0
-            self.variable_costs = 0
-            self.gains = 0
-            self.profit = 0
-        return self.profit
-
-    def hourly_reward(self, gl_model) -> SupportsFloat:
+    def compute_reward(self) -> SupportsFloat:
         self.fixed_costs = self._fixed_costs_hourly()
-        self.variable_costs = self._variable_costs(gl_model)
-        self.gains = self._gains(gl_model)
+        self.variable_costs = self._variable_costs()
+        self.gains = self._gains()
         self.profit = self.gains - self.variable_costs - self.fixed_costs
-        gl_model.reset_consumptions()
+        # gl_model.reset_consumptions()
 
-        if gl_model.timestep % self.timesteps_in_day== 0:
-            gl_model.reset_dli()
+        # if gl_model.timestep % self.timesteps_in_day== 0:
+        #     gl_model.reset_dli()
 
         return self.profit        
-
-    def compute_reward(self, gl_model) -> SupportsFloat:
-        return self.reward_fns[self.resolution](gl_model)
 

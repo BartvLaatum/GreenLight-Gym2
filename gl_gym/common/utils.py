@@ -1,9 +1,33 @@
+from typing import Dict, Tuple
+from os.path import join
 from datetime import datetime, timedelta
-
 from copy import deepcopy
+
+import yaml
 import numpy as np
 import pandas as pd
 from scipy.interpolate import PchipInterpolator
+
+def load_env_params(env_id: str, path: str) -> Tuple[Dict, Dict]:
+    '''
+    Function that loads in the environment variables. 
+    Returns the variables for the general parent GreenLightEnv class,
+    if one aims to use specified environment these are also returned.
+    Args:
+        env_id (str): the environment id
+        path (str): the path to the yaml file
+    '''
+    with open(join(path, env_id + ".yml"), "r") as f:
+        params = yaml.load(f, Loader=yaml.FullLoader)
+    if env_id != "GreenLightEnv":
+        env_specific_params = params[env_id]
+    else:
+        env_specific_params = {}
+
+    env_base_params = params["GreenLightEnv"]
+
+    return env_base_params, env_specific_params
+
 
 def get_starting_date(df):
     """
