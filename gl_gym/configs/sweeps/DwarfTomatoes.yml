@@ -1,0 +1,135 @@
+ppo:
+  method: bayes
+  metric:
+    name: rollout/ep_rew_mean
+    goal: maximize
+
+  early_terminate:
+      type: hyperband
+      min_iter: 40
+      eta: 1.5
+      strict: true
+
+  parameters:
+    policy:
+      value: MlpPolicy
+    batch_size:
+      values: [32, 64, 128, 256, 512]
+    learning_rate:
+      distribution: log_uniform_values
+      min: !!float 1e-7
+      max: !!float 1e-3
+    n_steps:
+      value: 2040
+    gamma_offset:
+      distribution: log_uniform_values
+      min: 0.001
+      max: 0.1
+    gae_lambda:
+      distribution: uniform
+      min: 0.9
+      max: 0.999
+    clip_range:
+      values: [0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]
+    ent_coef:
+      distribution: log_uniform_values
+      min: !!float 1e-5
+      max: !!float 1e-1
+    vf_coef:
+      distribution: uniform
+      min: !!float 0.1
+      max: !!float 1.0
+    n_epochs:
+      value: 8
+    use_sde:
+      values: [True, False]
+    sde_sample_freq:
+      distribution: q_log_uniform_values
+      min: 2
+      max: 64
+      q: 2
+    target_kl:
+      value: null
+    normalize_advantage:
+      value: True
+
+    pi:
+      values: [32, 64, 128, 256, 512]
+    vf:
+      values: [64, 128, 256, 512, 1024]
+    # optimizer_class:
+      # value: ADAM                       # we use the adam opimiser
+    optimizer_kwargs: 
+      value: {amsgrad: True}
+    activation_fn:
+      values: [SiLU, ReLU, Tanh]          
+
+recurrentppo:
+  method: bayes
+  metric:
+    name: rollout/ep_rew_mean
+    goal: maximize
+
+  early_terminate:
+      type: hyperband
+      min_iter: 100      # check for termination after min_iter * n_envs * n_steps (in the case of min_iter=40, n_envs=12 and n_steps=2040, this is ~1M timesteps)
+      eta: 1.5
+      strict: true
+
+  parameters:
+    policy:
+      value: MlpLstmPolicy
+    batch_size:
+      values: [64, 128, 256, 512]
+    learning_rate:
+      distribution: log_uniform_values
+      min: !!float 1e-6
+      max: !!float 1e-3
+    n_steps:
+      value: 2040
+    gamma_offset:
+      value: 0.01   # we use a gamma offset of 0.01 == gamma=0.99
+    gae_lambda:
+      distribution: uniform
+      min: 0.9
+      max: 1.0
+    clip_range:
+      values: [0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]
+    ent_coef:
+      distribution: log_uniform_values
+      min: !!float 1e-5
+      max: !!float 1e-1
+    vf_coef:
+      distribution: uniform
+      min: !!float 0.1
+      max: !!float 0.5
+    n_epochs:
+      value: 8
+    use_sde:
+      values: [True, False]
+    sde_sample_freq:
+      distribution: q_log_uniform_values
+      min: 2
+      max: 32
+      q: 2
+    target_kl:
+      value: null
+    normalize_advantage:
+      value: True
+
+    pi:
+      values: [64, 128, 256, 512]
+    vf:
+      values: [64, 128, 256, 512, 1024]
+    # optimizer_class:
+      # value: ADAM                       # we use the adam opimiser
+    optimizer_kwargs: 
+      value: {amsgrad: True}
+    activation_fn:
+      values: [SiLU, ReLU, Tanh]          
+
+### Values to use for recurrent policies #####
+    lstm_hidden_size:
+      values: [32, 64, 128, 256, 512]
+    enable_critic_lstm:
+      values: [True, False]           # if this one is true we should set shared_lstm to False
