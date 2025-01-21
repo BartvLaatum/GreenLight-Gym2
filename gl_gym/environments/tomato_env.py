@@ -9,7 +9,7 @@ from gl_gym.environments.observations import *
 from gl_gym.environments.rewards import BaseReward, EconomicReward
 from gl_gym.environments.models.greenlight_model import GreenLight
 from gl_gym.environments.utils import load_weather_data, init_state
-from gl_gym.common.parameters import init_default_params
+from gl_gym.environments.parameters import init_default_params
 
 REWARDS = {"EconomicReward": EconomicReward}
 
@@ -113,6 +113,28 @@ class TomatoEnv(GreenLightEnv):
                 info
                 )
 
+    def step_raw_control(self, control: np.ndarray):
+        # scale the action from controller (between -1, 1) to (u_min, u_max)
+        self.u = control
+
+        # self.weather_data
+        self.x =self.gl_model.evalF(self.x, self.u, self.weather_data[self.timestep], self.p)
+
+        # obs = self._get_obs()
+        if self._terminalState():
+            self.terminated = True
+        # compute reward
+        # reward = self._get_reward()
+
+        # additional information to return
+        # info = self._get_info()
+        self.timestep += 1
+        return (
+                self.x,
+                self.terminated, 
+                )
+
+
     def _get_obs(self):
         return self.observation_module.compute_obs()
 
@@ -125,6 +147,13 @@ class TomatoEnv(GreenLightEnv):
             "Fixed costs": self.reward.fixed_costs,
             "Control inputs": self.u,
         }
+
+    def set_crop_state(self, cBuf: float, cLeaf: float, cStem: float, cFruit: float, tCanSum: float):
+        self.x[22] = cBuf
+        self.x[23] = cLeaf
+        self.x[24] = cStem
+        self.x[25] = cFruit
+        self.x[26] = tCanSum
 
     def reset(self, seed: Optional[int] = None) -> Tuple[np.ndarray, Dict[str, Any]]:
         super().reset(seed=seed)
@@ -145,16 +174,16 @@ class TomatoEnv(GreenLightEnv):
 
         # load in weather data for specific simulation
         self.weather_data = load_weather_data(
-                self.weather_data_dir,
-                self.location,
-                self.data_source,
-                self.growth_year,
-                self.start_day,
-                self.season_length,
-                self.pred_horizon+1,
-                self.dt,
-                self.nd
-                )
+            self.weather_data_dir,
+            self.location,
+            self.data_source,
+            self.growth_year,
+            self.start_day,
+            self.season_length,
+            self.pred_horizon+1,
+            self.dt,
+            self.nd
+        )
         self.u = np.zeros(self.nu)
         self.x = init_state(self.weather_data[0])
 

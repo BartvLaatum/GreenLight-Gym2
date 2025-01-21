@@ -78,7 +78,6 @@ inline SX smoothHar(const SX& processVar, const SX& cutOff, double smooth, doubl
     return maxRate * (tanh(z) + 1.0) / 2.0;
 }
 
-
 inline SX airMv(const SX& f12, const SX& vp1, const SX& vp2, const SX& t1, const SX& t2) {
     // Vapor flux accompanying an air flux [kg m^{-2} s^{-1}]
     // Equation 44 [1]
@@ -95,6 +94,15 @@ inline SX airMc(const SX& f12, const SX& c1, const SX& c2) {
 
 // Update function for auxiliary variables
 SX update(const SX& x, const SX& u, const SX& d, const SX& p) {
+    /*
+        u is a control vector with 6 elements:
+        u(0) = uBoil
+        u(1) = uCo2
+        u(2) = uThScr
+        u(3) = uVent
+        u(4) = uLamp
+        u(5) = uBlScr
+    */
     std::vector<SX> a(240);
 
     a[0] = 1 - u(2) * (1 - p(80));

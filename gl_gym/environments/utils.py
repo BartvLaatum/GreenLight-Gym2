@@ -97,7 +97,6 @@ def load_weather_data(
     # check whether we exceed data length and we are in the final season
     if N0+Ns+Np > len(time):
         rawWeather = expandWeatherData(weatherDataDir, rawWeather, location, source, growthYear, time, dt)
-
     weatherData = np.zeros((Ns+Np, nd))                                         # preallocate weather data matrix
     time = rawWeather["time"].values[N0:N0+Ns+Np]                               # time since start of the year in [s]
     weatherData[:, 0] = rawWeather["global radiation"][N0:N0+Ns+Np]             # iGlob
@@ -147,7 +146,7 @@ def expandWeatherData(
     Returns:
         rawWeather      - weather data for the next year appended to the current weather data
     """
-    weatherDataPath = weatherDataDir + location +"/" + source + str(growthYear+1) + ".csv"
+    weatherDataPath = join(join(weatherDataDir, location), source + str(growthYear+1)) + ".csv"
     newRawWeather = pd.read_csv(weatherDataPath, sep=",")
     newRawWeather["time"] += time[-1] + dt
     rawWeather = pd.concat([rawWeather, newRawWeather.iloc[:, :]])

@@ -59,26 +59,26 @@ def init_default_params(nparams):
     # GREENHOUSE CONSTRUCTION PARAMETERS
     params[44] = 0.1;           # etaGlobAir;      Ratio of global radiation absorbed by the greenhouse construction []
     params[45] = 23.;           # psi;             mean greenhouse cover slope []
-    params[46] = 96.;           # aFlr;            Floor area of greenhouse [m2]
-    params[47] = 224.;          # aCov;            Surface of the cover including side walls [m2]
+    params[46] = 144.;          # aFlr;            Floor area of greenhouse [m2]
+    params[47] = 216.6;         # aCov;            Surface of the cover including side walls [m2]
     params[48] = 5.7;           # hAir;            Height of the main greenhouse compartment [m]
     params[49] = 6.2;           # hGh;             Mean height of the greenhouse [m]
-    params[50] = 3.84;          # cHecIn;          Convective heat exchange paramater between cover and indoor air [W m-2 K-1]
+    params[50] = 3.5;          # cHecIn;          Convective heat exchange paramater between cover and indoor air [W m-2 K-1]
     params[51] = 2.8;           # cHecOut1;        Convective heat exchange paramater between cover and outdoor air [W m-2 K-1]
     params[52] = 1.2;           # cHecOut2;        Convective heat exchange paramater between cover and outdoor air [W m-2 K-1]
     params[53] = 1.;            # cHecOut3;        Convective heat exchange paramater between cover and outdoor air [W m-2 K-1]
     params[54] = 0.;            # hElevation;      Altitude of the greenhouse [m]
-    params[55] = 40.;           # aRoof;           Roof area of the greenhouse [m2]
+    params[55] = 52.2;         # aRoof;           Roof area of the greenhouse [m2]
     params[56] = 0.87;          # hVent;           Height of the ventilation opening [m]
     params[57] = 1.;            # etaInsScr;       Insulation factor of the screen []
     params[58] = 0.;            # aSide;           Side wall area of the greenhouse [m2]
-    params[59] = 0.72;          # cDgh;            Discharge coefficient for the greenhouse [W m-2 K-1]
-    params[60] = 1.2e-4;        # cLeakage;        Ventilation leakage coefficient [m3 s-1 m-2 Pa-1]
-    params[61] = 0.09;          # cWgh;            Wind shelter factor of the greenhouse []
+    params[59] = 0.35;          # cDgh;            Discharge coefficient for the greenhouse [W m-2 K-1]
+    params[60] = 0.3e-4;        # cLeakage;        Ventilation leakage coefficient [m3 s-1 m-2 Pa-1]
+    params[61] = 0.02;          # cWgh;            Wind shelter factor of the greenhouse []
     params[62] = 0.;            # hSideRoof;       Height of the side roof [m]
 
     # ROOF PARAMETERS
-    params[63] = 0.7;           # epsRfFir;        FIR emissivity of the roof []
+    params[63] = 0.85;          # epsRfFir;        FIR emissivity of the roof []
     params[64] = 2600.;         # rhoRf;           Density of the roof [kg m-3]
     params[65] = 0.13;          # rhoRfNir;        NIR reflection coefficient of the roof []
     params[66] = 0.13;          # rhoRfPar;        PAR reflection coefficient of the roof []
@@ -92,28 +92,28 @@ def init_default_params(nparams):
 
     # THERMAL SCREEN PARAMETERS
     params[74] = 0.67;          # epsThScrFir;     FIR emissivity of the thermal screen []
-    params[75] = 127.5;         # rhoThScr;        Density of the thermal screen [kg m-3]
+    params[75] = 200.;         # rhoThScr;        Density of the thermal screen [kg m-3]
     params[76] = 0.35;          # rhoThScrNir;     NIR reflection coefficient of the thermal screen []
     params[77] = 0.35;          # rhoThScrPar;     PAR reflection coefficient of the thermal screen []
     params[78] = 0.18;          # rhoThScrFir;     FIR reflection coefficient of the thermal screen []
     params[79] = 0.6;           # tauThScrNir;     NIR transmission coefficient of the thermal screen []
-    params[80] = 0.6;           # tauThScrPar;     PAR transmission coefficient of the thermal screen []
+    params[80] = 0.75;           # tauThScrPar;     PAR transmission coefficient of the thermal screen []
     params[81] = 0.15;          # tauThScrFir;     FIR transmission coefficient of the thermal screen []
     params[82] = 1800.;         # cPThScr;         Specific heat capacity of the thermal screen [J kg-1 K-1]
-    params[83] = 4e-3;          # hThScr;          Thickness of the thermal screen [m]
-    params[84] = 3.5e-4;        # kThScr;          Thermal screen flux coefficient
+    params[83] = 0.35e-3;          # hThScr;          Thickness of the thermal screen [m]
+    params[84] = 5.e-4;        # kThScr;          Thermal screen flux coefficient
 
     # BLACKOUT SCREEN PARAMETERS
     params[85] = 0.67;          # epsBlScrFir;     FIR emissivity of the blackout screen []
-    params[86] = 167.5;         # rhoBlScr;        Density of the blackout screen [kg m-3]
+    params[86] = 200.;         # rhoBlScr;        Density of the blackout screen [kg m-3]
     params[87] = 0.35;          # rhoBlScrNir;     NIR reflection coefficient of the blackout screen []
     params[88] = 0.35;          # rhoBlScrPar;     PAR reflection coefficient of the blackout screen []
     params[89] = 0.01;          # tauBlScrNir;     NIR transmission coefficient of the blackout screen []
     params[90] = 0.01;          # tauBlScrPar;     PAR transmission coefficient of the blackout screen []
     params[91] = 0.7;           # tauBlScrFir;     FIR transmission coefficient of the blackout screen []
     params[92] = 1800.;         # cPBlScr;         Specific heat capacity of the blackout screen [J kg-1 K-1]
-    params[93] = 4e-3;          # hBlScr;          Thickness of the blackout screen [m]
-    params[94] = 5e-4;          # kBlScr;          Blackout screen flux coefficient
+    params[93] = 0.35e-3;          # hBlScr;          Thickness of the blackout screen [m]
+    params[94] = 5.e-4;          # kBlScr;          Blackout screen flux coefficient
 
     # FLOOR PARAMETERS
     params[95] = 1.;            # epsFlr;          FIR emissivity of the floor []
@@ -128,13 +128,14 @@ def init_default_params(nparams):
     params[103] = 0.85;         # lambdaSo;        Thermal heat conductivity of the soil [W m-1 K-1]
 
     # HEATING PIPE PARAMETERS
-    params[104] = 0.88;         # epsPipe;         FIR emission coefficient of the heating pipes
-    params[105] = (51e-3) - (2.25e-3); # phiPipeE;     External diameter of the heating pipes [m]
-    params[106] = 48.75e-3;     # phiPipeI;        Internal diameter of the heating pipes [m]
-    params[107] = 1.3375;       # lPipe;           Length of the heating pipes [m]
-    params[108] = 80.;          # pBoil;           Max energy input from boiler into the heating system [W/m2]
+    params[104] = 0.88;                 # epsPipe;         FIR emission coefficient of the heating pipes
+    params[105] = (51.e-3);             # phiPipeE;     External diameter of the heating pipes [m]
+    params[106] = (51.e-3)-(2.25e-3);   # phiPipeI;        Internal diameter of the heating pipes [m]
+    params[107] = 1.3375;               # lPipe;           Length of the heating pipes [m]
+    params[108] = 44.;                  # pBoil;           Max energy input from boiler into the heating system [W/m2]
 
-    params[109] = 2.083;        # phiExtCo2;       Capacity of external CO2 source [mg m-2 s-1]
+    params[109] = 5.0;                  # phiExtCo2;       Capacity of external CO2 source [mg m-2 s-1]
+
     # capPipe; Heat capacity of the heating pipes [J m-2 K-1]
     params[110] = 0.25 * np.pi * params[107] * ((params[105] * params[105] - params[106] * params[106]) * params[12] * params[24] + params[106] * params[106] * params[13] * params[25]); 
 
@@ -194,13 +195,13 @@ def init_default_params(nparams):
     params[155] = 0.095;        # rgLeaf;          Growth respiration coefficient for leaf
     params[156] = 0.074;        # rgStem;          Growth respiration coefficient for stem
 
-    params[157] = 5000;         # cBufMax;         Maximum buffer capacity [J m-2 K-1]
-    params[158] = 250;          # cBufMin;         Minimum buffer capacity [J m-2 K-1]
+    params[157] = 20e3;         # cBufMax;         Maximum buffer capacity [J m-2 K-1]
+    params[158] = 1e3;          # cBufMin;         Minimum buffer capacity [J m-2 K-1]
     params[159] = 23;           # tCan24Max;       Maximum canopy temperature at 24 hours [°C]
     params[160] = 18;           # tCan24Min;       Minimum canopy temperature at 24 hours [°C]
     params[161] = 28;           # tCanMax;         Maximum canopy temperature [°C]
     params[162] = 14;           # tCanMin;         Minimum canopy temperature [°C]
-    params[163] = 250;          # tEndSum;         Temperature sum for reaching max potential growth [day °C]
+    params[163] = 1035;          # tEndSum;         Temperature sum for reaching max potential growth [day °C]
     params[164] = 1250;         # tEndSumGrowth;   End of temperature sum for growth [day °C]
 
     # GROWTH PIPE PARAMETERS
@@ -214,25 +215,25 @@ def init_default_params(nparams):
 
 
     # LED LAMP PARAMETERS
-    params[172] = 62.5        # thetaLampMax;    Max energy input of the lamps [W/m2]
-    params[173] = 0;            # heatCorrection;  Heat correction factor for the lamp []
+    params[172] = 116        # thetaLampMax;    Max energy input of the lamps [W/m2]
+    params[173] = 0            # heatCorrection;  Heat correction factor for the lamp []
 
-    params[174] = 3.2/4.6;      # etaLampPar;      PAR efficiency of the lamp []
+    params[174] = 0.31      # etaLampPar;      PAR efficiency of the lamp []
     params[175] = 0.02        # etaLampNir;      NIR efficiency of the lamp []
 
-    params[176] = 0.98        # tauLampPar;      PAR transmission coefficient of the lamp []
-    params[177] = 0.98        # tauLampNir;      NIR transmission coefficient of the lamp []
-    params[178] = 0.98        # tauLampFir;      FIR transmission coefficient of the lamp []
+    params[176] = 0.95        # tauLampPar;      PAR transmission coefficient of the lamp []
+    params[177] = 0.95        # tauLampNir;      NIR transmission coefficient of the lamp []
+    params[178] = 0.95        # tauLampFir;      FIR transmission coefficient of the lamp []
     params[179] = 0.;           # rhoLampPar;      PAR reflection coefficient of the lamp []
     params[180] = 0.;           # rhoLampNir;      NIR reflection coefficient of the lamp []
-    params[181] = 0.02;         # aLamp;           Surface area of the lamp per floor area [m2 m-2]
+    params[181] = 0.05         # aLamp;           Surface area of the lamp per floor area [m2 m-2]
 
-    params[182] = 0.88        # epsLampTop;      FIR emission coefficient of the top lamp []
-    params[183] = 0.88        # epsLampBottom;   FIR emission coefficient of the bottom lamp []
-    params[184] = 10.;          # capLamp;         Heat capacity of the lamp [J m-2 K-1]
-    params[185] = 2.3         # cHecLampAir;     Heat exchange coefficient between the lamp and the air [W m-2 K-1]
-    params[186] = 0;            # etaLampCool;     Cooling efficiency of the lamp []
-    params[187] = 3.2         # zetaLampPar;     PAR emission coefficient of the lamp []
+    params[182] = 0.88          # epsLampTop;      FIR emission coefficient of the top lamp []
+    params[183] = 0.88          # epsLampBottom;   FIR emission coefficient of the bottom lamp []
+    params[184] = 10.           # capLamp;         Heat capacity of the lamp [J m-2 K-1]
+    params[185] = 2.3           # cHecLampAir;     Heat exchange coefficient between the lamp and the air [W m-2 K-1]
+    params[186] = 0.63;            # etaLampCool;     Cooling efficiency of the lamp []
+    params[187] = 5.2;           # zetaLampPar;     PAR emission coefficient of the lamp []
 
     # INTERNAL LAMP PARAMETERS	
     params[188] = 0;            # intLamps;        Are internal lamps present

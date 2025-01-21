@@ -75,16 +75,21 @@ struct GreenLight
         // Create the final function
         F = Function(
             "F",                            // name
-            {x_mx, u_mx, d_mx, p_mx},      // inputs
-            {result.at("xf")},             // outputs
-            {"x", "u", "d", "p"},          // input names
-            {"x_next"}                     // output names
+            {x_mx, u_mx, d_mx, p_mx},       // inputs
+            {result.at("xf")},              // outputs
+            {"x", "u", "d", "p"},           // input names
+            {"x_next"}                      // output names
         );
     }
 
-    std::vector<double> evalF(const std::vector<double>& x_np, const std::vector<double>& u_np, const std::vector<double>& d_np, const std::vector<double>& p_np)
+    std::vector<double> evalF(
+        const std::vector<double>& x_np,
+        const std::vector<double>& u_np,
+        const std::vector<double>& d_np,
+        const std::vector<double>& p_np
+    )
     {
-        // Convert input vectors to CasADi DM
+        // Convert numpy input vectors to CasADi DM
         DM x_dm = DM(x_np);
         DM u_dm = DM(u_np);
         DM d_dm = DM(d_np);
