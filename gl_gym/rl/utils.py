@@ -15,15 +15,14 @@ from stable_baselines3.common.vec_env import SubprocVecEnv, VecNormalize, VecMon
 from gl_gym.common.learning_rate import linear_schedule
 from gl_gym.common.callbacks import TensorboardCallback, SaveVecNormalizeCallback, BaseCallback
 from gl_gym.environments.base_env import GreenLightEnv
-from gl_gym.environments.dwarf_tomato import DwarfTomatoes
+from gl_gym.environments.tomato_env import TomatoEnv
 
 from gl_gym.common.results import Results
 
 ACTIVATION_FN = {"ReLU": ReLU, "SiLU": SiLU, "Tanh":Tanh, "ELU": ELU}
 OPTIMIZER = {"ADAM": Adam}
 
-envs = {"DwarfTomatoes": DwarfTomatoes,
-        "DwarfTomatoesObs": DwarfTomatoes}
+envs = {"TomatoEnv": TomatoEnv}
 
 def make_env(env_id, rank, seed, kwargs, kwargsSpecific, eval_env):
     '''
@@ -87,12 +86,7 @@ def load_env_params(env_id: str, path: str) -> Tuple[Dict, Dict, Dict]:
 
     env_base_params = params["GreenLightEnv"]
 
-    # options dictionary specifying the evaluation environment 
-    # options = params["options"]
-
-    # state and action column names used for plotting and saving data
-    results_columns = params["results_columns"]
-    return env_base_params, env_specific_params, results_columns
+    return env_base_params, env_specific_params
 
 def load_sweep_config(path: str, filename: str, algorithm: str) -> Dict[str, Any]:
     with open(join(path, filename + ".yml"), "r") as f:

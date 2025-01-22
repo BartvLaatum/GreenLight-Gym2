@@ -42,6 +42,7 @@ class GreenLightEnv(gym.Env):
         weather_data_dir: str,          # path to weather data
         location: str,                  # location of the recorded weather data
         data_source: str,               # source of the weather data
+        num_params: int,                # number of model parameters
         nx: int,                        # number of states
         nu: int,                        # number of control inputs
         nd: int,                        # number of disturbances
@@ -63,6 +64,7 @@ class GreenLightEnv(gym.Env):
         self.c = 86400
 
         # arguments that are kept the same over various simulations
+        self.num_params = num_params
         self.nx = nx
         self.nu = nu
         self.nd = nd

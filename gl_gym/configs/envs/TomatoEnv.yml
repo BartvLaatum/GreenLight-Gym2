@@ -4,6 +4,7 @@ GreenLightEnv:
   weather_data_dir: gl_gym/environments/weather # path to weather data
   location: Amsterdam             # location of the recorded weather data
   data_source: KNMI               # source of the weather data
+  num_params: 208                 # number of model parameters
   nx: 28                          # number of states
   nu: 6                           # number of control inputs
   nd: 10                          # number of weather disturbances
@@ -19,34 +20,40 @@ GreenLightEnv:
   end_train_day: 40               # end day of the year for training  training: True           # whether we are training or testing
 
 TomatoEnv:
-  reward_function: EconomicReward   # reward function to use
+  reward_function: GreenhouseReward       # reward function to use
   eval_options:
-    eval_days: [265]                # days to evaluate the agent on
-    eval_years: [2023]              # year to evaluate the agent on
-    location: Bleiswijk             # location of the greenhouse
-    data_source: KASPRO             # source of the weather data
-  observation_module: StateObservations # observation module to use
-  # obs_mod_kwargs:
-  #   StateObservations:
-  #     model_obs_names: [co2_air, co2_top, temp_air, temp_top, can_temp, covin_temp, covex_temp,
-  #                     thScr_temp, flr_temp, pipe_temp, soil1_temp, soil2_temp, soil3_temp, soil4_temp, soil5_temp, 
-  #                     vp_air, vp_top, lamp_temp, intlamp_temp, grow_pipe_temp, blscr_temp, 24_can_temp,
-  #                     cBuf, cleaves, cstem, cFruit, tsum]
+    eval_days: [265]                    # days to evaluate the agent on
+    eval_years: [2023]                  # year to evaluate the agent on
+    location: Bleiswijk                 # location of the greenhouse
+    data_source: KASPRO                 # source of the weather data
+ 
+  observation_modules: [                  # observation modules to use
+    IndoorClimateObservations,   
+    BasicCropObservations, 
+    ControlObservations, 
+    WeatherObservations,
+    TimeObservations
+  ]
+
+  constraints:
+    co2_min: 0.         # lower bound on CO2 concentration              [ppm]        0
+    co2_max: 1600.        # upper bound on CO2 concentration              [ppm]        2.75e-3
+    temp_min: 15.         # lower bound on temperature                    [°C]                    6.5
+    temp_max: 34.         # upper bound on temperature                    [°C]                    20
+    rh_min: 50.            # lower bound on relative humidity              [#]                     0
+    rh_max: 85.          # upper bound on relative humidity               [#]                     70
 
   reward_params:
     fixed_greenhouse_cost: 15.
     fixed_co2_cost: 0.015
     fixed_lamp_cost: 0.07       # in reality this is multiplied by the max used intensity of the lamps e.g., 200umol/m2/s (we do the same.)
     fixed_screen_cost: 2.       # 1,- per screen
-    fixed_spacing_cost: 1.5     # 1,50 per spacing
-    off_peak_price: 0.2         # €/kWh
-    on_peak_price: 0.3          # €/kWh
+    elec_price: 0.3             # €/kWh
     heating_price: 0.09         # €/kWh
     co2_price: 0.3              # €/kg
-    fruit_price: 2.0            # €/pot
-    max_fruit_weight_pot: 150   # g/pot
-    dmfm: 0.078                 # dry matter fresh matter ratio
-    resolution: hourly          # how often do we get non-zero rewards: hourly or daily
+    fruit_price: 1.6            # €/kg
+    dmfm: 0.065                 # dry matter fresh matter ratio
+    pen_weights: [4.e-3, 1.2, 0.4]
 
 # results_columns: [Time, co2_air, co2_top, temp_air, temp_top, can_temp, covin_temp, covex_temp,
 #                     thScr_temp, flr_temp, pipe_temp, soil1_temp, soil2_temp, soil3_temp, soil4_temp, soil5_temp, 
