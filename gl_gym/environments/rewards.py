@@ -144,7 +144,6 @@ class GreenhouseReward(BaseReward):
 
     def penalty_reward(self):
         violations = self.output_violations()
-        print(violations)
         return np.dot(self.pen_weights, violations)
 
     def compute_reward(self) -> SupportsFloat:
