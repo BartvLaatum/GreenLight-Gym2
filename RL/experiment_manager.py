@@ -8,11 +8,11 @@ from pprint import pprint
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 from torch.nn.modules.activation import ReLU, SiLU, Tanh, ELU
-from sb3_contrib import RecurrentPPO
-from stable_baselines3 import PPO
+# from sb3_contrib import RecurrentPPO
+from stable_baselines3 import PPO, SAC
 from stable_baselines3.common.vec_env import VecNormalize, SubprocVecEnv, VecMonitor
 
-from gl_gym.experiments.utils import load_env_params, load_model_params, wandb_init, make_vec_env, create_callbacks, make_env, load_sweep_config
+from utils import load_env_params, load_model_params, wandb_init, make_vec_env, create_callbacks, make_env, load_sweep_config
 from gl_gym.common.results import Results
 
 import wandb
@@ -98,7 +98,7 @@ class ExperimentManager:
         self.continued_project = continued_project
         self.continued_runname = continued_runname
         self.hp_tuning = hp_tuning
-        self.models = {'ppo': PPO, 'recurrentppo': RecurrentPPO}
+        self.models = {'ppo': PPO, 'sac': SAC}
 
         self.model_class = self.models[self.algorithm.lower()]
 
