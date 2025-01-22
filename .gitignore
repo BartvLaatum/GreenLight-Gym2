@@ -3,3 +3,5 @@ __pycache__/
 *.so
 build/
 gl_gym.egg-info/
+data/
+figures/
