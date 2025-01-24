@@ -9,40 +9,6 @@ from pandas._typing import ArrayLike
 import pandas as pd
 from scipy.interpolate import PchipInterpolator
 
-def init_state_pipeinput(d0, indoor, time_in_days=0):
-    # Initialize the state as a NumPy array of zeros with the appropriate size
-    state = np.zeros(28)  # Assuming 28 elements based on the original function
-
-    state[0] = indoor[1]   # co2Air
-    state[1] = state[0]    # co2Top
-    state[2] = indoor[0]   # tAir
-    state[3] = state[2]    # tTop
-    state[4] = state[2] + 4 # tCan
-    state[5] = state[2]    # tCovIn
-    state[6] = state[2]    # tCovE
-    state[7] = state[2]    # tThScr
-    state[8] = state[2]    # tFlr
-    state[9] = state[2]   # tPipe
-    state[10] = state[2]   # tSoil1
-    state[11] = 0.25 * (3. * state[2] + d0[6])  # tSoil2
-    state[12] = 0.25 * (2. * state[2] + 2 * d0[6])  # tSoil3
-    state[13] = 0.25 * (state[2] + 3 * d0[6])   # tSoil4
-    state[14] = d0[6]      # tSoil5
-    state[15] = indoor[2]   # vpAir
-    state[16] = state[15]  # vpTop
-    state[17] = state[2]   # tLamp
-    state[18] = state[2]   # tIntLamp
-    state[19] = state[2]   # tGroPipe
-    state[20] = state[2]   # tBlScr
-    state[21] = state[4]   # tCan24
-    state[22] = 1000.;      # cBuf
-    state[23] = 26000.;     # cLeaf
-    state[24] = 18000.;     # cStem
-    state[25] = 0.;         # cFruit
-    state[26] = 0.;         # tCanSum
-    state[27] = time_in_days  # time
-
-    return state
 
 def init_state(d0, rhMax=90, time_in_days=0):
     # Initialize the state as a NumPy array of zeros with the appropriate size
