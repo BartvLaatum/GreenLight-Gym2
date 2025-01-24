@@ -86,6 +86,7 @@ class ExperimentManager:
             continued_project (str): Project name of the saved model to continue training from.
             continued_runname (str): Run name of the saved model to continue training from.
         """
+        print(env_base_params)
         self.env_id = env_id
         self.project = project
         self.env_base_params = env_base_params
@@ -381,6 +382,7 @@ if __name__ == "__main__":
 
     env_config_path = f"gl_gym/configs/envs/"
     env_base_params, env_specific_params = load_env_params(args.env_id, env_config_path)
+    print(env_base_params)
     hyperparameters = load_model_hyperparams(args.algorithm, args.env_id)
     # Initialize the experiment manager
     experiment_manager = ExperimentManager(

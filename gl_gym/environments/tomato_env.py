@@ -110,7 +110,11 @@ class TomatoEnv(GreenLightEnv):
     def step(self, action: np.ndarray) -> Tuple[np.ndarray, SupportsFloat, bool, bool, Dict[str, Any]]:
         # scale the action from controller (between -1, 1) to (u_min, u_max)
         self.u = self.action_to_control(action)
-        self.x = self.gl_model.evalF(self.x, self.u, self.weather_data[self.timestep], self.p)
+        try:
+            self.x = self.gl_model.evalF(self.x, self.u, self.weather_data[self.timestep], self.p)
+        except:
+            print("Error in ODE approximation")
+            self.terminated = True
 
         self.day_of_year += (self.dt/self.c) % 365
         self.hour_of_day =  (self.dt/3600) % 24

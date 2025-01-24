@@ -8,7 +8,7 @@ GreenLightEnv:
   nx: 28                          # number of states
   nu: 6                           # number of control inputs
   nd: 10                          # number of weather disturbances
-  dt: 300                         # [s] time step for the underlying GreenLight solver
+  dt: 900                         # [s] time step for the underlying GreenLight solver
   u_min: [0, 0, 0, 0, 0, 0]
   u_max: [1, 1, 1, 1, 1, 1]
   delta_u_max: 0.1                # max change rate in control inputs
@@ -53,7 +53,8 @@ TomatoEnv:
     co2_price: 0.3              # €/kg
     fruit_price: 1.6            # €/kg
     dmfm: 0.065                 # dry matter fresh matter ratio
-    pen_weights: [4.e-4, 0.005, 0.02]
+    pen_weights: [4.e-4, 5.e-3, 7.e-4]
+    pen_lamp: 0.1
 
 # results_columns: [
 #   Time, co2_air, co2_top, temp_air, temp_top, can_temp, covin_temp, covex_temp,

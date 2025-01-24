@@ -52,6 +52,7 @@ class GreenhouseReward(BaseReward):
                 co2_price: float,
                 fruit_price: float,
                 pen_weights: List[float],
+                pen_lamp: float,
                 dmfm: float,
                 ) -> None:
         super(GreenhouseReward, self).__init__()
@@ -72,6 +73,7 @@ class GreenhouseReward(BaseReward):
         self.fruit_price = fruit_price              # €/kg
         self.dmfm = dmfm                            # ratio of dry matter to fresh matter; Assumption
         self.pen_weights = np.array(pen_weights)
+        self.pen_lamp = pen_lamp
         self._init_costs()
         self._init_violations()
 
@@ -79,6 +81,7 @@ class GreenhouseReward(BaseReward):
         self.temp_violation = 0
         self.co2_violation = 0
         self.rh_violation = 0
+        self.lamp_violation = 0
 
     def _init_costs(self):
         self.variable_costs = 0
@@ -148,13 +151,24 @@ class GreenhouseReward(BaseReward):
         self.rh_violation = lowerbound[2] + upperbound[2]
         return lowerbound+upperbound
 
-    def penalty_reward(self):
+    def output_penalty_reward(self):
         violations = self.output_violations()
         return np.dot(self.pen_weights, violations)
+
+    def control_violation(self):
+        if self.env.hour_of_day >= 20:
+            if self.env.u[4] > 0:
+                self.lamp_violation = 1
+        self.lamp_violation = 0
+
+    def control_penalty(self):
+        self.control_violation()
+        return self.lamp_violation * self.pen_lamp
 
     def compute_reward(self) -> SupportsFloat:
         self.variable_costs = self._variable_costs()
         self.gains = self._gains()
         self.profit = self.gains - self.variable_costs - self.fixed_costs
-        self.penalty = self.penalty_reward()
-        return self.profit - self.penalty
+        self.penalty = self.output_penalty_reward()
+        self.control_pen = self.control_penalty()
+        return self.profit - self.penalty - self.control_pen
