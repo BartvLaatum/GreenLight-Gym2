@@ -4,7 +4,6 @@ from gl_gym.common.utils import load_env_params
 import numpy as np
 import pandas as pd
 import time
-from gl_gym.environments.utils import init_state_pipeinput
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
