@@ -41,7 +41,7 @@ struct GreenLight
         // Set up integrator options
         Dict opts;
         Dict jit_options;
-        
+
         opts["jit"] = true;
         opts["compiler"] = "shell";
         opts["abstol"] = 1e-6;
@@ -71,7 +71,7 @@ struct GreenLight
         integrator_in["p"] = input_args_mx;
         
         auto result = integrator_func(integrator_in);
-        
+
         // Create the final function
         F = Function(
             "F",                            // name

@@ -135,6 +135,25 @@ class TomatoEnv(GreenLightEnv):
     def step_raw_control(self, control: np.ndarray):
         self.u = control
 
+
+        self.x = self.gl_model.evalF(self.x, self.u, self.weather_data[self.timestep], self.p)
+
+        if self._terminalState():
+            self.terminated = True
+        # compute reward
+        # reward = self._get_reward()
+
+        self.timestep += 1
+        # additional information to return
+        # info = self._get_info()
+        return (
+                self.x,
+                self.terminated, 
+                )
+
+    def step_raw_control_pipeinput(self, control: np.ndarray, pipe_input: float):
+        self.u = control
+
         self.x = self.gl_model.evalF(self.x, self.u, self.weather_data[self.timestep], self.p)
 
         if self._terminalState():
@@ -159,11 +178,17 @@ class TomatoEnv(GreenLightEnv):
 
     def _get_info(self) -> Dict[str, Any]:
         return {
-            "Profit": self.reward.profit,
-            "Gains": self.reward.gains,
-            "Variable costs": self.reward.variable_costs,
-            "Fixed costs": self.reward.fixed_costs,
-            "Control inputs": self.u,
+            "EPI": self.reward.profit,
+            "revenue": self.reward.gains,
+            "variable_costs": self.reward.variable_costs,
+            "fixed_costs": self.reward.fixed_costs,
+            "co2_cost": self.reward.co2_costs,
+            "heat_cost": self.reward.heat_costs,
+            "elec_cost": self.reward.elec_costs,
+            "temp_violation": self.reward.temp_violation,
+            "co2_violation": self.reward.co2_violation,
+            "rh_violation": self.reward.rh_violation,
+            "controls": self.u,
         }
 
     def set_crop_state(self, cBuf: float, cLeaf: float, cStem: float, cFruit: float, tCanSum: float):

@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 from gl_gym.environments.tomato_env import TomatoEnv
-from gl_gym.rl.utils import load_env_params
+from RL.utils import load_env_params
 
 class TestTomatoEnv(unittest.TestCase):
     def setUp(self):
@@ -9,7 +9,6 @@ class TestTomatoEnv(unittest.TestCase):
         self.env_id = "TomatoEnv"
         self.env_config_path = "gl_gym/configs/envs/"
         self.env_base_params, self.env_specific_params = load_env_params(self.env_id, self.env_config_path)
-
 
         # Initialize environment
         self.env = TomatoEnv(base_env_params=self.env_base_params, **self.env_specific_params)

@@ -5,3 +5,6 @@ build/
 gl_gym.egg-info/
 data/
 figures/
+wandb/
+jit_*.c
+train_data/

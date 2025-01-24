@@ -23,7 +23,7 @@ def init_default_params(nparams):
     params[14] = 65.8;          # gamma;           Psychrometric constant [Pa K-1]
     params[15] = 1.99e-7;       # omega;           Yearly frequency to calculate soil temperature [s-1]
     
-    params[16] = 1200.;         # capLea         Heat capacity of the leaf [J m-2 K-1]
+    params[16] = 1200.;         # capLeaf         Heat capacity of the leaf [J m-2 K-1]
     params[17] = 4.3;           # cEvap1;          Coefficient for radiation effect on stomatal resistance
     params[18] = 0.54;          # cEvap2;          Coefficient for vapour pressure deficit effect on stomatal resistance
     params[19] = 6.1e-7;        # cEvap3Day;       Coefficient for CO2 effect on stomatal resistance during day
@@ -96,7 +96,7 @@ def init_default_params(nparams):
     params[76] = 0.35;          # rhoThScrNir;     NIR reflection coefficient of the thermal screen []
     params[77] = 0.35;          # rhoThScrPar;     PAR reflection coefficient of the thermal screen []
     params[78] = 0.18;          # rhoThScrFir;     FIR reflection coefficient of the thermal screen []
-    params[79] = 0.6;           # tauThScrNir;     NIR transmission coefficient of the thermal screen []
+    params[79] = 0.75;           # tauThScrNir;     NIR transmission coefficient of the thermal screen []
     params[80] = 0.75;           # tauThScrPar;     PAR transmission coefficient of the thermal screen []
     params[81] = 0.15;          # tauThScrFir;     FIR transmission coefficient of the thermal screen []
     params[82] = 1800.;         # cPThScr;         Specific heat capacity of the thermal screen [J kg-1 K-1]
@@ -132,9 +132,9 @@ def init_default_params(nparams):
     params[105] = (51.e-3);             # phiPipeE;     External diameter of the heating pipes [m]
     params[106] = (51.e-3)-(2.25e-3);   # phiPipeI;        Internal diameter of the heating pipes [m]
     params[107] = 1.3375;               # lPipe;           Length of the heating pipes [m]
-    params[108] = 44.;                  # pBoil;           Max energy input from boiler into the heating system [W/m2]
+    params[108] = 44.*params[46];                  # pBoil;           Max energy input from boiler into the heating system [W]
 
-    params[109] = 5.0;                  # phiExtCo2;       Capacity of external CO2 source [mg m-2 s-1]
+    params[109] = 5.0*params[46];                  # phiExtCo2;       Capacity of external CO2 source [mg s-1]
 
     # capPipe; Heat capacity of the heating pipes [J m-2 K-1]
     params[110] = 0.25 * np.pi * params[107] * ((params[105] * params[105] - params[106] * params[106]) * params[12] * params[24] + params[106] * params[106] * params[13] * params[25]); 
@@ -179,8 +179,8 @@ def init_default_params(nparams):
     params[141] = 3.0;          # laiMax;          Maximum leaf area index
     params[142] = 2.66e-5;      # sla;             Specific leaf area [m2 kg-1]
     params[143] = 3e-6;         # rgr;             Relative growth rate [kg m-2 s-1]
-    params[144] = 3_000_000;    # cLeafMax;        Maximum leaf carbon content [kg m-2]
-    params[145] = 3_000_000;    # cFruitMax;       Maximum Fruit carbon content [kg m-2]
+    params[144] = params[141] /params[142];    # cLeafMax;        Maximum leaf carbon content [kg m-2]
+    params[145] = 300_000;    # cFruitMax;       Maximum Fruit carbon content [kg m-2]
     params[146] = 0.27;         # cFruitG;         Growth respiration coefficient for fruit
     params[147] = 0.28;         # cLeafG;          Growth respiration coefficient for leaf
     params[148] = 0.3;          # cStemG;          Growth respiration coefficient for stem
@@ -197,10 +197,10 @@ def init_default_params(nparams):
 
     params[157] = 20e3;         # cBufMax;         Maximum buffer capacity [J m-2 K-1]
     params[158] = 1e3;          # cBufMin;         Minimum buffer capacity [J m-2 K-1]
-    params[159] = 23;           # tCan24Max;       Maximum canopy temperature at 24 hours [°C]
-    params[160] = 18;           # tCan24Min;       Minimum canopy temperature at 24 hours [°C]
-    params[161] = 28;           # tCanMax;         Maximum canopy temperature [°C]
-    params[162] = 14;           # tCanMin;         Minimum canopy temperature [°C]
+    params[159] = 24.5;         # tCan24Max;       Maximum canopy temperature at 24 hours [°C]
+    params[160] = 15;           # tCan24Min;       Minimum canopy temperature at 24 hours [°C]
+    params[161] = 34;           # tCanMax;         Maximum canopy temperature [°C]
+    params[162] = 10;           # tCanMin;         Minimum canopy temperature [°C]
     params[163] = 1035;          # tEndSum;         Temperature sum for reaching max potential growth [day °C]
     params[164] = 1250;         # tEndSumGrowth;   End of temperature sum for growth [day °C]
 
@@ -235,7 +235,7 @@ def init_default_params(nparams):
     params[186] = 0.63;            # etaLampCool;     Cooling efficiency of the lamp []
     params[187] = 5.2;           # zetaLampPar;     PAR emission coefficient of the lamp []
 
-    # INTERNAL LAMP PARAMETERS	
+    # INTER LAMP PARAMETERS	
     params[188] = 0;            # intLamps;        Are internal lamps present
     params[189] = 0.5         # vIntLampPos      Vertical position of the interlights within the canopy [0-1, 0 is above canopy and 1 is below]
     params[190] = 0.5         # fIntLampDown     Fraction of interlight light output of lamps that is directed downwards

@@ -10,21 +10,18 @@ import pandas as pd
 from torch.optim.adam import Adam
 from torch.nn.modules.activation import ReLU, SiLU, Tanh, ELU
 from wandb.integration.sb3 import WandbCallback
-from stable_baselines3.common.vec_env import SubprocVecEnv, VecNormalize, VecMonitor, VecEnv, VecCheckNan, VecFrameStack
+from stable_baselines3.common.vec_env import SubprocVecEnv, VecNormalize, VecMonitor, VecEnv
 
-from gl_gym.common.learning_rate import linear_schedule
-from gl_gym.common.callbacks import TensorboardCallback, SaveVecNormalizeCallback, BaseCallback
-from gl_gym.environments.base_env import GreenLightEnv
+from gl_gym.common.callbacks import CustomWandbCallback, SaveVecNormalizeCallback, BaseCallback
 from gl_gym.environments.tomato_env import TomatoEnv
 
 from gl_gym.common.results import Results
 
 ACTIVATION_FN = {"ReLU": ReLU, "SiLU": SiLU, "Tanh":Tanh, "ELU": ELU}
 OPTIMIZER = {"ADAM": Adam}
+ENVS = {"TomatoEnv": TomatoEnv}
 
-envs = {"TomatoEnv": TomatoEnv}
-
-def make_env(env_id, rank, seed, kwargs, kwargsSpecific, eval_env):
+def make_env(env_id, rank, seed, env_base_params, env_specific_params, eval_env):
     '''
     Utility function for multiprocessed env.
 
@@ -32,7 +29,7 @@ def make_env(env_id, rank, seed, kwargs, kwargsSpecific, eval_env):
     :return: (Gym Environment) The gym environment
     '''
     def _init():
-        env = envs[env_id](**kwargsSpecific, **kwargs)
+        env = ENVS[env_id](**env_specific_params, base_env_params=env_base_params)
         # if not env.training:
         #     # env.start_days = options["start_days"]
         #     # # we fix the growth year for each individual evaluation environment
@@ -44,29 +41,61 @@ def make_env(env_id, rank, seed, kwargs, kwargsSpecific, eval_env):
         return env
     return _init
 
-def load_model_params(algorithm: str, path: str, env_id: str) -> Dict[str, Any]:
+def make_vec_env(
+    env_id: str,
+    env_base_params: Dict[str, Any],
+    env_specific_params: Dict[str, Any],
+    seed: int,
+    n_envs: int,
+    monitor_filename: str | None = None,
+    vec_norm_kwargs: Dict[str, Any] | None = None,
+    eval_env: bool = False
+    ) -> VecEnv:
+    """
+    Creates a vectorized environment, with n individual envs.
+    """
+    # make dir if not exists
+    if monitor_filename is not None and not os.path.exists(os.path.dirname(monitor_filename)):
+        os.makedirs(os.path.dirname(monitor_filename), exist_ok=True)
+    env = SubprocVecEnv([make_env(env_id, rank, seed, env_base_params, env_specific_params, eval_env=eval_env) for rank in range(n_envs)])
+    env = VecMonitor(env, filename=monitor_filename)
 
-    with open(join(path, algorithm + ".yml"), "r") as f:
+    if vec_norm_kwargs is not None:
+        env = VecNormalize(env, **vec_norm_kwargs)
+        if eval_env:
+            env.training = False
+            env.norm_reward = False
+    # env.seed(seed=seed) DO WE NEED TO SEED ENVS HERE??
+    return env
+
+
+def load_model_hyperparams(algorithm: str, env_id: str) -> Dict[str, Any]:
+    with open(join("gl_gym/configs/agents/", algorithm + ".yml"), "r") as f:
         params = yaml.load(f, Loader=yaml.FullLoader)
+    model_hyperparams = params[env_id]
+    return model_hyperparams
 
-    model_params = params[env_id]
+    # with open(join(path, algorithm + ".yml"), "r") as f:
+    #     params = yaml.load(f, Loader=yaml.FullLoader)
 
-    if "policy_kwargs" in model_params.keys():
-        model_params["policy_kwargs"]["activation_fn"] = \
-            ACTIVATION_FN[model_params["policy_kwargs"]["activation_fn"]]
-        model_params["policy_kwargs"]["optimizer_class"] = \
-            OPTIMIZER[model_params["policy_kwargs"]["optimizer_class"]]
-        model_params["policy_kwargs"]["log_std_init"] = \
-            eval(model_params["policy_kwargs"]["log_std_init"])
+    # model_params = params[env_id]
 
-    if model_params["learning_rate_schedule"]:
-        model_params["learning_rate"] = linear_schedule(**model_params["learning_rate_schedule"])
-        del model_params["learning_rate_schedule"]
+    # if "policy_kwargs" in model_params.keys():
+    #     model_params["policy_kwargs"]["activation_fn"] = \
+    #         ACTIVATION_FN[model_params["policy_kwargs"]["activation_fn"]]
+    #     model_params["policy_kwargs"]["optimizer_class"] = \
+    #         OPTIMIZER[model_params["policy_kwargs"]["optimizer_class"]]
+    #     model_params["policy_kwargs"]["log_std_init"] = \
+    #         eval(model_params["policy_kwargs"]["log_std_init"])
 
-    # if "learning_rate_scheduler" in model_params.keys():
-    #     model_params["learning_rate"] = linear_schedule(**model_params["learning_rate_scheduler"])
-    #     del model_params["learning_rate_scheduler"]
-    return model_params
+    # if model_params["learning_rate_schedule"]:
+    #     model_params["learning_rate"] = linear_schedule(**model_params["learning_rate_schedule"])
+    #     del model_params["learning_rate_schedule"]
+
+    # # if "learning_rate_scheduler" in model_params.keys():
+    # #     model_params["learning_rate"] = linear_schedule(**model_params["learning_rate_scheduler"])
+    # #     del model_params["learning_rate_scheduler"]
+    # return model_params
 
 def load_env_params(env_id: str, path: str) -> Tuple[Dict, Dict, Dict]:
     '''
@@ -153,27 +182,17 @@ def set_model_params(config):
     return model_params
 
 
-def wandb_init(model_params: Dict[str, Any],
-               env_params: Dict[str, Any],
-               env_specific_params: Dict[str, Any],
-               timesteps: int,
+def wandb_init(hyperparameters: Dict[str, Any],
                env_seed: int,
                model_seed: int,
                project: str,
                group: str,
-               runname: Optional[str],
-               job_type: str,
                save_code: bool = False,
-               resume: bool = False
                ):
-
     config= {
-        "policy": model_params["policy"],
-        "total_timesteps": timesteps,
         "env_seed": env_seed,
-        'model_seed': model_seed,
-        "model_params": {**model_params},
-        "env_params": {**env_specific_params, **env_params}
+        "model_seed": model_seed,
+        **hyperparameters,
     }
 
     config_exclude_keys = []
@@ -181,12 +200,9 @@ def wandb_init(model_params: Dict[str, Any],
         project=project,
         config=config,
         group=group,
-        name=runname,
         sync_tensorboard=True,
         config_exclude_keys=config_exclude_keys,
-        job_type=job_type,
         save_code=save_code,
-        resume=resume,
         allow_val_change=True,
     )
     return run, config
@@ -207,7 +223,7 @@ def create_callbacks(n_eval_episodes: int,
         save_vec_best = SaveVecNormalizeCallback(save_freq=1, save_path=env_log_dir, verbose=2)
     else:
         save_vec_best = None
-    eval_callback = TensorboardCallback(eval_env,
+    eval_callback = CustomWandbCallback(eval_env,
                                         n_eval_episodes=n_eval_episodes,
                                         eval_freq=eval_freq,
                                         best_model_save_path=model_log_dir,

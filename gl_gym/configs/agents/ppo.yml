@@ -1,4 +1,6 @@
-DwarfTomatoes:          # educated guess based on Bayes optimisation...
+TomatoEnv:              # educated guess based on Bayes optimisation...
+  total_timesteps: 10_000_000
+  n_envs: 8
   policy: MlpPolicy
   n_steps: 2048         # we update after n_steps calls of step() function. in the case of N envs --> N * n_steps
   batch_size: 256
@@ -14,38 +16,11 @@ DwarfTomatoes:          # educated guess based on Bayes optimisation...
   sde_sample_freq: 8
   target_kl: null
 
-  policy_kwargs: {net_arch: {pi: [256, 256, 256], vf: [512, 512, 512]},
-                  optimizer_class: ADAM,
+  policy_kwargs: {net_arch: {pi: [256, 256], vf: [512, 512]},
+                  optimizer_class: adam,
                   optimizer_kwargs: {amsgrad: True},
-                  activation_fn: Tanh,
+                  activation_fn: tanh,
                   log_std_init: np.log(1) # Results in policy standard deviation of 0.5 since exp(log(0.5)) = 0.5, where np.log(1) results in std of 1
           }
 
-#   learning_rate: 7.e-5
-  learning_rate_schedule: {initial_learning_rate: 1.e-4, final_learning_rate: 2.e-5, final_progress: 0.5}
-
-DwarfTomatoesObs:          # educated guess based on Bayes optimisation...
-  policy: MlpPolicy
-  n_steps: 2048         # we update after n_steps calls of step() function. in the case of N envs --> N * n_steps
-  batch_size: 256
-  n_epochs: 10
-  gamma: 0.99
-  gae_lambda: 0.92
-  clip_range: 0.2
-  normalize_advantage: True
-  ent_coef: 1.e-4
-  vf_coef: 0.45
-  max_grad_norm: 0.3
-  use_sde: True
-  sde_sample_freq: 8
-  target_kl: null
-
-  policy_kwargs: {net_arch: {pi: [256, 256, 256], vf: [512, 512, 512]},
-                  optimizer_class: ADAM,
-                  optimizer_kwargs: {amsgrad: True},
-                  activation_fn: Tanh,
-                  log_std_init: np.log(1) # Results in policy standard deviation of 0.5 since exp(log(0.5)) = 0.5, where np.log(1) results in std of 1
-          }
-
-#   learning_rate: 7.e-5
-  learning_rate_schedule: {initial_learning_rate: 1.e-4, final_learning_rate: 2.e-5, final_progress: 0.5}
+  learning_rate: 7.e-5

@@ -1,3 +1,8 @@
+from stable_baselines3.common.callbacks import BaseCallback
+from typing import Optional
+import os
+import json
+
 import os
 from typing import Optional, Union, List, Any
 
@@ -11,10 +16,10 @@ from stable_baselines3.common.callbacks import EvalCallback, BaseCallback
 from stable_baselines3.common.vec_env import VecEnv, sync_envs_normalization
 
 from gl_gym.common.evaluation import evaluate_policy
-from gl_gym.common.utils import days2date
+# from gl_gym.common.utils import days2date
 from gl_gym.common.results import Results
 
-class TensorboardCallback(EvalCallback):
+class CustomWandbCallback(EvalCallback):
     """
     Callback that logs specified data from RL model and environment to Tensorboard.
     Is a daughter class of EvalCallback from Stable Baselines3.
@@ -51,11 +56,60 @@ class TensorboardCallback(EvalCallback):
         self.plot = True if run else False
         self.results = results
         self.save_results = True if results else False
+        self.cum_metrics = {
+            "EPI": 0,
+            "revenue": 0.0,
+            "variable_costs": 0.0,
+            "fixed_costs": 0.0,
+            "co2_cost": 0.0,
+            "heat_cost": 0.0,
+            "elec_cost": 0.0,
+            "temp_violation": 0.0,
+            "co2_violation": 0.0,
+            "rh_violation": 0.0,
+        }
+
 
         if self.save_results:
             self.results_path = f"data/{self.run.project}/{self.run.group}"
             # create save directory if not already present
             os.makedirs(self.results_path, exist_ok=True)
+
+    def _cost_metrics_callback(self, local_vars, global_vars):
+        # Extract the 'infos' variable from local_vars. 
+        # 'infos' should be a list of info dicts returned by env.step().
+        if "infos" not in local_vars:
+            return
+
+        infos = local_vars["infos"]
+
+        # Initialize the cumulative metrics dictionary in global_vars if it does not exist
+        # if "cumulative_metrics" not in global_vars:
+        #     global_vars["cumulative_metrics"] = {
+        #         "revenue": 0.0,
+        #         "heating_cost": 0.0,
+        #         "co2_cost": 0.0,
+        #         "temperature_violation": 0.0,
+        #         "co2_violation": 0.0,
+        #         "relative_humidity_violation": 0.0,
+        #     }
+
+        # cum_metrics = global_vars["cumulative_metrics"]
+
+        # Accumulate metrics from infos
+        # Assuming each info dictionary may contain keys like:
+        # "revenue", "heating_cost", "co2_cost", "temperature_violation", 
+        # "co2_violation", and "relative_humidity_violation".
+        for info in infos:
+            self.cum_metrics["EPI"] += info["EPI"]
+            self.cum_metrics["temp_violation"] += info["temp_violation"]
+            self.cum_metrics["co2_violation"] += info["co2_violation"]
+            self.cum_metrics["rh_violation"] += info["rh_violation"]
+            self.cum_metrics["variable_costs"] += info["variable_costs"]
+            self.cum_metrics["fixed_costs"] += info["fixed_costs"]
+            self.cum_metrics["co2_cost"] += info["co2_cost"]
+            self.cum_metrics["heat_cost"] += info["heat_cost"]
+            self.cum_metrics["elec_cost"] += info["elec_cost"]
 
     def _on_step(self) -> bool:
 
@@ -73,13 +127,21 @@ class TensorboardCallback(EvalCallback):
                         "and warning above."
                     ) from e
 
-            # reset the index of the evaluation environment
-            self.eval_env.env_method("_reset_eval_idx")
 
-            # Reset success rate buffer
-            self._is_success_buffer = []
+            # Reset cumulative metrics
+            self.cum_metrics = {
+                "EPI": 0,
+                "temp_violation": 0.0,
+                "co2_violation": 0.0,
+                "rh_violation": 0.0,
+                "variable_costs": 0.0,
+                "fixed_costs": 0.0,
+                "co2_cost": 0.0,
+                "heat_cost": 0.0,
+                "elec_cost": 0.0,
+            }
 
-            episode_rewards, episode_lengths, episode_actions, episode_obs, time_vec, episode_profits, episode_gains, episode_var_costs, episode_fixed_costs = evaluate_policy(
+            episode_rewards, episode_lengths, _ = evaluate_policy(
                 self.model,
                 self.eval_env,
                 n_eval_episodes=self.n_eval_episodes,
@@ -87,8 +149,7 @@ class TensorboardCallback(EvalCallback):
                 deterministic=self.deterministic,
                 return_episode_rewards=True,
                 warn=self.warn,
-                callback=self._log_success_callback,
-                save_info=True,
+                callback=self._cost_metrics_callback,
             )
 
             # we cutoff the last observations because that already belongs to the reset of the next episode
@@ -115,13 +176,6 @@ class TensorboardCallback(EvalCallback):
                 )
             mean_reward, std_reward = np.mean(episode_rewards), np.std(episode_rewards)
 
-            # sum_violations = np.sum(episode_violations, axis=1)
-            sum_profits = np.sum(episode_profits, axis=1)
-            sum_gains = np.sum(episode_gains, axis=1)
-            sum_var_costs = np.sum(episode_var_costs, axis=1)
-            sum_fixed_costs = np.sum(episode_fixed_costs, axis=1)
-            # mean_ep_length, std_ep_length = np.mean(episode_lengths), np.std(episode_lengths)
-            self.last_mean_reward = mean_reward
 
             if self.verbose >= 1:
                 print(f"Eval num_timesteps={self.num_timesteps}, " f"episode_reward={mean_reward:.2f} +/- {std_reward:.2f}")
@@ -129,12 +183,18 @@ class TensorboardCallback(EvalCallback):
 
             # Add to current Logger
             self.logger.record("eval/mean_reward", float(mean_reward))
-            self.logger.record("eval/mean_episode_length", float(np.mean(episode_lengths)))
-            self.logger.record("eval/mean_profit", float(np.mean(sum_profits)))
+            # self.logger.record("eval/mean_episode_length", float(np.mean(episode_lengths)))
+            # self.logger.record("eval/mea_profit", float(np.mean(sum_profits)))
 
-            self.logger.record("eval/gains", np.mean(sum_gains))
-            self.logger.record("eval/var_costs", np.mean(sum_var_costs))
-            self.logger.record("eval/fixed_costs", np.mean(sum_fixed_costs))
+            self.logger.record("eval/EPI", np.mean(self.cum_metrics["EPI"]))
+            self.logger.record("eval/temp_violation", np.mean(self.cum_metrics["temp_violation"]))
+            self.logger.record("eval/co2_violation", np.mean(self.cum_metrics["co2_violation"]))
+            self.logger.record("eval/rh_violation", np.mean(self.cum_metrics["rh_violation"]))
+            self.logger.record("eval/variable_costs", np.mean(self.cum_metrics["variable_costs"]))
+            self.logger.record("eval/fixed_costs", np.mean(self.cum_metrics["fixed_costs"]))
+            self.logger.record("eval/co2_cost", np.mean(self.cum_metrics["co2_cost"]))
+            self.logger.record("eval/heat_cost", np.mean(self.cum_metrics["heat_cost"]))
+            self.logger.record("eval/elec_cost", np.mean(self.cum_metrics["elec_cost"]))
 
             if len(self._is_success_buffer) > 0:
                 success_rate = np.mean(self._is_success_buffer)
@@ -152,50 +212,51 @@ class TensorboardCallback(EvalCallback):
                 if self.best_model_save_path is not None:
                     self.model.save(os.path.join(self.best_model_save_path, "best_model"))
                 self.best_mean_reward = mean_reward
+
                 # Trigger callback on new best model, if needed
                 if self.callback_on_new_best is not None:
                     continue_training = self.callback_on_new_best.on_step()
 
-                # update the results class with the results of the current episode
-                if self.results is not None:
-                    times = np.array([time_vec[i, :] for i in range(time_vec.shape[0])])
+                # # update the results class with the results of the current episode
+                # if self.results is not None:
+                #     # times = np.array([time_vec[i, :] for i in range(time_vec.shape[0])])
 
-                    # add dimension to time_vec and episode_profits so that they can be concatenated to other arrays
-                    times = np.expand_dims(times, axis=-1)
-                    episode_profits = np.expand_dims(episode_profits, axis=-1)
-                    episode_cum_profits = np.cumsum(episode_profits, axis=1)
+                #     # add dimension to time_vec and episode_profits so that they can be concatenated to other arrays
+                #     times = np.expand_dims(times, axis=-1)
+                #     episode_profits = np.expand_dims(episode_profits, axis=-1)
+                #     episode_cum_profits = np.cumsum(episode_profits, axis=1)
 
-                    episode_gains = np.expand_dims(episode_gains, axis=-1)
-                    episode_var_costs = np.expand_dims(episode_var_costs, axis=-1)
-                    episode_fixed_costs = np.expand_dims(episode_fixed_costs, axis=-1)
+                #     episode_gains = np.expand_dims(episode_gains, axis=-1)
+                #     episode_var_costs = np.expand_dims(episode_var_costs, axis=-1)
+                #     episode_fixed_costs = np.expand_dims(episode_fixed_costs, axis=-1)
 
-                    episode_cum_gains = np.cumsum(episode_gains, axis=1)
-                    episode_cum_var_costs = np.cumsum(episode_var_costs, axis=1)
-                    episode_cum_fixed_costs = np.cumsum(episode_fixed_costs, axis=1)
+                #     episode_cum_gains = np.cumsum(episode_gains, axis=1)
+                #     episode_cum_var_costs = np.cumsum(episode_var_costs, axis=1)
+                #     episode_cum_fixed_costs = np.cumsum(episode_fixed_costs, axis=1)
 
-                    # concatenate the results of the current episode to the results of the previous episodes
-                    data = np.concatenate((times, episode_obs[:,:,:26], episode_actions, episode_profits, episode_cum_profits, episode_cum_fixed_costs, episode_cum_var_costs, episode_cum_gains), axis=2)
-                    self.results.update_result(data)
+                    # # concatenate the results of the current episode to the results of the previous episodes
+                    # data = np.concatenate((times, episode_obs[:,:,:26], episode_actions, episode_profits, episode_cum_profits, episode_cum_fixed_costs, episode_cum_var_costs, episode_cum_gains), axis=2)
+                    # self.results.update_result(data)
 
-                    # save results
-                    if self.save_results:
-                        # save results to csv given the run name
-                        self.results.save(os.path.join(self.results_path, f"{self.run.name}.csv"))
+                    # # save results
+                    # if self.save_results:
+                    #     # save results to csv given the run name
+                    #     self.results.save(os.path.join(self.results_path, f"{self.run.name}.csv"))
 
                 # plot results of a single episode (usually the first one)
 
-                if self.plot:
-                    plot_episode = 0
-                    table = wandb.Table(dataframe=self.results.df[(self.results.df['episode'] == plot_episode) &  (self.results.df['Time'] != 0)])
+                # if self.plot:
+                #     plot_episode = 0
+                #     table = wandb.Table(dataframe=self.results.df[(self.results.df['episode'] == plot_episode) &  (self.results.df['Time'] != 0)])
 
-                    for col in self.results.col_names[1:-1]:
-                        wandb.log(
-                            {
-                                f"plot_{col}_id": wandb.plot.line(
-                                    table, "Time", col, title=f"Plot of {col} over Time"
-                                )
-                            }
-                        )
+                #     for col in self.results.col_names[1:-1]:
+                #         wandb.log(
+                #             {
+                #                 f"plot_{col}_id": wandb.plot.line(
+                #                     table, "Time", col, title=f"Plot of {col} over Time"
+                #                 )
+                #             }
+                #         )
 
             # Trigger callback after every evaluation, if needed
             if self.callback is not None:

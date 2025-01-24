@@ -73,6 +73,12 @@ class GreenhouseReward(BaseReward):
         self.dmfm = dmfm                            # ratio of dry matter to fresh matter; Assumption
         self.pen_weights = np.array(pen_weights)
         self._init_costs()
+        self._init_violations()
+
+    def _init_violations(self):
+        self.temp_violation = 0
+        self.co2_violation = 0
+        self.rh_violation = 0
 
     def _init_costs(self):
         self.variable_costs = 0
