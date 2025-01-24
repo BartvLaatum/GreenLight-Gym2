@@ -64,6 +64,7 @@ def split_weather_controls(df):
     """
     # Create uBoil column based on PipeTemp threshold
     df['uBoil'] = (df['PipeTemp'] > df['air temperature']).astype(float)
+    # df['uBoil'] = 0
     # Weather variables
     weather_vars = [
         'Time',
@@ -198,21 +199,23 @@ def format_controls_df(controls_df):
     """
     Format controls dataframe to match required columns and units
     """
-    np_controls = np.zeros((len(controls_df), 6))
+    np_controls = np.zeros((len(controls_df), 7))
     np_controls[:, 0] = controls_df['uBoil']
     np_controls[:, 1] = controls_df['Co2Injection']
     np_controls[:, 2] = controls_df['ThScrPos']/100
     np_controls[:, 3] = 0.5*(controls_df['WindSideVent'] + controls_df['LeeSideVent'])/100
     np_controls[:, 4] = controls_df['TopLight']/100
     np_controls[:, 5] = controls_df['BlScrPos']/100
+    np_controls[:, 6] = controls_df['PipeTemp']
+
     # Check for NaN values in each control column
-    for i, control in enumerate(['Boiler', 'CO2', 'Thermal Screen', 'Ventilation', 'Top Light', 'Blackout Screen']):
+    for i, control in enumerate(['Boiler', 'CO2', 'Thermal Screen', 'Ventilation', 'Top Light', 'Blackout Screen', 'PipeTemp']):
         nan_count = np.isnan(np_controls[:, i]).sum()
         if nan_count > 0:
             print(f"Warning: {nan_count} NaN values found in {control} control")
             # Replace NaNs with 0 to avoid issues
             np_controls[:, i] = np.nan_to_num(np_controls[:, i], 0)
-    df_controls = pd.DataFrame(np_controls, columns=['Boiler', 'CO2', 'Thermal Screen', 'Ventilation', 'Top Light', 'Blackout Screen'])
+    df_controls = pd.DataFrame(np_controls, columns=['Boiler', 'CO2', 'Thermal Screen', 'Ventilation', 'Top Light', 'Blackout Screen', 'PipeTemp'])
     return df_controls
 
 def process_time_data(df):
@@ -235,7 +238,8 @@ def process_time_data(df):
     df_2010['time'] = df_2010['time'] - (365 * 86400)  # 86400 seconds per day
     
     # Filter 2009 data (days 292-364)
-    df_2009 = df[(df['day number'] >= 292) & (df['day number'] < 365)].copy()
+    # df_2009 = df[(df['day number'] >= 292) & (df['day number'] < 365)].copy()
+    df_2009 = df[(df['day number'] < 365)].copy()
     
     return df_2009, df_2010
 
