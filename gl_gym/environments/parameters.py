@@ -132,9 +132,9 @@ def init_default_params(nparams):
     params[105] = (51.e-3);             # phiPipeE;     External diameter of the heating pipes [m]
     params[106] = (51.e-3)-(2.25e-3);   # phiPipeI;        Internal diameter of the heating pipes [m]
     params[107] = 1.3375;               # lPipe;           Length of the heating pipes [m]
-    params[108] = 44.*params[46];                  # pBoil;           Max energy input from boiler into the heating system [W]
+    params[108] = 80.*params[46];       # pBoil;           Max energy input from boiler into the heating system [W]
 
-    params[109] = 5.0*params[46];                  # phiExtCo2;       Capacity of external CO2 source [mg s-1]
+    params[109] = 5.0*params[46];       # phiExtCo2;       Capacity of external CO2 source [mg s-1]
 
     # capPipe; Heat capacity of the heating pipes [J m-2 K-1]
     params[110] = 0.25 * np.pi * params[107] * ((params[105] * params[105] - params[106] * params[106]) * params[12] * params[24] + params[106] * params[106] * params[13] * params[25]); 
@@ -180,7 +180,7 @@ def init_default_params(nparams):
     params[142] = 2.66e-5;      # sla;             Specific leaf area [m2 kg-1]
     params[143] = 3e-6;         # rgr;             Relative growth rate [kg m-2 s-1]
     params[144] = params[141] /params[142];    # cLeafMax;        Maximum leaf carbon content [kg m-2]
-    params[145] = 300_000;    # cFruitMax;       Maximum Fruit carbon content [kg m-2]
+    params[145] = 3_000_000;    # cFruitMax;       Maximum Fruit carbon content [mg m-2]
     params[146] = 0.27;         # cFruitG;         Growth respiration coefficient for fruit
     params[147] = 0.28;         # cLeafG;          Growth respiration coefficient for leaf
     params[148] = 0.3;          # cStemG;          Growth respiration coefficient for stem
@@ -191,9 +191,9 @@ def init_default_params(nparams):
     params[152] = 3.47e-7;      # cLeafM;          Maintenance respiration coefficient for leaf
     params[153] = 1.47e-7;      # cStemM;          Maintenance respiration coefficient for stem
 
-    params[154] = 0.328;        # rgFruit;         Growth respiration coefficient for fruit
-    params[155] = 0.095;        # rgLeaf;          Growth respiration coefficient for leaf
-    params[156] = 0.074;        # rgStem;          Growth respiration coefficient for stem
+    params[154] = 0.328;        # rgFruit;         Potential growth rate coefficient for fruit
+    params[155] = 0.095;        # rgLeaf;          Potential growth rate coefficient for leaf
+    params[156] = 0.074;        # rgStem;          Potential growth rate coefficient for stem
 
     params[157] = 20e3;         # cBufMax;         Maximum buffer capacity [J m-2 K-1]
     params[158] = 1e3;          # cBufMin;         Minimum buffer capacity [J m-2 K-1]

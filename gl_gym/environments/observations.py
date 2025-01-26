@@ -61,7 +61,7 @@ class IndoorClimateObservations(BaseObservations):
     """
     def __init__(self, env) -> None:
         self.env = env
-        self.obs_names = ["co2_air", "temp_air", "pipe_temp", "rh_air"]
+        self.obs_names = ["co2_air", "temp_air","rh_air",  "pipe_temp"]
         self.n_obs = len(self.obs_names)
 
     def observation_space(self):

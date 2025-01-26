@@ -79,7 +79,6 @@ class TomatoEnv(GreenLightEnv):
         spaces_high_list = []
 
         for module in self.observation_modules:
-            module_name = module.__class__.__name__.lower()
             module_obs_space = module.observation_space()
             spaces_low_list.append(module_obs_space.low)
             spaces_high_list.append(module_obs_space.high)
@@ -116,8 +115,11 @@ class TomatoEnv(GreenLightEnv):
             print("Error in ODE approximation")
             self.terminated = True
 
+        # update time
         self.day_of_year += (self.dt/self.c) % 365
-        self.hour_of_day =  (self.dt/3600) % 24
+        self.hour_of_day +=  (self.dt/3600)
+        self.hour_of_day = self.hour_of_day % 24
+
         self.obs = self._get_obs()
         if self._terminalState():
             self.terminated = True
@@ -180,6 +182,14 @@ class TomatoEnv(GreenLightEnv):
         obs = np.concatenate(obs, axis=0)
         return obs
 
+    def get_obs_names(self):
+        """
+        """
+        obs_names = []
+        for module in self.observation_modules:
+            obs_names.extend(module.obs_names)
+        return obs_names
+
     def _get_info(self) -> Dict[str, Any]:
         return {
             "EPI": self.reward.profit,
@@ -192,6 +202,7 @@ class TomatoEnv(GreenLightEnv):
             "temp_violation": self.reward.temp_violation,
             "co2_violation": self.reward.co2_violation,
             "rh_violation": self.reward.rh_violation,
+            "lamp_violation": self.reward.lamp_violation,
             "controls": self.u,
         }
 

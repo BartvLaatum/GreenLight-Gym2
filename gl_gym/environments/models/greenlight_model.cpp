@@ -18,6 +18,10 @@ struct GreenLight
     SX a;
     SX p;
 
+    // Reuse buffers to minimize overhead:
+    std::vector<DM> inputs_;        // F has 4 inputs: x, u, d, p
+    std::vector<DM> result_;        // F returns 1 output: x_next
+    std::vector<double> x_next_;    // Reusable output buffer
 
     // Function ODE_func;
     Function integrator_func;
@@ -80,6 +84,11 @@ struct GreenLight
             {"x", "u", "d", "p"},           // input names
             {"x_next"}                      // output names
         );
+
+        // Pre-allocate buffers
+        inputs_.resize(4); // x, u, d, p
+        result_.resize(1); // x_next
+        x_next_.resize(nx, 0.0);
     }
 
     std::vector<double> evalF(
@@ -89,24 +98,35 @@ struct GreenLight
         const std::vector<double>& p_np
     )
     {
-        // Convert numpy input vectors to CasADi DM
-        DM x_dm = DM(x_np);
-        DM u_dm = DM(u_np);
-        DM d_dm = DM(d_np);
-        DM p_dm = DM(p_np);
+        // Reuse input buffer
+        inputs_[0] = x_np;  // x
+        inputs_[1] = u_np;  // u
+        inputs_[2] = d_np;  // d
+        inputs_[3] = p_np;  // p
 
-        // Call the function F
-        // F takes inputs {x, u, d, p}
-        std::vector<DM> result = F(std::vector<DM>{x_np, u_dm, d_dm, p_dm});
+        // Evaluate CasADi function
+        result_ = F(inputs_);
 
-        // // F returns one output: x_next
-        DM x_next_dm = result.at(0);
+        // result_[0] is DM holding x_nexts
+        DM& x_next_dm = result_[0];
 
-        // Convert DM to std::vector<double>
-        // "x_next_dm" is typically a 1D array of length nx
-        std::vector<double> x_next(x_next_dm->begin(), x_next_dm->end());
+        // Copy to x_next_ buffer
+        auto data = x_next_dm.nonzeros();
+        std::copy(data.begin(), data.end(), x_next_.begin());
 
-        return x_next;
+        return x_next_;
+        // // Call the function F
+        // // F takes inputs {x, u, d, p}
+        // std::vector<DM> result = F(std::vector<DM>{x_np, u_np, d_np, p_np});
+
+        // // // F returns one output: x_next
+        // DM x_next_dm = result.at(0);
+
+        // // Convert DM to std::vector<double>
+        // // "x_next_dm" is typically a 1D array of length nx
+        // std::vector<double> x_next(x_next_dm->begin(), x_next_dm->end());
+
+        // return x_next;
     }
 
     ~GreenLight() {

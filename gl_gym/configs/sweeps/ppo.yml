@@ -1,4 +1,4 @@
-ppo:
+TomatoEnv:
   method: bayes
   metric:
     name: rollout/ep_rew_mean

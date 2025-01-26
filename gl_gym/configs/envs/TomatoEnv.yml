@@ -21,11 +21,6 @@ GreenLightEnv:
 
 TomatoEnv:
   reward_function: GreenhouseReward       # reward function to use
-  eval_options:
-    eval_days: [265]                    # days to evaluate the agent on
-    eval_years: [2023]                  # year to evaluate the agent on
-    location: Bleiswijk                 # location of the greenhouse
-    data_source: KASPRO                 # source of the weather data
  
   observation_modules: [                  # observation modules to use
     IndoorClimateObservations,   
@@ -42,6 +37,12 @@ TomatoEnv:
     temp_max: 34.         # upper bound on temperature                    [°C]        20
     rh_min: 50.            # lower bound on relative humidity             [#]          0
     rh_max: 85.          # upper bound on relative humidity               [#]         70
+
+  eval_options:
+    eval_days: [40]                    # days to evaluate the agent on
+    eval_years: [2010]                  # year to evaluate the agent on
+    location: Amsterdam                 # location of the greenhouse
+    data_source: KNMI                 # source of the weather data
 
   reward_params:
     fixed_greenhouse_cost: 15.

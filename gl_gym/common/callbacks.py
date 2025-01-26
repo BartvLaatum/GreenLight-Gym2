@@ -16,7 +16,6 @@ from stable_baselines3.common.callbacks import EvalCallback, BaseCallback
 from stable_baselines3.common.vec_env import VecEnv, sync_envs_normalization
 
 from gl_gym.common.evaluation import evaluate_policy
-# from gl_gym.common.utils import days2date
 from gl_gym.common.results import Results
 
 class CustomWandbCallback(EvalCallback):
@@ -83,25 +82,14 @@ class CustomWandbCallback(EvalCallback):
 
         infos = local_vars["infos"]
 
-        # Initialize the cumulative metrics dictionary in global_vars if it does not exist
-        # if "cumulative_metrics" not in global_vars:
-        #     global_vars["cumulative_metrics"] = {
-        #         "revenue": 0.0,
-        #         "heating_cost": 0.0,
-        #         "co2_cost": 0.0,
-        #         "temperature_violation": 0.0,
-        #         "co2_violation": 0.0,
-        #         "relative_humidity_violation": 0.0,
-        #     }
-
-        # cum_metrics = global_vars["cumulative_metrics"]
-
         # Accumulate metrics from infos
         # Assuming each info dictionary may contain keys like:
         # "revenue", "heating_cost", "co2_cost", "temperature_violation", 
         # "co2_violation", and "relative_humidity_violation".
         for info in infos:
             self.cum_metrics["EPI"] += info["EPI"]
+            self.cum_metrics["revenue"] += info["revenue"]
+            self.cum_metrics["lamp_violation"] += info["lamp_violation"]
             self.cum_metrics["temp_violation"] += info["temp_violation"]
             self.cum_metrics["co2_violation"] += info["co2_violation"]
             self.cum_metrics["rh_violation"] += info["rh_violation"]
@@ -130,7 +118,9 @@ class CustomWandbCallback(EvalCallback):
 
             # Reset cumulative metrics
             self.cum_metrics = {
-                "EPI": 0,
+                "EPI": 0.0,
+                "revenue": 0.0,
+                "lamp_violation": 0.0,
                 "temp_violation": 0.0,
                 "co2_violation": 0.0,
                 "rh_violation": 0.0,
@@ -141,7 +131,7 @@ class CustomWandbCallback(EvalCallback):
                 "elec_cost": 0.0,
             }
 
-            episode_rewards, episode_lengths, _ = evaluate_policy(
+            episode_rewards, episode_lengths, add_info = evaluate_policy(
                 self.model,
                 self.eval_env,
                 n_eval_episodes=self.n_eval_episodes,
@@ -177,6 +167,8 @@ class CustomWandbCallback(EvalCallback):
             mean_reward, std_reward = np.mean(episode_rewards), np.std(episode_rewards)
 
 
+                
+
             if self.verbose >= 1:
                 print(f"Eval num_timesteps={self.num_timesteps}, " f"episode_reward={mean_reward:.2f} +/- {std_reward:.2f}")
                 # print(f"Episode length: {mean_ep_length:.2f} +/- {std_ep_length:.2f}")
@@ -187,6 +179,7 @@ class CustomWandbCallback(EvalCallback):
             # self.logger.record("eval/mea_profit", float(np.mean(sum_profits)))
 
             self.logger.record("eval/EPI", np.mean(self.cum_metrics["EPI"]))
+            self.logger.record("eval/revenue", np.mean(self.cum_metrics["revenue"]))
             self.logger.record("eval/temp_violation", np.mean(self.cum_metrics["temp_violation"]))
             self.logger.record("eval/co2_violation", np.mean(self.cum_metrics["co2_violation"]))
             self.logger.record("eval/rh_violation", np.mean(self.cum_metrics["rh_violation"]))
@@ -216,6 +209,22 @@ class CustomWandbCallback(EvalCallback):
                 # Trigger callback on new best model, if needed
                 if self.callback_on_new_best is not None:
                     continue_training = self.callback_on_new_best.on_step()
+
+                    obs_names = self.eval_env.env_method("get_obs_names")[0]
+                    obs_df = pd.DataFrame(add_info["observations"][0], columns=obs_names)
+                    table = wandb.Table(dataframe=obs_df)
+                    # Create a linspace vector for x-axis
+                    x_axis = np.linspace(0, len(obs_df) - 1, len(obs_df))
+                    obs_df['step'] = x_axis  # Add the linspace vector as a column
+                    
+                    for col in obs_names[:]:
+                        wandb.log(
+                            {
+                                f"plot_{col}_id": wandb.plot.line(
+                                    table, "timestep", col, title=f"Plot of {col} over steps"
+                                )
+                            }
+                        )
 
                 # # update the results class with the results of the current episode
                 # if self.results is not None:

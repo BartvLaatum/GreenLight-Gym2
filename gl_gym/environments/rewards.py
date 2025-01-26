@@ -115,9 +115,9 @@ class GreenhouseReward(BaseReward):
         Returns:
             float: The total variable costs.
         """
-        heating_energy = self.env.u[0] * self.env.p[108] * self.env.dt*1e-3 # convert to kW/m2/timestep
-        co2_dosing = self.env.u[1] * self.env.p[109] * self.env.dt*1e-6     # convert to kg/m2/timestep
-        elec_use = self.env.u[2] * self.env.p[172] * self.env.dt*1e-3       # convert to kW/m2/timestep
+        heating_energy = self.env.u[0] * self.env.p[108] / self.env.p[46] * self.env.dt/3600*1e-3   # convert W/aFlr to kWh/m2
+        elec_use = self.env.u[4] * self.env.p[172] * self.env.dt/3600*1e-3                          # convert W/aFlr to kWh/m2
+        co2_dosing = self.env.u[1] * self.env.p[109] / self.env.p[46] * self.env.dt * 1e-6          # convert to kg/m2
         self.heat_costs = heating_energy * self.heating_price
         self.co2_costs = co2_dosing * self.co2_price
         self.elec_costs = elec_use * self.elec_price
@@ -133,7 +133,7 @@ class GreenhouseReward(BaseReward):
         3. Multiplies the daily FFW growth by the fruit price, which resembles €/kg.
         """
         fruit_growth_dm = self.env.x[25] - self.env.x_prev[25]
-        fruit_growth_ffw = fruit_growth_dm * 1e-3 / self.dmfm
+        fruit_growth_ffw = fruit_growth_dm * 1e-6 / self.dmfm
         return fruit_growth_ffw * self.fruit_price
 
     def output_violations(self):
@@ -156,6 +156,11 @@ class GreenhouseReward(BaseReward):
         return np.dot(self.pen_weights, violations)
 
     def control_violation(self):
+        """
+        Checks if lamps are used during night hours (after 8 PM).
+        Sets lamp_violation to 1 if lamps are on after 20:00,
+        otherwise sets it to 0.
+        """
         if self.env.hour_of_day >= 20:
             if self.env.u[4] > 0:
                 self.lamp_violation = 1
