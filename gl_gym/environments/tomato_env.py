@@ -55,6 +55,8 @@ class TomatoEnv(GreenLightEnv):
             constraints["temp_max"],
             constraints["rh_max"],
         ])
+        # set the default parameters
+        self.p = init_default_params(self.num_params)
 
         # initialise the reward function
         self.reward = self._init_rewards(reward_function, reward_params)
@@ -240,7 +242,7 @@ class TomatoEnv(GreenLightEnv):
             self.growth_year,
             self.start_day,
             self.season_length,
-            self.pred_horizon+1,
+            self.Np+1,
             self.dt,
             self.nd
         )
@@ -249,7 +251,6 @@ class TomatoEnv(GreenLightEnv):
         self.x = init_state(self.weather_data[0])
         self.x_prev = np.copy(self.x)
         self.timestep = 0
-        self.p = init_default_params(self.num_params)
         self.obs = self._get_obs()
     
 

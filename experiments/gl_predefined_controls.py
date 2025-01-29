@@ -47,18 +47,19 @@ if __name__ == "__main__":
     env_base_params["end_train_year"] = 2009
     env_base_params["start_train_day"] = 0
     env_base_params["end_train_day"] = 0
-    env_base_params["season_length"] = 5
+    env_base_params["season_length"] = 1
     env_base_params["nu"] = 6
     env_base_params["dt"] = 300
+    env_base_params["pred_horizon"] = 0
 
     dt_data = 300
-    Ns_data = int(86400*env_base_params['season_length']/dt_data)
+    Ns_data = int(86400*env_base_params['season_length']/dt_data) + 1
 
     # Initialize the environment with both parameter dictionaries
     env = TomatoEnv(base_env_params=env_base_params, **env_specific_params)
     crop_DM = 6240*10
-    controls = pd.read_csv('data/bleiswijk/controls2009.csv').values[:Ns_data, :6]
-    weather = pd.read_csv('data/bleiswijk/weather2009.csv').values[:Ns_data, :10]
+    controls = pd.read_csv('data/comparison/controls2009.csv').values[:Ns_data, :6]
+    weather = pd.read_csv('data/comparison/weather2009.csv').values[:Ns_data, :10]
     weather = interpolate_weather_data(weather, env_base_params)
 
     def run_simulation():
@@ -89,11 +90,11 @@ if __name__ == "__main__":
                       "cBuf", "cLeaf", "cStem", "cFruit", "tCanSum", "time"]
     print(np.array(Xs).shape)
     states = pd.DataFrame(np.array(Xs), columns=state_columns)
-    states.to_csv("data/bleiswijk/states_pipeinput.csv", index=False)
+    states.to_csv("data/comparison/states_pipeinput.csv", index=False)
 
     weather_cols = ["glob_rad", "temp", "vpout", "co2out", "wind", "tsky", "tso", "dli", "isday", "isday_smooth"]   
     controls_cols = ["uBoil", "uCO2", "uThScr", "uVent", "uLamp", "uBlScr"]
     weather_data = pd.DataFrame(env.weather_data, columns=weather_cols)
-    weather_data.to_csv("data/bleiswijk/weather_pipeinput.csv", index=False)
+    weather_data.to_csv("data/comparison/weather_pipeinput.csv", index=False)
     controls_data = pd.DataFrame(controls, columns=controls_cols)
-    controls_data.to_csv("data/bleiswijk/controls_pipeinput.csv", index=False)
+    controls_data.to_csv("data/comparison/controls_pipeinput.csv", index=False)

@@ -12,12 +12,12 @@ GreenLightEnv:
   u_min: [0, 0, 0, 0, 0, 0]
   u_max: [1, 1, 1, 1, 1, 1]
   delta_u_max: 0.1                # max change rate in control inputs
-  pred_horizon: 0                 # [days] number of future weather predictions
-  season_length: 10               # number of days to simulate
+  pred_horizon: 0.5               # [days] number of future weather predictions
+  season_length: 60               # number of days to simulate
   start_train_year: 2010          # start year for training
   end_train_year: 2010            # end year for training
-  start_train_day: 40             # start day of the year for training
-  end_train_day: 40               # end day of the year for training  training: True           # whether we are training or testing
+  start_train_day: 59             # start day of the year for training
+  end_train_day: 59               # end day of the year for training  training: True           # whether we are training or testing
 
 TomatoEnv:
   reward_function: GreenhouseReward       # reward function to use
@@ -27,11 +27,12 @@ TomatoEnv:
     BasicCropObservations, 
     ControlObservations, 
     WeatherObservations,
-    TimeObservations
+    TimeObservations,
+    WeatherForecastObservations
   ]
 
   constraints:
-    co2_min: 0.         # lower bound on CO2 concentration                [ppm]        0
+    co2_min: 300.         # lower bound on CO2 concentration                [ppm]        0
     co2_max: 1600.        # upper bound on CO2 concentration              [ppm]        2.75e-3
     temp_min: 15.         # lower bound on temperature                    [°C]         6.5
     temp_max: 34.         # upper bound on temperature                    [°C]        20
@@ -39,7 +40,7 @@ TomatoEnv:
     rh_max: 85.          # upper bound on relative humidity               [#]         70
 
   eval_options:
-    eval_days: [40]                    # days to evaluate the agent on
+    eval_days: [59]                    # days to evaluate the agent on
     eval_years: [2010]                  # year to evaluate the agent on
     location: Amsterdam                 # location of the greenhouse
     data_source: KNMI                 # source of the weather data

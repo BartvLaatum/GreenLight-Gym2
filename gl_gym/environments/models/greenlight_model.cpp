@@ -50,11 +50,13 @@ struct GreenLight
         opts["compiler"] = "shell";
         opts["abstol"] = 1e-6;
         opts["reltol"] = 1e-6;
-        jit_options["flags"] = "-Ofast -march=native";
+        opts["jit_cleanup"] = true;
+        jit_options["flags"] = "-O3";
+        jit_options["cleanup"] = true;   // Some CasADi versions recognize this
         opts["jit_options"] = jit_options;
 
         // Create the integrator
-        Function integrator_func = integrator(
+        integrator_func = integrator(
             "integrator_func", "cvodes",
             {{"x", x}, {"p", input_args_sym}, {"ode", dxdt}},
             0., dt, opts
@@ -115,22 +117,12 @@ struct GreenLight
         std::copy(data.begin(), data.end(), x_next_.begin());
 
         return x_next_;
-        // // Call the function F
-        // // F takes inputs {x, u, d, p}
-        // std::vector<DM> result = F(std::vector<DM>{x_np, u_np, d_np, p_np});
-
-        // // // F returns one output: x_next
-        // DM x_next_dm = result.at(0);
-
-        // // Convert DM to std::vector<double>
-        // // "x_next_dm" is typically a 1D array of length nx
-        // std::vector<double> x_next(x_next_dm->begin(), x_next_dm->end());
-
-        // return x_next;
     }
 
     ~GreenLight() {
         std::cout << "GreenLight destructor called" << std::endl;
+        F = Function();
+        integrator_func = Function();
     }
 
 };

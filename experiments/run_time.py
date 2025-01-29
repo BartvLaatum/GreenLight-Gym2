@@ -22,40 +22,30 @@ if __name__ == "__main__":
     env_base_params["start_train_day"] = 0
     env_base_params["end_train_day"] = 0
     env_base_params["season_length"] = 10
+    env_base_params["pred_horizon"] = 0
     env_base_params["dt"] = 300
 
     # Initialize the environment with both parameter dictionaries
     env = TomatoEnv(base_env_params=env_base_params, **env_specific_params)
     crop_DM = 6240*10
-    controls = pd.read_csv('data/bleiswijk/controls2009.csv').values
+    controls = pd.read_csv('data/comparison/controls2009.csv').values[:,:6]
 
     def run_simulation():
         env.reset(seed=env_seed)
         env.set_crop_state(cBuf=0, cLeaf=0.7*crop_DM, cStem=0.25*crop_DM, cFruit=0.05*crop_DM, tCanSum=0)
         done = False
         time_start = time.time()
-        Xs = []
         while not done:
             x, done = env.step_raw_control(controls[env.timestep])
-            Xs.append(x)
         time_end = time.time()
-        return time_end - time_start, Xs
+        return time_end - time_start
 
 
     # Time the execution of the function
     elapsed_times = []
-    for i in range(1):
-        elapsed_time, Xs = run_simulation()
+    for i in range(10):
+        elapsed_time = run_simulation()
         elapsed_times.append(elapsed_time)
-    # save elapsed times to csv
-    state_columns = ["co2_air", "co2_top", "temp_air", "temp_top", "can_temp", "covin_temp", "covex_temp",
-                      "thScr_temp", "flr_temp", "pipe_temp", "soil1_temp", "soil2_temp", "soil3_temp", "soil4_temp", "soil5_temp", 
-                      "vp_air", "vp_top", "lamp_temp", "intlamp_temp", "grow_pipe_temp", "blscr_temp", "24_can_temp",
-                      "cBuf", "cleaves", "cstem", "cFruit", "tsum", "time"]
-    print(np.array(Xs).shape)
-    states = pd.DataFrame(np.array(Xs), columns=state_columns)
-    states.to_csv("data/bleiswijk/states.csv", index=False)
-    
     df = pd.DataFrame(elapsed_times, columns=["elapsed_time"])
-    df.to_csv("data/bleiswijk/elapsed_times.csv", index=False)
+    df.to_csv("data/run_times/elapsed_times.csv", index=False)
     print(f"Elapsed time: {np.mean(elapsed_times):.4f} seconds")  # Print elapsed time

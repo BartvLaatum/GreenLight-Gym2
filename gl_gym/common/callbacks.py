@@ -210,14 +210,12 @@ class CustomWandbCallback(EvalCallback):
                 if self.callback_on_new_best is not None:
                     continue_training = self.callback_on_new_best.on_step()
 
-                    obs_names = self.eval_env.env_method("get_obs_names")[0]
-                    obs_df = pd.DataFrame(add_info["observations"][0], columns=obs_names)
+                    obs_names = self.eval_env.env_method("get_obs_names")[0][:23]
+                    obs_df = pd.DataFrame(add_info["observations"][0][:int(5*86400/900)], columns=obs_names)
                     table = wandb.Table(dataframe=obs_df)
                     # Create a linspace vector for x-axis
-                    x_axis = np.linspace(0, len(obs_df) - 1, len(obs_df))
-                    obs_df['step'] = x_axis  # Add the linspace vector as a column
-                    
-                    for col in obs_names[:]:
+                    cols2plot = ["co2_air", "temp_air","rh_air",  "pipe_temp", "cFruit","uBoil", "uCo2", "uThScr", "uVent", "uLamp", "uBlScr"]
+                    for col in cols2plot:
                         wandb.log(
                             {
                                 f"plot_{col}_id": wandb.plot.line(

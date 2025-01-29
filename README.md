@@ -4,4 +4,4 @@ This repository is a reimplementation of the state-of-the-art greenhouse model i
 
 The model is wrapped in the Gymnasium environment to experiment (reinforcement) learning-based controllers.
 
-Since the downstream model is implemented in CasADi, also *advanced* control techniques like MPC are available.
+Since the GreenLight model is implemented in CasADi, also *advanced* control techniques like MPC are available.

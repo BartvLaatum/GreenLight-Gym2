@@ -131,7 +131,7 @@ def evaluate_policy(
                             episode_rewards.append(info["episode"]["r"])
                             episode_lengths.append(info["episode"]["l"])
                             episode_actions.append(current_actions[i].copy())
-                            episode_obs.append(current_obs[i].copy())
+                            episode_obs.append(current_obs[i].copy()[:,:23])
 
                             # Only increment at `the real end of an episode
                             episode_counts[i] += 1
@@ -140,7 +140,7 @@ def evaluate_policy(
                         episode_rewards.append(current_rewards[i])
                         episode_lengths.append(current_lengths[i])
                         episode_actions.append(current_actions[i].copy())
-                        episode_obs.append(current_obs[i].copy())
+                        episode_obs.append(current_obs[i].copy()[:,:23])
                         episode_counts[i] += 1
                         timestep = 0
 

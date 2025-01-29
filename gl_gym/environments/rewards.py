@@ -16,6 +16,9 @@ class BaseReward(ABC):
     def compute_reward(self) -> SupportsFloat:
         pass
 
+    def scale_reward(self, r: float, min_r, max_r) -> SupportsFloat:
+        return (r - min_r)/(max_r - min_r)
+
 class GreenhouseReward(BaseReward):
     """	
     Economic reward function for the GreenLight environment.
@@ -76,6 +79,49 @@ class GreenhouseReward(BaseReward):
         self.pen_lamp = pen_lamp
         self._init_costs()
         self._init_violations()
+        self.max_profit = self.max_profit_reward()
+        self.min_profit = self.min_profit_reward()
+        self.min_state_violations = self.min_violations()
+        self.max_state_violations = self.max_violations()
+
+    def min_violations(self):
+        return np.zeros(3)
+    
+    def max_violations(self):
+        co2_violation = 2500
+        temp_violation = 15
+        rh_violation = 15
+        return np.array([co2_violation, temp_violation, rh_violation])
+
+    def max_profit_reward(self):
+        """
+        Computes the maximum possible reward for the current timestep.
+        The maximum reward is computed as the maximum possible gains minus the minimum possible costs.
+        The maximum possible gains are computed as the maximum fruit growth per pot per day multiplied by the fruit price.
+        The minimum possible costs are computed as the sum of the heating, co2, off peak and on peak electricity costs.
+        Returns:
+            float: The maximum possible reward.
+        """
+        max_gains = self.env.p[154] * self.env.dt * 1e-6 /self.dmfm * self.fruit_price
+        return max_gains
+
+    def min_profit_reward(self):
+        """
+        Computes the minimum possible reward for the current timestep.
+        The minimum reward is computed as the minimum possible gains minus the maximum possible costs.
+        The minimum possible gains are computed as the minimum fruit growth per pot per day multiplied by the fruit price.
+        The maximum possible costs are computed as the sum of the heating, co2, off peak and on peak electricity costs.
+        Returns:
+            float: The minimum possible reward.
+        """
+
+        # min_gains = self.env.p[155] * self.env.dt * 1e-6 /self.dmfm * self.fruit_price
+        max_heating = self.env.p[108] / self.env.p[46] * self.env.dt/3600*1e-3 * self.heating_price     # convert W/aFlr to kWh/m2
+        max_elec = self.env.p[172] * self.env.dt/3600*1e-3 * self.elec_price                          # convert W/aFlr to kWh/m2
+        max_cost = self.env.p[109] / self.env.p[46] * self.env.dt * 1e-6 * self.co2_price        # convert to kg/m2
+        max_costs = sum([max_heating, max_elec, max_cost])
+        max_costs = -max_costs
+        return max_costs
 
     def _init_violations(self):
         self.temp_violation = 0
@@ -151,8 +197,7 @@ class GreenhouseReward(BaseReward):
         self.rh_violation = lowerbound[2] + upperbound[2]
         return lowerbound+upperbound
 
-    def output_penalty_reward(self):
-        violations = self.output_violations()
+    def output_penalty_reward(self, violations):
         return np.dot(self.pen_weights, violations)
 
     def control_violation(self):
@@ -170,10 +215,19 @@ class GreenhouseReward(BaseReward):
         self.control_violation()
         return self.lamp_violation * self.pen_lamp
 
+
+
     def compute_reward(self) -> SupportsFloat:
         self.variable_costs = self._variable_costs()
         self.gains = self._gains()
-        self.profit = self.gains - self.variable_costs - self.fixed_costs
-        self.penalty = self.output_penalty_reward()
+        # self.profit = self.gains - self.variable_costs - self.fixed_costs
+        self.profit = self.gains - self.variable_costs
+
+        violations = self.output_violations()
+        self.penalty = self.output_penalty_reward(violations)
         self.control_pen = self.control_penalty()
-        return self.profit - self.penalty - self.control_pen
+
+        scaled_profit = self.scale_reward(self.profit, self.min_profit, self.max_profit)
+        scaled_pen = np.sum(self.scale_reward(violations, self.min_state_violations, self.max_state_violations))
+        # r_pen = self.scale_reward(self.penalty, 0, 1)
+        return scaled_profit - scaled_pen - self.control_pen

@@ -165,6 +165,8 @@ class WeatherForecastObservations(BaseObservations):
     def __init__(self, env) -> None:
         self.env = env
         self.n_obs = 5*self.env.Np
+        self.obs_names = ["glob_rad", "temp_out", "rh_out", "co2_out", "wind_speed"]*self.env.Np
+
 
     def observation_space(self):
         return spaces.Box(low=-1e-4, high=1e4, shape=(self.n_obs,), dtype=np.float32)
@@ -174,6 +176,6 @@ class WeatherForecastObservations(BaseObservations):
         Compute, and retrieve observations from GreenLight and the weather.
         """
         forecast = []
-        for i in range(1, self.Np+1):
-            forecast += np.copy(self.env.weather_data[self.env.timestep+i][0:5])        # Only the first 5 weather variables
+        for i in range(1, self.env.Np+1):
+            forecast.extend(self.env.weather_data[self.env.timestep+i][0:5])        # Only the first 5 weather variables
         return np.array(forecast)

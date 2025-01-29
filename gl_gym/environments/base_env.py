@@ -76,7 +76,7 @@ class GreenLightEnv(gym.Env):
         self.data_source = data_source
         self.dt = dt
         self.pred_horizon = pred_horizon
-
+        self.Np = int(self.pred_horizon * self.c/self.dt)
         self.train_years = list(range(start_train_year, end_train_year+1))
         self.train_days = list(range(start_train_day, end_train_day+1))
 
