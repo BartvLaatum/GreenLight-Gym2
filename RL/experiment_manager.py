@@ -131,12 +131,11 @@ class ExperimentManager:
             )
             self.model_params = self.build_model_parameters()
 
-            self.init_envs()
-            print(self.env.observation_space.shape)
+            self.init_envs(self.model_params["gamma"])
             # Initialize the model
             self.initialise_model()
 
-    def init_envs(self):
+    def init_envs(self, gamma):
         '''
         Initialize training and evaluation environments
         '''
@@ -145,7 +144,7 @@ class ExperimentManager:
             "norm_obs": True,
             "norm_reward": True,
             "clip_obs": 10,
-            "gamma": self.hyperparameters["gamma"]
+            "gamma": gamma
         }
 
         # Setup new environment for training
@@ -291,16 +290,15 @@ class ExperimentManager:
             self.run = run
             self.config = wandb.config
             self.build_model_hyperparameters(self.config)
-            self.init_envs()
+            self.init_envs(self.model_params)
             self.initialise_model()
-            print(self.model.policy) 
             self.run_experiment()
 
     def hyperparameter_tuning(self):
         '''
         Perform hyperparameter tuning for the model. Using the Sweep API from Weights and Biases.
         '''
-        continue_sweep = True
+        continue_sweep = False
         sweep_config = load_sweep_config(self.hyp_config_path, self.env_id, self.algorithm)
         if continue_sweep:
             wandb.agent("puk5fznz", project="dwarf-env", function=self.run_single_sweep, count=100)
@@ -382,7 +380,6 @@ if __name__ == "__main__":
 
     env_config_path = f"gl_gym/configs/envs/"
     env_base_params, env_specific_params = load_env_params(args.env_id, env_config_path)
-    print(env_base_params)
     hyperparameters = load_model_hyperparams(args.algorithm, args.env_id)
     # Initialize the experiment manager
     experiment_manager = ExperimentManager(

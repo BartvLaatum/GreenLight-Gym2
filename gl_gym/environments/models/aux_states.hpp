@@ -1165,23 +1165,21 @@ SX update(const SX& x, const SX& u, const SX& d, const SX& p) {
     //Equation B.5 [2]
     a[214] = smoothHar(x(23), p(144), 1e4, 5e4);
 
-    //Fruit harvest [mg{CH2O} m^{-2} s^{-1}]
-    //Equation A45 [5], Equation 7.45 [7]
+    // Fruit harvest [mg{CH2O} m^{-2} s^{-1}]
+    // Equation A45 [5], Equation 7.45 [7]
     a[215] = smoothHar(x(25), p(145), 1e4, 5e4);
 
-    //Net crop assimilation [mg{CO2} m^{-2} s^{-1}]
-    //It is assumed that for every mol of CH2O in net assimilation, a mol
-    //of CO2 is taken from the air, thus the conversion uses molar masses
-    //addAux(gl, 'mcAirCan', (p(139)/p(138))*(gl.a[200]-gl.a[209]-gl.a[213]))
+    // Net crop assimilation [mg{CO2} m^{-2} s^{-1}]
+    // It is assumed that for every mol of CH2O in net assimilation, a mol
+    // of CO2 is taken from the air, thus the conversion uses molar masses
     // addAux(gl, 'mcAirCan', (p.mCo2/p.mCh2o)*(gl.a.mcAirBuf-gl.a.mcBufAir-gl.a.mcOrgAir))
-    // a[216] = (p(139)/p(138)) * (a[200]-a[209]-a[213]);
-    a[216] = (p(139)/p(138)) * (a[200]-a[209]-a[213]);
+    a[216] = (p(139)/p(138)) * (a[200] - a[209] - a[213]);
 
-    //Other CO2 flows [mg{CO2} m^{-2} s^{-1}]
-    //Equation 45 [1]
+    // Other CO2 flows [mg{CO2} m^{-2} s^{-1}]
+    // Equation 45 [1]
 
-    //From main to top compartment 
-    //addAux(gl, 'mcAirTop', airMc(gl.a[144], x.co2Air, x.co2Top))
+    // From main to top compartment
+    // addAux(gl, 'mcAirTop', airMc(gl.a[144], x.co2Air, x.co2Top))
     a[217] = airMc(a[144], x(0), x(1));
 
     //From top compartment outside

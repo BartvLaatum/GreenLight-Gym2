@@ -201,7 +201,7 @@ def init_default_params(nparams):
     params[160] = 15;           # tCan24Min;       Minimum canopy temperature at 24 hours [°C]
     params[161] = 34;           # tCanMax;         Maximum canopy temperature [°C]
     params[162] = 10;           # tCanMin;         Minimum canopy temperature [°C]
-    params[163] = 1035;          # tEndSum;         Temperature sum for reaching max potential growth [day °C]
+    params[163] = 1035;         # tEndSum;         Temperature sum for reaching max potential growth [day °C]
     params[164] = 1250;         # tEndSumGrowth;   End of temperature sum for growth [day °C]
 
     # GROWTH PIPE PARAMETERS

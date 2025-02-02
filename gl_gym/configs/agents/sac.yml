@@ -1,16 +1,16 @@
 hyperparameters:
-  total_timesteps: 5_000_000
+  total_timesteps: 2_000_000
   n_envs: 8
   policy: MlpPolicy
-  learning_rate: 7.e-5
-  buffer_size: 1_000_000  
-  learning_starts: 50_000 # let the agents randomly explore for episodes.
-  batch_size: 1024
-  tau: 0.005
-  gamma: 0.99
+  learning_rate: 7.e-4
+  buffer_size: 576_100  
+  learning_starts: 57_610 # let the agents randomly explore for 10 episodes.
+  batch_size: 128
+  tau: 0.0135
+  gamma: 0.9362
   ent_coef: auto
-  train_freq: 1
-  gradient_steps: 1
+  train_freq: 50
+  gradient_steps: 10
   action_noise: 
     normalactionnoise:
       sigma: 0.05
@@ -23,11 +23,10 @@ hyperparameters:
   use_sde_at_warmup: False
   stats_window_size: 100
 
-  policy_kwargs: {net_arch: {pi: [256, 256], vf: [512, 512]},
-                  optimizer_class: adam,
+  policy_kwargs: {net_arch: {pi: [256, 256, 256], qf: [512, 512, 512]},
+                  optimizer_class: silu,
                   optimizer_kwargs: {amsgrad: True},
-                  activation_fn: tanh,
+                  activation_fn: silu,
                   log_std_init: np.log(1) # Results in policy standard deviation of 0.5 since exp(log(0.5)) = 0.5, where np.log(1) results in std of 1
           }
 
-# stats_window_size=100, tensorboard_log=None, policy_kwargs=None, verbose=0, seed=None, device='auto', _init_setup_model=True
