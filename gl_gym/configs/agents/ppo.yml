@@ -12,7 +12,7 @@ TomatoEnv:              # educated guess based on Bayes optimisation...
   ent_coef: 0.05434
   vf_coef: 0.8225
   max_grad_norm: 0.3
-  use_sde: True
+  use_sde: False
   sde_sample_freq: 8
   target_kl: null
 

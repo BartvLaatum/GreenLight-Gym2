@@ -1,4 +1,4 @@
-hyperparameters:
+TomatoEnv:
   total_timesteps: 2_000_000
   n_envs: 8
   policy: MlpPolicy
@@ -24,7 +24,7 @@ hyperparameters:
   stats_window_size: 100
 
   policy_kwargs: {net_arch: {pi: [256, 256, 256], qf: [512, 512, 512]},
-                  optimizer_class: silu,
+                  optimizer_class: adam,
                   optimizer_kwargs: {amsgrad: True},
                   activation_fn: silu,
                   log_std_init: np.log(1) # Results in policy standard deviation of 0.5 since exp(log(0.5)) = 0.5, where np.log(1) results in std of 1
