@@ -68,13 +68,6 @@ def make_vec_env(
     # env.seed(seed=seed) DO WE NEED TO SEED ENVS HERE??
     return env
 
-
-def load_model_hyperparams(algorithm: str, env_id: str) -> Dict[str, Any]:
-    with open(join("gl_gym/configs/agents/", algorithm + ".yml"), "r") as f:
-        params = yaml.load(f, Loader=yaml.FullLoader)
-    model_hyperparams = params[env_id]
-    return model_hyperparams
-
     # with open(join(path, algorithm + ".yml"), "r") as f:
     #     params = yaml.load(f, Loader=yaml.FullLoader)
 

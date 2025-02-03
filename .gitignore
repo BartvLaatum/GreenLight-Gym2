@@ -1,4 +1,5 @@
 __pycache__/
+wandb/
 .vscode/
 *.pyc
 *.so

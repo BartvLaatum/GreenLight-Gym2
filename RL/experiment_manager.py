@@ -12,13 +12,12 @@ from stable_baselines3 import PPO, SAC
 from stable_baselines3.common.noise import NormalActionNoise, OrnsteinUhlenbeckActionNoise
 from stable_baselines3.common.vec_env import VecNormalize, SubprocVecEnv, VecMonitor
 
+from gl_gym.common.utils import load_model_hyperparams
 from utils import (
     load_env_params, 
-    load_model_hyperparams, 
     wandb_init, 
     make_vec_env, 
     create_callbacks, 
-    make_env, 
     load_sweep_config
 )
 from gl_gym.common.results import Results
@@ -129,9 +128,9 @@ class ExperimentManager:
                 group=self.group,
                 save_code=False
             )
+            self.init_envs(self.hyperparameters["gamma"])
             self.model_params = self.build_model_parameters()
 
-            self.init_envs(self.model_params["gamma"])
             # Initialize the model
             self.initialise_model()
 

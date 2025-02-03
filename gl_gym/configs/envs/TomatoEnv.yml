@@ -17,7 +17,8 @@ GreenLightEnv:
   start_train_year: 2010          # start year for training
   end_train_year: 2010            # end year for training
   start_train_day: 59             # start day of the year for training
-  end_train_day: 59               # end day of the year for training  training: True           # whether we are training or testing
+  end_train_day: 59               # end day of the year for training  
+  training: True                  # whether we are training or testing
 
 TomatoEnv:
   reward_function: GreenhouseReward       # reward function to use

@@ -47,7 +47,7 @@ if __name__ == "__main__":
     env_base_params["end_train_year"] = 2009
     env_base_params["start_train_day"] = 0
     env_base_params["end_train_day"] = 0
-    env_base_params["season_length"] = 1
+    env_base_params["season_length"] = 5
     env_base_params["nu"] = 6
     env_base_params["dt"] = 300
     env_base_params["pred_horizon"] = 0
@@ -66,7 +66,7 @@ if __name__ == "__main__":
         print(env.N)
         env.reset(seed=env_seed)
         env.weather_data = weather
-        env.set_crop_state(cBuf=0, cLeaf=0.7*crop_DM, cStem=0.25*crop_DM, cFruit=0.05*crop_DM, tCanSum=0)
+        # env.set_crop_state(cBuf=0, cLeaf=0.7*crop_DM, cStem=0.25*crop_DM, cFruit=0.05*crop_DM, tCanSum=0)
 
         done = False
         time_start = time.time()

@@ -248,14 +248,14 @@ def dailLightSum(time: np.ndarray, rad: np.ndarray, c: int):
                 mnAfter = mnAfter[0]
     return lightSum*interval*1e-6
 
-def sat_vp(temp):
-    return .61078*np.exp(17.2694*temp/(temp+238.3))
+# def sat_vp(temp):
+#     return .61078*np.exp(17.2694*temp/(temp+238.3))
 
-def actual_vp(temp, rh):
-    return sat_vp(temp)*(rh/100)
+# def actual_vp(temp, rh):
+#     return sat_vp(temp)*(rh/100)
 
-def hum_deficit(temp, rh):
-    return sat_vp(temp) - actual_vp(temp, rh)
+# def hum_deficit(temp, rh):
+#     return sat_vp(temp) - actual_vp(temp, rh)
 
 def soilTempNl(time):
     # SOILTEMPNL An estimate of the soil temperature in the Netherlands in a given time of year

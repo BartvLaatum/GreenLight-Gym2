@@ -1,4 +1,4 @@
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Any
 from os.path import join
 from datetime import datetime, timedelta
 from copy import deepcopy
@@ -7,6 +7,13 @@ import yaml
 import numpy as np
 import pandas as pd
 from scipy.interpolate import PchipInterpolator
+
+def load_model_hyperparams(algorithm: str, env_id: str) -> Dict[str, Any]:
+    with open(join("gl_gym/configs/agents/", algorithm + ".yml"), "r") as f:
+        params = yaml.load(f, Loader=yaml.FullLoader)
+    model_hyperparams = params[env_id]
+    return model_hyperparams
+
 
 def load_env_params(env_id: str, path: str) -> Tuple[Dict, Dict]:
     '''

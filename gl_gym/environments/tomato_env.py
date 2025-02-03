@@ -142,21 +142,27 @@ class TomatoEnv(GreenLightEnv):
 
     def step_raw_control(self, control: np.ndarray):
         self.u = control
-
-
         self.x = self.gl_model.evalF(self.x, self.u, self.weather_data[self.timestep], self.p)
+        # update time
+        self.day_of_year += (self.dt/self.c) % 365
+        self.hour_of_day +=  (self.dt/3600)
+        self.hour_of_day = self.hour_of_day % 24
+
+        self.obs = self._get_obs()
 
         if self._terminalState():
             self.terminated = True
         # compute reward
-        # reward = self._get_reward()
+        reward = self._get_reward()
 
         self.timestep += 1
         # additional information to return
-        # info = self._get_info()
         return (
-                self.x,
-                self.terminated, 
+                self.obs,
+                reward,
+                self.terminated,
+                False,
+                self._get_info()
                 )
 
     def step_raw_control_pipeinput(self, control: np.ndarray, pipe_input: float):
@@ -167,7 +173,7 @@ class TomatoEnv(GreenLightEnv):
         if self._terminalState():
             self.terminated = True
         # compute reward
-        # reward = self._get_reward()
+        reward = self._get_reward()
 
         # additional information to return
         # info = self._get_info()
