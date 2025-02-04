@@ -179,7 +179,7 @@ def init_default_params(nparams):
     params[141] = 3.0;          # laiMax;          Maximum leaf area index
     params[142] = 2.66e-5;      # sla;             Specific leaf area [m2 kg-1]
     params[143] = 3e-6;         # rgr;             Relative growth rate [kg m-2 s-1]
-    params[144] = params[141] /params[142];    # cLeafMax;        Maximum leaf carbon content [kg m-2]
+    params[144] = params[141] /params[142];        # cLeafMax;        Maximum leaf carbon content [kg m-2]
     params[145] = 3_000_000;    # cFruitMax;       Maximum Fruit carbon content [mg m-2]
     params[146] = 0.27;         # cFruitG;         Growth respiration coefficient for fruit
     params[147] = 0.28;         # cLeafG;          Growth respiration coefficient for leaf

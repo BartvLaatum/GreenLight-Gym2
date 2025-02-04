@@ -10,6 +10,7 @@ from gl_gym.environments.rewards import BaseReward, GreenhouseReward
 from gl_gym.environments.models.greenlight_model import GreenLight
 from gl_gym.environments.utils import load_weather_data, init_state
 from gl_gym.environments.parameters import init_default_params
+from gl_gym.environments.noise import parametric_crop_uncertainty
 
 REWARDS = {"GreenhouseReward": GreenhouseReward}
 
@@ -26,13 +27,16 @@ OBSERVATION_MODULES = {
 class TomatoEnv(GreenLightEnv):
     def __init__(self,
         reward_function: str,                   # reward function
-        observation_modules: List[str],                # observation function
+        observation_modules: List[str],         # observation function
         constraints: Dict[str, Any],            # constraints for the environment
         eval_options: Dict[str, Any],           # days for evaluation
         reward_params: Dict[str, Any] = {},     # reward function arguments
         base_env_params: Dict[str, Any] = {},   # base environment parameters
+        uncertainty_scale = 0.0
         ) -> None:
         super(TomatoEnv, self).__init__(**base_env_params)
+
+        self.uncertainty_scale = uncertainty_scale
 
         # set year and days for the evaluation environment 
         self.eval_options = eval_options
@@ -111,8 +115,9 @@ class TomatoEnv(GreenLightEnv):
     def step(self, action: np.ndarray) -> Tuple[np.ndarray, SupportsFloat, bool, bool, Dict[str, Any]]:
         # scale the action from controller (between -1, 1) to (u_min, u_max)
         self.u = self.action_to_control(action)
+        params = parametric_crop_uncertainty(self.p, self.uncertainty_scale, self._np_random)
         try:
-            self.x = self.gl_model.evalF(self.x, self.u, self.weather_data[self.timestep], self.p)
+            self.x = self.gl_model.evalF(self.x, self.u, self.weather_data[self.timestep], params)
         except:
             print("Error in ODE approximation")
             self.terminated = True
