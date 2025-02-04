@@ -16,6 +16,7 @@ ALG = {"ppo": PPO,
        "sac": SAC}
 
 def load_env(env_id, model_name, env_base_params, env_specific_params, load_path):
+    env_base_params["training"] = False
     # Setup new environment for training
     env = make_vec_env(
         env_id, 
@@ -54,7 +55,7 @@ def evaluate(model, env):
     )
         observations, rewards, dones, infos = env.step(actions)
         episode_rewards[:, timestep] += rewards
-        episodic_obs[timestep] += observations[0, :23]
+        episodic_obs[timestep] += env.unnormalize_obs(observations)[0, :23]
         epi[timestep] += infos[0]["EPI"]
         revenue[timestep] += infos[0]["revenue"]
         heat_cost[timestep] += infos[0]["heat_cost"]
