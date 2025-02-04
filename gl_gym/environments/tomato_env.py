@@ -154,8 +154,8 @@ class TomatoEnv(GreenLightEnv):
             self.terminated = True
         # compute reward
         reward = self._get_reward()
-
         self.timestep += 1
+        self.x_prev = np.copy(self.x)
         # additional information to return
         return (
                 self.obs,

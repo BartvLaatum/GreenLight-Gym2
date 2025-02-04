@@ -85,7 +85,6 @@ class ExperimentManager:
             continued_project (str): Project name of the saved model to continue training from.
             continued_runname (str): Run name of the saved model to continue training from.
         """
-        print(env_base_params)
         self.env_id = env_id
         self.project = project
         self.env_base_params = env_base_params
@@ -230,7 +229,7 @@ class ExperimentManager:
         if self.algorithm == "sac":
             if "action_noise" in self.hyperparameters:
                 action_noise_key, noise_params = next(iter(self.hyperparameters["action_noise"].items()))
-                
+
                 if action_noise_key in ACTION_NOISE:
                     action_noise = ACTION_NOISE[action_noise_key](
                         mean=np.zeros(self.env.action_space.shape),
@@ -242,43 +241,48 @@ class ExperimentManager:
 
     def build_model_hyperparameters(self, config):
         """Build the model hyperparameters from the given config."""
-
-        self.model_params["policy"] = config["policy"]
-        self.model_params["learning_rate"] = config["learning_rate"]
-        self.model_params["n_steps"] = config["n_steps"]
-        self.model_params["batch_size"] = config["batch_size"]
-        self.model_params["n_epochs"] = config["n_epochs"]
+        self.model_params = dict(config).copy()
         self.model_params["gamma"] = 1.0 - config["gamma_offset"]
-        self.model_params["gae_lambda"] = config["gae_lambda"]
-        self.model_params["clip_range"] = config["clip_range"]
-        self.model_params["ent_coef"] = config["ent_coef"]
-        self.model_params["vf_coef"] = config["vf_coef"]
-
-        self.model_params["use_sde"] = config["use_sde"]
-        self.model_params["sde_sample_freq"] = config["sde_sample_freq"]
-        self.model_params["target_kl"] = config["target_kl"]
-        self.model_params["normalize_advantage"] = config["normalize_advantage"]
 
         policy_kwargs = {}
         policy_kwargs["net_arch"] = {}
-        
+        policy_kwargs["optimizer_kwargs"] = config["optimizer_kwargs"]
+        policy_kwargs["activation_fn"] = ACTIVATION_FN[config["activation_fn"]]
+        del self.model_params["optimizer_kwargs"], self.model_params["activation_fn"], self.model_params["gamma_offset"]
+
         if self.algorithm == "ppo":
             policy_kwargs["net_arch"]["pi"] = [config["pi"]]*3
             policy_kwargs["net_arch"]["vf"] = [config["vf"]]*3
+            del self.model_params["vf"]
 
-        policy_kwargs["optimizer_kwargs"] = config["optimizer_kwargs"]
-        policy_kwargs["activation_fn"] = ACTIVATION_FN[config["activation_fn"]]
+        elif self.algorithm == "sac":
+            policy_kwargs["net_arch"]["pi"] = [config["pi"]]*3
+            policy_kwargs["net_arch"]["qf"] = [config["qf"]]*3
 
-        if self.algorithm == "recurrentppo":
+            action_noise_key = config["action_noise_type"]
+            action_std = config["action_sigma"]
+            action_noise = ACTION_NOISE[action_noise_key](
+                        mean=np.zeros(self.env.action_space.shape),
+                        sigma=action_std * np.ones(self.env.action_space.shape)
+                    )
+            self.model_params["action_noise"] = action_noise
+            del self.model_params["action_noise_type"],self.model_params["action_sigma"], self.model_params["qf"]
+
+        elif self.algorithm == "recurrentppo":
             policy_kwargs["net_arch"]["pi"] = [config["pi"]]*2
             policy_kwargs["net_arch"]["vf"] = [config["vf"]]*2
             policy_kwargs["lstm_hidden_size"] = config["lstm_hidden_size"]
             policy_kwargs["enable_critic_lstm"] = config["enable_critic_lstm"]
+
             if policy_kwargs["enable_critic_lstm"]:
                 policy_kwargs["shared_lstm"] = False
             else:
                 policy_kwargs["shared_lstm"] = True
-        self.model_params["policy_kwargs"].update(policy_kwargs)
+            del self.model_params["lstm_hidden_size"], self.model_params["enable_critic_lstm"]
+
+        del self.model_params["pi"]
+
+        self.model_params["policy_kwargs"] = policy_kwargs
 
     def run_single_sweep(self):
         """
@@ -288,8 +292,8 @@ class ExperimentManager:
         with wandb.init(sync_tensorboard=True) as run:
             self.run = run
             self.config = wandb.config
+            self.init_envs(1-self.config["gamma_offset"])
             self.build_model_hyperparameters(self.config)
-            self.init_envs(self.model_params)
             self.initialise_model()
             self.run_experiment()
 

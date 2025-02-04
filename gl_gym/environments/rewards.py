@@ -215,8 +215,6 @@ class GreenhouseReward(BaseReward):
         self.control_violation()
         return self.lamp_violation * self.pen_lamp
 
-
-
     def compute_reward(self) -> SupportsFloat:
         self.variable_costs = self._variable_costs()
         self.gains = self._gains()
