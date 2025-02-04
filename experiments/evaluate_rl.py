@@ -29,15 +29,17 @@ def load_env(env_id, model_name, env_base_params, env_specific_params, load_path
         eval_env=True
     )
     env = VecNormalize.load(join(load_path + f"/envs", f"{model_name}/best_vecnormalize.pkl"), env)
+    env.training = False
+    env.norm_reward = False
+
     return env
 
 def evaluate(model, env):
     N = env.get_attr("N")[0]
-
     epi, revenue, heat_cost, co2_cost, elec_cost = np.zeros(N+1), np.zeros(N+1), np.zeros(N+1), np.zeros(N+1),np.zeros(N+1)
     temp_violation, co2_violation, rh_violation = np.zeros(N+1), np.zeros(N+1), np.zeros(N+1)
     episodic_obs = np.zeros((N+1, 23))
-    episode_rewards = np.zeros((1, N))
+    episode_rewards = np.zeros(N+1)
 
     dones = np.zeros((1,), dtype=bool)
     episode_starts = np.ones((1,), dtype=bool)
@@ -54,7 +56,7 @@ def evaluate(model, env):
             deterministic=True,
     )
         observations, rewards, dones, infos = env.step(actions)
-        episode_rewards[:, timestep] += rewards
+        episode_rewards[timestep] += rewards[0]
         episodic_obs[timestep] += env.unnormalize_obs(observations)[0, :23]
         epi[timestep] += infos[0]["EPI"]
         revenue[timestep] += infos[0]["revenue"]
@@ -67,7 +69,7 @@ def evaluate(model, env):
         timestep += 1
 
 
-    result_data = np.column_stack((episodic_obs, epi, revenue, heat_cost, co2_cost, elec_cost, temp_violation, co2_violation, rh_violation))
+    result_data = np.column_stack((episodic_obs, episode_rewards, epi, revenue, heat_cost, co2_cost, elec_cost, temp_violation, co2_violation, rh_violation))
     return result_data
 
 
@@ -97,7 +99,7 @@ if __name__ == "__main__":
     model = ALG[args.algorithm].load(join(load_path + f"models", f"{args.model_name}/best_model.zip"), device="cpu")
 
     result_columns = eval_env.env_method("get_obs_names")[0][:23]
-    result_columns.extend(["EPI", "Revenue", "Heat costs", "CO2 costs", "Elec costs"])
+    result_columns.extend(["Rewards", "EPI", "Revenue", "Heat costs", "CO2 costs", "Elec costs"])
     result_columns.extend(["temp_violation", "co2_violation", "rh_violation"])
     result = Results(result_columns)
 

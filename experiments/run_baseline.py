@@ -1,14 +1,13 @@
 import argparse
 
 import numpy as np
-from time import time
 from gl_gym.environments.tomato_env import TomatoEnv
 from gl_gym.environments.baseline import RuleBasedController
 from gl_gym.common.utils import load_env_params, load_model_hyperparams
 from gl_gym.common.results import Results
 import os
 
-def evaluate_controller(env, controller, result, save_dir):
+def evaluate_controller(env, controller):
     epi, revenue, heat_cost, co2_cost, elec_cost = np.zeros(env.N+1), np.zeros(env.N+1), np.zeros(env.N+1), np.zeros(env.N+1),np.zeros(env.N+1)
     temp_violation, co2_violation, rh_violation = np.zeros(env.N+1), np.zeros(env.N+1), np.zeros(env.N+1)
     rewards = np.zeros(env.N+1)
@@ -32,9 +31,8 @@ def evaluate_controller(env, controller, result, save_dir):
         rh_violation[timestep] += info["rh_violation"]
         timestep += 1
 
-    result_data = np.column_stack((episodic_obs, epi, revenue, heat_cost, co2_cost, elec_cost, temp_violation, co2_violation, rh_violation))
-    result.update_result(result_data)
-    result.save(f"{save_dir}/rb_baseline-{env.growth_year}{env.start_day}-{env.location}.csv")
+    result_data = np.column_stack((episodic_obs, rewards, epi, revenue, heat_cost, co2_cost, elec_cost, temp_violation, co2_violation, rh_violation))
+    return result_data
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -42,6 +40,7 @@ if __name__ == "__main__":
     parser.add_argument("--env_id", type=str, default="TomatoEnv", help="Environment ID")
     parser.add_argument("--stochastic", action="store_true", help="Whether to run the experiment in stochastic mode")
     args = parser.parse_args()
+
     if args.stochastic:
         save_dir = f"data/{args.project}/stochastic"
     else:
@@ -57,8 +56,11 @@ if __name__ == "__main__":
     rb_controller = RuleBasedController(**rb_params)
     env = TomatoEnv(base_env_params=env_base_params, **env_specific_params)
     result_columns = env.get_obs_names()[:23]
-    result_columns.extend(["EPI", "Revenue", "Heat costs", "CO2 costs", "Elec costs"])
+    result_columns.extend(["Rewards", "EPI", "Revenue", "Heat costs", "CO2 costs", "Elec costs"])
     result_columns.extend(["temp_violation", "co2_violation", "rh_violation"])
     result = Results(result_columns)
 
-    evaluate_controller(env, rb_controller, result, save_dir)
+    result_data = evaluate_controller(env, rb_controller)
+
+    result.update_result(result_data)
+    result.save(f"{save_dir}/rb_baseline-{env.growth_year}{env.start_day}-{env.location}.csv")
