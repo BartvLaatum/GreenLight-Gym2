@@ -10,17 +10,15 @@ from torch.nn.modules.activation import ReLU, SiLU, Tanh, ELU
 from torch.optim import Adam, RMSprop
 from stable_baselines3 import PPO, SAC
 from stable_baselines3.common.noise import NormalActionNoise, OrnsteinUhlenbeckActionNoise
-from stable_baselines3.common.vec_env import VecNormalize, SubprocVecEnv, VecMonitor
 
 from gl_gym.common.utils import load_model_hyperparams
-from utils import (
+from RL.utils import (
     load_env_params, 
     wandb_init, 
     make_vec_env, 
     create_callbacks, 
     load_sweep_config
 )
-from gl_gym.common.results import Results
 
 import wandb
 
@@ -364,7 +362,7 @@ class ExperimentManager:
         del self.model, self.env, self.eval_env
         gc.collect()
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--project", type=str, default="AgriControl", help="Wandb project name")
     parser.add_argument("--env_id", type=str, default="TomatoEnv", help="Environment ID")
@@ -413,3 +411,6 @@ if __name__ == "__main__":
     else:
     # Run the experiment
         experiment_manager.run_experiment()
+
+if __name__ == "__main__":
+    main()

@@ -12,7 +12,6 @@ plt.rcParams["svg.fonttype"] = "path"  # Converts text to paths
 plt.rcParams["text.usetex"] = False    # Use mathtext instead of full LaTeX
 plt.rcParams["mathtext.fontset"] = "dejavuserif"  # Use a more Illustrator-friendly font
 plt.rcParams["font.family"] = "serif"
-# plt.rcParams["font.family"] = "DejaVu Sans" 
 
 plt.rcParams["font.size"] = 8  # General font size
 plt.rcParams["axes.labelsize"] = 10  # Axis label size
@@ -105,6 +104,7 @@ def violations_plot(data):
     bar_width = 0.25
     index = range(n_metrics)
     colors = ["#003366", "#0066CC","#4394E5"]
+    # ax.set_yscale(?'log')
 
     # Plot bars for each model
     for i, model in enumerate(models):
@@ -113,17 +113,18 @@ def violations_plot(data):
                label=model, color=colors[i])
 
     # Customize plot
-    ax.set_ylabel("Violation")
+    ax.set_ylabel("Cumulative violation")
     ax.set_xticks([x + bar_width for x in index])
     xlabels = ["Temperature", r"CO$_2$", "Relative Humidity"]
     ax.set_xticklabels(xlabels, rotation=0)
     ax.legend()
-    ax.set_yscale('log')
-    ax.set_yticks([1e1, 1e2, 1e3])
+    # ax.set_yticks([1e1, 1e2, 1e3])
+    # ax.set_ylim(1e1, max(max(values) * 1.1, 1e3))  # Prevent bars from going to zero
+
     # Adjust layout and save
     plt.tight_layout()
     fig.canvas = FigureCanvasSVG(fig)
-    plt.savefig(f"figures/{args.project}/{args.mode}/violations_metrics_comparison.svg", format="svg", dpi=300)
+    plt.savefig(f"figures/{args.project}/{args.mode}/violations_metrics_comparison.svg", format="svg", dpi=300, metadata={"Creator": "Illustrator"})
     plt.savefig(f"figures/{args.project}/{args.mode}/violations_metrics_comparison.png")
     plt.close()
 

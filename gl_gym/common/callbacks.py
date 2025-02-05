@@ -55,19 +55,7 @@ class CustomWandbCallback(EvalCallback):
         self.plot = True if run else False
         self.results = results
         self.save_results = True if results else False
-        self.cum_metrics = {
-            "EPI": 0,
-            "revenue": 0.0,
-            "variable_costs": 0.0,
-            "fixed_costs": 0.0,
-            "co2_cost": 0.0,
-            "heat_cost": 0.0,
-            "elec_cost": 0.0,
-            "temp_violation": 0.0,
-            "co2_violation": 0.0,
-            "rh_violation": 0.0,
-        }
-
+        self.cum_metrics = {}
 
         if self.save_results:
             self.results_path = f"data/{self.run.project}/{self.run.group}"
@@ -86,18 +74,17 @@ class CustomWandbCallback(EvalCallback):
         # Assuming each info dictionary may contain keys like:
         # "revenue", "heating_cost", "co2_cost", "temperature_violation", 
         # "co2_violation", and "relative_humidity_violation".
-        for info in infos:
-            self.cum_metrics["EPI"] += info["EPI"]
-            self.cum_metrics["revenue"] += info["revenue"]
-            self.cum_metrics["lamp_violation"] += info["lamp_violation"]
-            self.cum_metrics["temp_violation"] += info["temp_violation"]
-            self.cum_metrics["co2_violation"] += info["co2_violation"]
-            self.cum_metrics["rh_violation"] += info["rh_violation"]
-            self.cum_metrics["variable_costs"] += info["variable_costs"]
-            self.cum_metrics["fixed_costs"] += info["fixed_costs"]
-            self.cum_metrics["co2_cost"] += info["co2_cost"]
-            self.cum_metrics["heat_cost"] += info["heat_cost"]
-            self.cum_metrics["elec_cost"] += info["elec_cost"]
+        self.cum_metrics["EPI"][local_vars["episode_counts"]] += [info["EPI"] for info in infos]
+        self.cum_metrics["revenue"][local_vars["episode_counts"]] += [info["revenue"] for info in infos]
+        self.cum_metrics["lamp_violation"][local_vars["episode_counts"]] += [info["lamp_violation"] for info in infos]
+        self.cum_metrics["temp_violation"][local_vars["episode_counts"]] += [info["temp_violation"] for info in infos]
+        self.cum_metrics["co2_violation"][local_vars["episode_counts"]] += [info["co2_violation"] for info in infos]
+        self.cum_metrics["rh_violation"][local_vars["episode_counts"]] += [info["rh_violation"] for info in infos]
+        self.cum_metrics["variable_costs"][local_vars["episode_counts"]] += [info["variable_costs"] for info in infos]
+        self.cum_metrics["fixed_costs"][local_vars["episode_counts"]] += [info["fixed_costs"] for info in infos]
+        self.cum_metrics["co2_cost"][local_vars["episode_counts"]] += [info["co2_cost"] for info in infos]
+        self.cum_metrics["heat_cost"][local_vars["episode_counts"]] += [info["heat_cost"] for info in infos]
+        self.cum_metrics["elec_cost"][local_vars["episode_counts"]] += [info["elec_cost"] for info in infos]
 
     def _on_step(self) -> bool:
 
@@ -118,17 +105,17 @@ class CustomWandbCallback(EvalCallback):
 
             # Reset cumulative metrics
             self.cum_metrics = {
-                "EPI": 0.0,
-                "revenue": 0.0,
-                "lamp_violation": 0.0,
-                "temp_violation": 0.0,
-                "co2_violation": 0.0,
-                "rh_violation": 0.0,
-                "variable_costs": 0.0,
-                "fixed_costs": 0.0,
-                "co2_cost": 0.0,
-                "heat_cost": 0.0,
-                "elec_cost": 0.0,
+                "EPI": np.zeros(self.n_eval_episodes),
+                "revenue": np.zeros(self.n_eval_episodes),
+                "variable_costs": np.zeros(self.n_eval_episodes),
+                "fixed_costs": np.zeros(self.n_eval_episodes),
+                "co2_cost": np.zeros(self.n_eval_episodes),
+                "heat_cost": np.zeros(self.n_eval_episodes),
+                "elec_cost": np.zeros(self.n_eval_episodes),
+                "temp_violation": np.zeros(self.n_eval_episodes),
+                "co2_violation": np.zeros(self.n_eval_episodes),
+                "rh_violation": np.zeros(self.n_eval_episodes),
+                "lamp_violation": np.zeros(self.n_eval_episodes)
             }
 
             episode_rewards, episode_lengths, add_info = evaluate_policy(
@@ -165,9 +152,6 @@ class CustomWandbCallback(EvalCallback):
                     **kwargs,
                 )
             mean_reward, std_reward = np.mean(episode_rewards), np.std(episode_rewards)
-
-
-                
 
             if self.verbose >= 1:
                 print(f"Eval num_timesteps={self.num_timesteps}, " f"episode_reward={mean_reward:.2f} +/- {std_reward:.2f}")

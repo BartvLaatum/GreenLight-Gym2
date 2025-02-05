@@ -7,12 +7,12 @@ from gl_gym.common.utils import load_env_params, load_model_hyperparams
 from gl_gym.common.results import Results
 import os
 
-def evaluate_controller(env, controller):
+def evaluate_controller(env, controller, rank=0):
     epi, revenue, heat_cost, co2_cost, elec_cost = np.zeros(env.N+1), np.zeros(env.N+1), np.zeros(env.N+1), np.zeros(env.N+1),np.zeros(env.N+1)
     temp_violation, co2_violation, rh_violation = np.zeros(env.N+1), np.zeros(env.N+1), np.zeros(env.N+1)
     rewards = np.zeros(env.N+1)
     episodic_obs = np.zeros((env.N+1, 23))
-    obs = env.reset(seed=666)
+    obs = env.reset(seed=666+rank)
     done = False
     timestep = 0
     while not done:
