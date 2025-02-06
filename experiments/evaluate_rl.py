@@ -70,8 +70,7 @@ def evaluate(model, env):
 
 
     result_data = np.column_stack((episodic_obs, episode_rewards, epi, revenue, heat_cost, co2_cost, elec_cost, temp_violation, co2_violation, rh_violation))
-    return result_data
-
+    return result_data[:-1]
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -79,21 +78,27 @@ if __name__ == "__main__":
     parser.add_argument("--env_id", type=str, default="TomatoEnv", help="Environment ID")
     parser.add_argument("--model_name", type=str, default="cosmic-music-45", help="Name of the trained RL model")
     parser.add_argument("--algorithm", type=str, default="ppo", help="Name of the algorithm (ppo or sac)")
-    parser.add_argument("--stochastic", action="store_true", help="Whether to use stochastic control")
+    parser.add_argument("--uncertainty_scale", type=float, help="Uncertainty scale", required=True)
+    parser.add_argument("--mode", type=str, choices=['deterministic', 'stochastic'], required=True)
     args = parser.parse_args()
 
-    env_config_path = f"gl_gym/configs/envs/"
-    if args.stochastic:
-        load_path = f"train_data/{args.project}/{args.algorithm}/stochastic/"
-        save_dir = f"data/{args.project}/stochastic/"
-    else:
-        load_path = f"train_data/{args.project}/{args.algorithm}/deterministic/"
-        save_dir = f"data/{args.project}/deterministic/"
+    assert not (args.mode == "deterministic" and args.uncertainty_scale != 0.0), \
+        "Uncertainty scale must be 0.0 for deterministic mode"
 
+    env_config_path = f"gl_gym/configs/envs/"
+    load_path = f"train_data/{args.project}/{args.algorithm}/{args.mode}/"
+    if args.mode == "stochastic":
+        save_dir = f"data/{args.project}/{args.mode}/{args.algorithm}/{args.uncertainty_scale}/"
+        n_sims = 30
+    else:
+        save_dir = f"data/{args.project}/{args.mode}/{args.algorithm}/"
+        n_sims = 1
     os.makedirs(save_dir, exist_ok=True)
 
+    # load in the environment and model
     env_base_params, env_specific_params = load_env_params(args.env_id, env_config_path)
     model_params = load_model_hyperparams(args.algorithm, args.env_id)
+    env_specific_params["uncertainty_scale"] = args.uncertainty_scale
     eval_env = load_env(args.env_id, args.model_name, env_base_params, env_specific_params, load_path)
 
     model = ALG[args.algorithm].load(join(load_path + f"models", f"{args.model_name}/best_model.zip"), device="cpu")
@@ -101,12 +106,20 @@ if __name__ == "__main__":
     result_columns = eval_env.env_method("get_obs_names")[0][:23]
     result_columns.extend(["Rewards", "EPI", "Revenue", "Heat costs", "CO2 costs", "Elec costs"])
     result_columns.extend(["temp_violation", "co2_violation", "rh_violation"])
+    result_columns.extend(["episode"])
     result = Results(result_columns)
 
-    result_data = evaluate(model, eval_env)
+    for sim in range(n_sims):
+        result_data = evaluate(model, eval_env)
+        sim_column = np.full((result_data.shape[0], 1), sim)
+        result_data = np.column_stack((result_data, sim_column))
 
-    result.update_result(result_data)
+        result.update_result(result_data, sim)
+
     start_day = eval_env.get_attr("start_day")[0]
     growth_year = eval_env.get_attr("growth_year")[0]
     location = eval_env.get_attr("location")[0]
-    result.save(f"{save_dir}/{args.algorithm}-{args.model_name}-{growth_year}{start_day}-{location}.csv")
+
+    save_name = f"{args.model_name}-{growth_year}{start_day}-{location}.csv"
+    print("saving results to", save_name)
+    result.save(f"{save_dir}/{save_name}")

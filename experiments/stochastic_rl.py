@@ -25,7 +25,8 @@ if __name__ == "__main__":
 
     # Initialize the experiment manager
     uncertainties = np.linspace(0.0, 0.3, 7)
-
+    uncertainties.round(2)
+    print(uncertainties)
     for uncertainty in uncertainties:
         hyperparameters = load_model_hyperparams(args.algorithm, args.env_id)
         group = f"{args.algorithm}-stoch-{uncertainty}"

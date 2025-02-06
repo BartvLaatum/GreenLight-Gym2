@@ -40,26 +40,23 @@ width = 85 * 0.03937  # 85 mm ≈ 3.35 inches
 height = width * 0.75  # Adjust aspect ratio (3:2 or 4:3 is ideal)
 
 def load_data(args):
-    base_path = os.path.join("data/"+args.project, args.mode)
-    # Load PPO data
-    ppo_file = [f for f in os.listdir(base_path) if 
-                all(x in f for x in ["ppo", args.growth_year, args.start_day, args.location]) and f.endswith(".csv")][0]
-    ppo_data = pd.read_csv(os.path.join(base_path, ppo_file))
-    ppo_data["model"] = "PPO"
+    base_path = os.path.join(f"data/{args.project}", args.mode)
 
-    # Load SAC data
-    sac_file = [f for f in os.listdir(base_path) if 
-                all(x in f for x in ["sac", args.growth_year, args.start_day, args.location]) and f.endswith(".csv")][0]
-    sac_data = pd.read_csv(os.path.join(base_path, sac_file))
-    sac_data["model"] = "SAC"
+    def load_and_label(folder, model_name):
+        files = [f for f in os.listdir(os.path.join(base_path, folder)) if
+                 all(x in f for x in [args.growth_year, args.start_day, args.location]) and f.endswith(".csv")]
+        if not files:
+            print(f"Warning: No data found for {model_name} in {folder}")
+            return pd.DataFrame()  # Return an empty DataFrame if no file is found
+        filepath = os.path.join(base_path, folder, files[0])
+        data = pd.read_csv(filepath)
+        data["model"] = model_name
+        return data
 
-    # Load RB baseline data
-    rb_file = [f for f in os.listdir(base_path) if 
-               all(x in f for x in ["rb_baseline", args.growth_year, args.start_day, args.location]) and f.endswith(".csv")][0]
-    rb_data = pd.read_csv(os.path.join(base_path, rb_file))
-    rb_data["model"] = "RB Baseline"
+    ppo_data = load_and_label("ppo", "PPO")
+    sac_data = load_and_label("sac", "SAC")
+    rb_data = load_and_label("rb_baseline", "RB Baseline")
 
-    # Combine all data
     return pd.concat([ppo_data, sac_data, rb_data], ignore_index=True)
 
 def costs_plot(data):
