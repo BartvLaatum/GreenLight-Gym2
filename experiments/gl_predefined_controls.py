@@ -32,6 +32,49 @@ def interpolate_weather_data(weather, env_base_params):
     return weather_interp
 
 
+def init_mat_state(d0, indoor, time_in_days=0):
+    # Initialize the state as a NumPy array of zeros with the appropriate size
+    state = np.zeros(28)  # Assuming 28 elements based on the original function
+
+    state[0] = indoor[1]        # co2Air
+    state[1] = state[0]     # co2Top
+    state[2] = indoor[0]         # tAir
+    state[3] = state[2]     # tTop
+    state[4] = state[2] + 4 # tCan
+    state[5] = state[2]     # tCovIn
+    state[6] = state[2]     # tCovE
+    state[7] = state[2]     # tThScr
+    state[8] = state[2]     # tFlr
+    state[9] = d0[10]     # tPipe
+    state[10] = state[2]    # tSoil1
+    state[11] = 0.25 * (3. * state[2] + d0[6])      # tSoil2
+    state[12] = 0.25 * (2. * state[2] + 2 * d0[6])  # tSoil3
+    state[13] = 0.25 * (state[2] + 3 * d0[6])       # tSoil4
+    state[14] = d0[6]                               # tSoil5
+    state[15] = indoor[2]   # vpAir
+    state[16] = state[15]   # vpTop
+    state[17] = state[2]    # tLamp
+    state[18] = state[2]    # tIntLamp
+    state[19] = state[2]    # tGroPipe
+    state[20] = state[2]    # tBlScr
+    state[21] = state[4]    # tCan24
+    state[22] = 0.          # cBuf
+    state[23] = 9.5283e4    # cLeaf
+    state[24] = 2.5107e5    # cStem
+    state[25] = 5.5338e4    # cFruit
+    state[26] = 3.0978e3    # tCanSum
+    state[27] = time_in_days    # time
+
+    return state
+
+def set_matlab_params(params):
+    params[79] = 0.6                # tauThScrNir
+    params[108] = 44.*params[46]    # pBoil
+    params[109] = 720.              # phiExtCO2
+    params[165] = 0.88              # epsGroPipe
+    params[170] = 44. * params[46]  # pBoilGro
+    params[145] = 300_000           # cFruitMax
+    return params
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -49,6 +92,7 @@ if __name__ == "__main__":
     env_base_params["end_train_day"] = 0
     env_base_params["season_length"] = 5
     env_base_params["nu"] = 6
+    env_base_params["nd"] = 14
     env_base_params["dt"] = 300
     env_base_params["pred_horizon"] = 0
 
@@ -57,24 +101,32 @@ if __name__ == "__main__":
 
     # Initialize the environment with both parameter dictionaries
     env = TomatoEnv(base_env_params=env_base_params, **env_specific_params)
-    crop_DM = 6240*10
-    controls = pd.read_csv('data/comparison/controls2009.csv').values[:Ns_data, :6]
-    weather = pd.read_csv('data/comparison/weather2009.csv').values[:Ns_data, :10]
-    weather = interpolate_weather_data(weather, env_base_params)
+
+    controls = pd.read_csv('data/AgriControl/comparison/matlab/controls_pipe2009.csv').values[:Ns_data, :6]
+    weather = pd.read_csv('data/AgriControl/comparison/matlab/weather_pipe2009.csv').values[:Ns_data, :]
+    # weather = interpolate_weather_data(weather, env_base_params)
+    indoor = [23.7, 1291.822759273841, 1907.926700562060]
 
     def run_simulation():
         print(env.N)
         env.reset(seed=env_seed)
         env.weather_data = weather
+        env.p = set_matlab_params(env.p)
+        print(env.p[171])
+        env.x = init_mat_state(env.weather_data[0], indoor)
         # env.set_crop_state(cBuf=0, cLeaf=0.7*crop_DM, cStem=0.25*crop_DM, cFruit=0.05*crop_DM, tCanSum=0)
 
         done = False
         time_start = time.time()
         Xs = [np.copy(env.x)]
         Us = [np.copy(env.u)]
-        print(env.x[0])
-        while not done:
-            x, done = env.step_raw_control(controls[env.timestep])
+        for _ in range(env.N):
+
+            # x, done = env.step_raw_control(controls[env.timestep])
+            try:
+                x, done = env.step_raw_control_pipeinput(controls[env.timestep])
+            except IndexError:
+                breakpoint()
             Xs.append(x)
             Us.append(env.u)
         Xs = np.array(Xs)
@@ -84,17 +136,26 @@ if __name__ == "__main__":
     # Time the execution of the function
     Xs, Us = run_simulation()
     # save elapsed times to csv
-    state_columns = ["co2Air", "co2Top", "tAir", "tTop", "tCan", "tCovIn", "tCovE",
-                      "tThScr", "tFlr", "tPipe", "tSo1", "tSo2", "tSo3", "tSo4", "tSo5", 
-                      "vpAir", "vpTop", "tLamp", "tIntLamp", "tGroPipe", "tBlScr", "tCan24",
-                      "cBuf", "cLeaf", "cStem", "cFruit", "tCanSum", "time"]
-    print(np.array(Xs).shape)
-    states = pd.DataFrame(np.array(Xs), columns=state_columns)
-    states.to_csv("data/comparison/states_pipeinput.csv", index=False)
+    state_columns = [
+        "co2Air", "co2Top", "tAir", "tTop", "tCan", "tCovIn", "tCovE",
+        "tThScr", "tFlr", "tPipe", "tSo1", "tSo2", "tSo3", "tSo4", "tSo5", 
+        "vpAir", "vpTop", "tLamp", "tIntLamp", "tGroPipe", "tBlScr", "tCan24",
+        "cBuf", "cLeaf", "cStem", "cFruit", "tCanSum", "time"
+    ]
 
-    weather_cols = ["glob_rad", "temp", "vpout", "co2out", "wind", "tsky", "tso", "dli", "isday", "isday_smooth"]   
-    controls_cols = ["uBoil", "uCO2", "uThScr", "uVent", "uLamp", "uBlScr"]
+    states = pd.DataFrame(np.array(Xs), columns=state_columns)
+    states.to_csv("data/AgriControl/comparison/gl_gym/states_no_growPipe2009.csv", index=False)
+
+    weather_cols = [
+        "glob_rad", "temp", "vpout", "co2out", 
+        "wind", "tsky", "tso", "dli", 
+        "isday", "isday_smooth", "tPipe", 
+        "tGroPipe", "pipeSwitchOff", "groPipeSwitchOff"
+    ]
+
     weather_data = pd.DataFrame(env.weather_data, columns=weather_cols)
-    weather_data.to_csv("data/comparison/weather_pipeinput.csv", index=False)
+    weather_data.to_csv("data/AgriControl/comparison/gl_gym/weather_no_growPipe2009.csv", index=False)
+
+    controls_cols = ["uBoil", "uCO2", "uThScr", "uVent", "uLamp", "uBlScr"]
     controls_data = pd.DataFrame(controls, columns=controls_cols)
-    controls_data.to_csv("data/comparison/controls_pipeinput.csv", index=False)
+    controls_data.to_csv("data/AgriControl/comparison/gl_gym/controls_no_growPipe2009.csv", index=False)

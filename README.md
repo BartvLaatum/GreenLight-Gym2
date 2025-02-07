@@ -27,3 +27,8 @@ Plotting the cost and state violation metrics
 ```shell
 python visualisations/cost_metrics.py --project AgriControl --mode deterministic --growth_year 2010 --start_day 59 --location Amsterdam
 ```
+
+Plotting parametric uncertainties
+```shell
+python visualisations/param_uncertainty.py --project AgriControl --mode stochastic --growth_year 2010 --start_day 59 --location Amsterdam --algorithm ppo
+```

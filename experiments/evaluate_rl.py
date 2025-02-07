@@ -1,7 +1,7 @@
 import argparse
 import os
 from os.path import join
-
+from tqdm import tqdm
 import pandas as pd
 import numpy as np
 
@@ -109,7 +109,7 @@ if __name__ == "__main__":
     result_columns.extend(["episode"])
     result = Results(result_columns)
 
-    for sim in range(n_sims):
+    for sim in tqdm(range(n_sims)):
         result_data = evaluate(model, eval_env)
         sim_column = np.full((result_data.shape[0], 1), sim)
         result_data = np.column_stack((result_data, sim_column))

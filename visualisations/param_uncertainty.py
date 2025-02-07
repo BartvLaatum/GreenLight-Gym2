@@ -109,8 +109,10 @@ def plot_cumulative_reward(final_rewards, col2plot):
     plt.show()
 
 def compute_cumulative_metrics(data_dict):
-    columns_to_sum = ['cFruit', 'Rewards', 'EPI', 'Revenue', 'Heat costs', 'CO2 costs', 'Elec costs', 
-                      'temp_violation', 'co2_violation', 'rh_violation']
+    columns_to_sum = [
+        'cFruit', 'Rewards', 'EPI', 'Revenue', 'Heat costs', 'CO2 costs',
+        'Elec costs', 'temp_violation', 'co2_violation', 'rh_violation'
+    ]
 
     # Process each noise level's data
     for noise_level, data in data_dict.items():
