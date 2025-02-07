@@ -87,7 +87,7 @@ def load_data(project, mode, algorithm, growth_year, start_day, location):
                     and growth_year in f 
                     and start_day in f 
                     and location in f]
-        
+
         if csv_files:
             try:
                 data_dict[noise_level] = pd.read_csv(os.path.join(folder_path, csv_files[0]))
@@ -98,15 +98,21 @@ def load_data(project, mode, algorithm, growth_year, start_day, location):
             print(f"No matching CSV file found in {folder_path}")
     return data_dict
 
-def plot_cumulative_reward(final_rewards, col2plot):
+def plot_cumulative_reward(final_metrics, col2plot):
 
     fig, ax = plt.subplots(figsize=(WIDTH, HEIGHT), dpi=300)
-
+    colors =[ "#003366", "#A60000"]
     # ax.plot(final_rewards.index, final_rewards[f"Cumulative {col2plot}"], "o-", label=col2plot)
-    ax.errorbar(final_rewards.index, final_rewards[f"Cumulative {col2plot}"], yerr=final_rewards[f"std {col2plot}"], fmt="o-", capsize=0)
+    for i, (algorithm, final_rewards) in enumerate(final_metrics.items()):
+        ax.errorbar(final_rewards.index, final_rewards[f"Cumulative {col2plot}"], yerr=final_rewards[f"std {col2plot}"], fmt="o-", markersize=4, color=colors[i], label=algorithm.upper(), capsize=0)
+
     ax.set_xlabel(r"Noise Level $(\sigma)$")
     ax.set_ylabel(col2plot)
-    plt.show()
+    ax.legend()
+    # plt.show()
+    plt.tight_layout()
+    fig.savefig(f"figures/AgriControl/stochastic/{col2plot}_cumulative_reward.png")
+    fig.savefig(f"figures/AgriControl/stochastic/{col2plot}_cumulative_reward.svg", format="svg", dpi=300)
 
 def compute_cumulative_metrics(data_dict):
     columns_to_sum = [
@@ -135,17 +141,23 @@ def compute_cumulative_metrics(data_dict):
     return final_rewards
 
 def main(args):
-    data_dict = load_data(args.project, args.mode, args.algorithm, args.growth_year, args.start_day, args.location)
-  
-    final_rewards = compute_cumulative_metrics(data_dict)
-    plot_cumulative_reward(final_rewards, col2plot="Rewards")
-    plot_cumulative_reward(final_rewards, col2plot="EPI")
+    algorithms = ["ppo", "sac"]
+
+    final_metrics  = {}
+    for algorithm in algorithms:
+        # data_dict = load_data(args.project, args.mode, args.algorithm, args.growth_year, args.start_day, args.location)
+        data_dict = load_data(args.project, args.mode, algorithm, args.growth_year, args.start_day, args.location)
+        final_rewards = compute_cumulative_metrics(data_dict)
+        final_metrics[algorithm] = final_rewards
+
+    # final_rewards = compute_cumulative_metrics(data_dict)
+    plot_cumulative_reward(final_metrics, col2plot="Rewards")
+    plot_cumulative_reward(final_metrics, col2plot="EPI")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Plot cost metrics from different models")
     parser.add_argument("--project", type=str, required=True, help="Path to project folder")
     parser.add_argument("--mode", type=str, choices=["deterministic", "stochastic"], required=True, help="Simulation mode")
-    parser.add_argument("--algorithm" , type=str, required=True, help="RL algorithm to use")
     parser.add_argument("--growth_year", type=str, required=True, help="Growth year")
     parser.add_argument("--start_day", type=str, required=True, help="Start day")
     parser.add_argument("--location", type=str, required=True, help="Location")

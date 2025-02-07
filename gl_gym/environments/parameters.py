@@ -208,25 +208,25 @@ def init_default_params(nparams):
     params[165] = 0;            # epsGroPipe;      FIR emission coefficient of the growth pipes
     params[166] = 1.655;        # lGroPipe;        Length of the growth pipes [m]
     params[167] = 35e-3;        # phiGroPipeE;     External diameter of the growth pipes [m]
-    params[168] = 35e-3 - 1.2e-3; # phiGroPipeI;   Internal diameter of the growth pipes [m]
+    params[168] = (35e-3) - (1.2e-3); # phiGroPipeI;   Internal diameter of the growth pipes [m]
     params[169] = np.pi * params[166] * params[167]; # aGroPipe; Surface of the growth pipes per floor area [m2 m-2]
     params[170] = 0;            # pBoilGro;        Max energy input from boiler into the growth system [W/m2]
     params[171] = 0.25 * np.pi * params[166] * ((params[167] * params[167] - params[168] * params[168]) * params[12] * params[24] + params[168] * params[168] * params[13] * params[25]); # capGroPipe; Heat capacity of the growth pipes [J m-2 K-1]
 
 
     # LED LAMP PARAMETERS
-    params[172] = 116        # thetaLampMax;    Max energy input of the lamps [W/m2]
-    params[173] = 0            # heatCorrection;  Heat correction factor for the lamp []
+    params[172] = 116           # thetaLampMax;    Max energy input of the lamps [W/m2]
+    params[173] = 0             # heatCorrection;  Heat correction factor for the lamp []
 
-    params[174] = 0.31      # etaLampPar;      PAR efficiency of the lamp []
-    params[175] = 0.02        # etaLampNir;      NIR efficiency of the lamp []
+    params[174] = 0.31          # etaLampPar;      PAR efficiency of the lamp []
+    params[175] = 0.02          # etaLampNir;      NIR efficiency of the lamp []
 
-    params[176] = 0.95        # tauLampPar;      PAR transmission coefficient of the lamp []
-    params[177] = 0.95        # tauLampNir;      NIR transmission coefficient of the lamp []
-    params[178] = 0.95        # tauLampFir;      FIR transmission coefficient of the lamp []
+    params[176] = 0.95          # tauLampPar;      PAR transmission coefficient of the lamp []
+    params[177] = 0.95          # tauLampNir;      NIR transmission coefficient of the lamp []
+    params[178] = 0.95          # tauLampFir;      FIR transmission coefficient of the lamp []
     params[179] = 0.;           # rhoLampPar;      PAR reflection coefficient of the lamp []
     params[180] = 0.;           # rhoLampNir;      NIR reflection coefficient of the lamp []
-    params[181] = 0.05         # aLamp;           Surface area of the lamp per floor area [m2 m-2]
+    params[181] = 0.05          # aLamp;           Surface area of the lamp per floor area [m2 m-2]
 
     params[182] = 0.88          # epsLampTop;      FIR emission coefficient of the top lamp []
     params[183] = 0.88          # epsLampBottom;   FIR emission coefficient of the bottom lamp []

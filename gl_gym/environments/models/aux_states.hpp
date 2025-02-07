@@ -110,6 +110,7 @@ SX update(const SX& x, const SX& u, const SX& d, const SX& p) {
     // a.tauThScrPar = 1-u(2)*(1-p.tauThScrPar)
     a[0] = 1 - u(2) * (1 - p(80));
     //PAR reflection coefficient of the thermal screen [-]
+    // a.rhoThScrPar
     a[1] = u(2) * p(77);
     //PAR transmission coefficient of the thermal screen and roof [-]
     a[2] = tau12(p(69), a[0], p(66), a[1]);
@@ -140,13 +141,16 @@ SX update(const SX& x, const SX& u, const SX& d, const SX& p) {
     //Vanthoor cover with blackout screen
 
     //PAR transmission coefficient of the blackout screen [-]
+    // a.tauBlScrPar = u.blScrPar
     a[10] = 1 - u(5) * (1 - p(90));
 
     //PAR reflection coefficient of the blackout screen [-]
+    // a.rhoBlScrPar
     a[11] = u(5) * p(88);
 
     //PAR transmission coefficient of the old cover and blackout screen [-]
 	//Equation A9 [5]
+    // a.tauCovBlScrPar
     a[12] = tau12(a[2], a[10], a[4], a[11]);
 
     //PAR up reflection coefficient of the old cover and blackout screen [-]
@@ -185,9 +189,9 @@ SX update(const SX& x, const SX& u, const SX& d, const SX& p) {
     //NIR transmission coefficient of the cover [-]
     a[22] = tau12(a[17], p(177), a[19], p(180));
 
-    //NIR reflection coefficient of the cover [-]
+    // NIR reflection coefficient of the cover [-]
+    // a.rhoCovNir
     a[23] = rhoUp(a[17], a[18], a[19], p(180));
-
 
     // SINCE ONLY THE SHADING SCREEN AND THE ROOF HAVE AN EFFECT ON THE FIR TRANSMISSION AND REFLECTION
     // WE CAN SIMPLY SET THIS TO THE FIR TRANSMISSION OF THE ROOF
@@ -201,9 +205,11 @@ SX update(const SX& x, const SX& u, const SX& d, const SX& p) {
     a[25] = p(67);
 
     //PAR absorption coefficient of the cover [-]
+    // a.aCovPar
     a[26] = 1 - a[20] - a[21];
     
     //NIR absorption coefficient of the cover [-]
+    // a.aCovNir
     a[27] = 1 - a[22] - a[23];
     
     //FIR absorption coefficient of the cover [-]
@@ -256,6 +262,7 @@ SX update(const SX& x, const SX& u, const SX& d, const SX& p) {
 
     //PAR above the canopy from the sun [W m^{-2}]
     //Equation 27 [1], Equation A14 [5]
+    // a.rParSun
     a[39] = (1 - p(44)) * a[20] * p(6) * d(0);
 
     //PAR above the canopy from the lamps [W m^{-2}] 
@@ -269,6 +276,7 @@ SX update(const SX& x, const SX& u, const SX& d, const SX& p) {
     //Global radiation above the canopy from the sun [W m^{-2}]
     //(PAR+NIR, where UV is counted together with NIR)
     //Equation 7.24 [7]
+    // a.rCanSun
     a[42] = (1 - p(44)) * d(0) * (p(6) * a[20] + p(5) * a[22]);
     
     //Global radiation above the canopy from the lamps [W m^{-2}]
@@ -348,44 +356,53 @@ SX update(const SX& x, const SX& u, const SX& d, const SX& p) {
 
     //Virtual NIR transmission for the cover-canopy-floor lumped model [-]
     //Equation 29 [1]
+    // a.tauHatCovNir
     a[57] = 1 - a[23];
     a[58] = 1 - p(97);
 
     //NIR transmission coefficient of the canopy [-]
-    //Equation 30 [1]   
+    //Equation 30 [1]
+    // a.tauHatCanNir 
     a[59] = exp(-p(34) * a[31]);
-    
+
     //NIR reflection coefficient of the canopy [-]
     //Equation 31 [1]
+    // a.rhoHatCanNir
     a[60] = p(11) * (1 - a[59]);
 
     //NIR transmission coefficient of the cover and canopy [-]
+    // a.tauCovCanNir
     a[61] = tau12(a[57], a[59], a[23], a[60]);
 
     //NIR reflection coefficient of the cover and canopy towards the top [-]
-    a[62] = rhoUp(a[59], a[23], a[23], a[60]);
+    //a.rhoCovCanNirUp
+    a[62] = rhoUp(a[57], a[23], a[23], a[60]);
 
     //NIR reflection coefficient of the cover and canopy towards the bottom [-]
+    // a.rhoCovCanNirDn
     a[63] = rhoDn(a[59], a[23], a[60], a[60]);
 
     //NIR transmission coefficient of the cover, canopy and floor [-]
+    // a.tauCovCanFlrNir
     a[64] = tau12(a[61], a[58], a[63], p(97));
 
     //NIR reflection coefficient of the cover, canopy and floor [-]
+    // a.rhoCovCanFlrNir
+    // TODO: CHECHING THIS ONE. 
     a[65] = rhoUp(a[61], a[62], a[63], p(97));
 
     //The calculated absorption coefficient equals a[66] [-]
-    //pg. 23 [1]
+    // a.aCanNir
     a[66] = 1 - a[64] - a[65];
 
     //The calculated transmission coefficient equals m.a[67] [-]
     //pg. 23 [1]
-    //addAux(gl, 'aFlrNir', gl.a[64])
+    //a.aFlrNir
     a[67] = a[64];
 
     //NIR from the sun absorbed by the canopy [W m^{-2}]
     //Equation 32 [1]
-    //addAux(gl, 'rNirSunCan', (1-p(44)).*gl.a[66].*p(5).*d.iGlob)
+    //a.rNirSunCan = (1-p(44)).*gl.a[66].*p(5).*d.iGlob)
     a[68] = (1 - p(44)) * a[66] * p(5) * d(0);
     
     //NIR from the lamps absorbed by the canopy [W m^{-2}]
@@ -400,7 +417,7 @@ SX update(const SX& x, const SX& u, const SX& d, const SX& p) {
 
     //NIR from the sun absorbed by the floor [W m^{-2}]
     //Equation 33 [1]
-    //addAux(gl, 'rNirSunFlr', (1-p(44)).*gl.a[67].*p(5).*d.iGlob)
+    //a.rNirSunFlr = (1-p(44)).*gl.a[67].*p(5).*d.iGlob)
     a[71] = (1 - p(44)) * a[67] * p(5) * d(0);
 
     //NIR from the lamps absorbed by the floor [W m^{-2}]
@@ -444,11 +461,12 @@ SX update(const SX& x, const SX& u, const SX& d, const SX& p) {
     
     //Global radiation from the sun absorbed by the greenhouse air [W m^{-2}]
     //Equation 35 [1]
+    // a.rGlobSunAir
     a[79] = p(44) * d(0) * (a[20] * p(6) + (a[66] + a[67]) * p(5));
-    
+
     //Global radiation from the sun absorbed by the cover [W m^{-2}]
     //Equation 36 [1]
-    //addAux(gl, 'rGlobSunCovE', (gl.a[26]*p(6)+gl.a[27]*p(5)).*d.iGlob)
+    // a.rGlobSunCovE = gl.a[26]*p(6)+gl.a[27]*p(5)).*d.iGlob
     a[80] = (a[26] * p(6) + a[27] * p(5)) * d(0);
     //FIR heat fluxes - Section 5.2 [1]
 

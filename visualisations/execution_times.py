@@ -65,7 +65,7 @@ models = ["GL-Matlab", "GL-Python", "GL-Gym"]
 means = [gl_matlab_mean, glplus_mean, cpp_mean]
 stds = [gl_matlab_std, glplus_std,cpp_std ]
 
-cpp_color = "#4394E5"
+cpp_color = "C0"
 glplus_color = "#A60000"
 gl_matlab_color = "grey"
 colors = [gl_matlab_color, glplus_color, cpp_color]
