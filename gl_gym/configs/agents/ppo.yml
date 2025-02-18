@@ -1,5 +1,5 @@
 TomatoEnv:              # educated guess based on Bayes optimisation...
-  total_timesteps: 3_000_000
+  total_timesteps: 2_000_000
   n_envs: 8
   policy: MlpPolicy
   n_steps: 2048         # we update after n_steps calls of step() function. in the case of N envs --> N * n_steps

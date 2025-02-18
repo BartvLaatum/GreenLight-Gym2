@@ -110,6 +110,7 @@ class ControlObservations(BaseObservations):
         Compute, and retrieve observations from GreenLight.
         """
         return self.env.u
+
 class WeatherObservations(BaseObservations):
     """
     Observer class, which give us control over the observations we want to our RL algorithm to use.

@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # MODELS FOR STOCHASTIC PPO
-# models=("divine-glitter-278" "resilient-monkey-279" "crimson-bird-280" "glad-haze-281" "zany-meadow-282" "true-yogurt-283" "giddy-disco-284")
+# models=("hopeful-wind-295" "light-wave-296" "ruby-star-297" "eager-resonance-298" "rural-eon-300" "stellar-durian-301" "copper-dawn-303")
 
 # MODELS FOR STOCHASTIC SAC
-models=("floral-aardvark-287" "sparkling-microwave-289" "driven-night-290" "elated-dragon-291" "earnest-silence-292" "iconic-flower-293" "blooming-cherry-294")
+models=("distinctive-frost-299" "stoic-moon-302" "graceful-dream-304" "copper-frog-305" "warm-flower-306" "sunny-sky-307" "leafy-cloud-308")
 
 # Array of uncertainty scales to test
 uncertainty_scales=(0.0 0.05 0.1 0.15 0.2 0.25 0.3)

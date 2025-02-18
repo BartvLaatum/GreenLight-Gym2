@@ -237,7 +237,6 @@ class TomatoEnv(GreenLightEnv):
             self.growth_year = self._np_random.choice(self.train_years)
             self.start_day = self._np_random.choice(self.train_days)
         else:
-            print("Evaluating")
             self.growth_year = self._np_random.choice(self.eval_options["eval_years"])
             self.start_day = self._np_random.choice(self.eval_options["eval_days"])
             self.location = self.eval_options["location"]
@@ -265,8 +264,7 @@ class TomatoEnv(GreenLightEnv):
         self.x_prev = np.copy(self.x)
         self.timestep = 0
         self.obs = self._get_obs()
-    
+
 
         self.terminated = False
         return self.obs, {}
-

@@ -64,7 +64,7 @@ def plot_learning_curves(ppo_data, sac_data, baseline):
     # Plot SAC data
     ax.plot(sac_data['global step'], sac_data['train reward'], label='SAC', color=SAC_COLOR, alpha=0.8)
 
-    ax.hlines(baseline_rewards,ppo_data['global step'].iloc[0], ppo_data['global step'].iloc[-1], label="RB Baseline", linestyle="--", color="grey", alpha=0.8)
+    ax.hlines(baseline_rewards,ppo_data['global step'].iloc[0], ppo_data['global step'].iloc[-1], label="RB Baseline", linestyle="--", color=c, alpha=0.8)
 
     ax.set_xlabel('Total time steps')
     ax.set_ylabel('Cumulative reward')

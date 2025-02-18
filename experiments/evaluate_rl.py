@@ -68,7 +68,6 @@ def evaluate(model, env):
         rh_violation[timestep] += infos[0]["rh_violation"]
         timestep += 1
 
-
     result_data = np.column_stack((episodic_obs, episode_rewards, epi, revenue, heat_cost, co2_cost, elec_cost, temp_violation, co2_violation, rh_violation))
     return result_data[:-1]
 
@@ -110,6 +109,8 @@ if __name__ == "__main__":
     result = Results(result_columns)
 
     for sim in tqdm(range(n_sims)):
+        # eval_env.set_seed(sim)
+        eval_env.env_method("set_seed", 666+sim)
         result_data = evaluate(model, eval_env)
         sim_column = np.full((result_data.shape[0], 1), sim)
         result_data = np.column_stack((result_data, sim_column))

@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
+from gymnasium.utils import seeding
 
 from gl_gym.environments.observations import BaseObservations
 from gl_gym.environments.rewards import BaseReward
@@ -161,6 +162,12 @@ class GreenLightEnv(gym.Env):
 
     def increase_eval_idx(self):
         self.eval_idx += 1
+
+    def set_seed(self, seed):
+        """
+        Seed the environment.
+        """
+        seeding.np_random(seed)
 
     @abstractmethod
     def reset(self, seed: Optional[int] = None) -> Tuple[np.ndarray, Dict[str, Any]]:

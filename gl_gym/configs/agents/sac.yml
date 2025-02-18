@@ -7,7 +7,7 @@ TomatoEnv:
   learning_starts: 57_610 # let the agents randomly explore for 10 episodes.
   batch_size: 128
   tau: 0.0135
-  gamma: 0.9362
+  gamma: 0.9631
   ent_coef: auto
   train_freq: 50
   gradient_steps: 10

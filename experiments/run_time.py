@@ -1,10 +1,11 @@
 import argparse
 from gl_gym.environments.tomato_env import TomatoEnv
 from gl_gym.common.utils import load_env_params
+from gl_predefined_controls import set_matlab_params
 import numpy as np
 import pandas as pd
 import time
-import timeit
+
 
 
 if __name__ == "__main__":
@@ -27,19 +28,24 @@ if __name__ == "__main__":
 
     # Initialize the environment with both parameter dictionaries
     env = TomatoEnv(base_env_params=env_base_params, **env_specific_params)
-    crop_DM = 6240*10
-    controls = pd.read_csv('data/comparison/controls2009.csv').values[:,:6]
+    controls = pd.read_csv('data/AgriControl/comparison/matlab/controls_pipe2009.csv').values[:, :6]
+    weather = pd.read_csv('data/AgriControl/comparison/matlab/weather_pipe2009.csv').values[:, :]
+    # weather = interpolate_weather_data(weather, env_base_params)
+    indoor = [23.7, 1291.822759273841, 1907.926700562060]
 
     def run_simulation():
+        print(env.N)
         env.reset(seed=env_seed)
-        env.set_crop_state(cBuf=0, cLeaf=0.7*crop_DM, cStem=0.25*crop_DM, cFruit=0.05*crop_DM, tCanSum=0)
+        env.weather_data = weather
+        env.p = set_matlab_params(env.p)
+        env.reset(seed=env_seed)
+        env.set_crop_state(cBuf=0, cLeaf=0.9e5, cStem=2.5e5, cFruit=2.8e5, tCanSum=3000)
         done = False
         time_start = time.time()
         while not done:
-            x, done = env.step_raw_control(controls[env.timestep])
+            obs, reward, terminated, _, _ = env.step_raw_control(controls[env.timestep])
         time_end = time.time()
         return time_end - time_start
-
 
     # Time the execution of the function
     elapsed_times = []
@@ -47,5 +53,5 @@ if __name__ == "__main__":
         elapsed_time = run_simulation()
         elapsed_times.append(elapsed_time)
     df = pd.DataFrame(elapsed_times, columns=["elapsed_time"])
-    df.to_csv("data/run_times/elapsed_times.csv", index=False)
+    df.to_csv("data/AgriControl/run_times/gl_gym.csv", index=False)
     print(f"Elapsed time: {np.mean(elapsed_times):.4f} seconds")  # Print elapsed time

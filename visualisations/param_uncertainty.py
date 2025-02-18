@@ -13,7 +13,7 @@ plt.rcParams["mathtext.fontset"] = "dejavuserif"  # Use a more Illustrator-frien
 plt.rcParams["font.family"] = "serif"
 
 plt.rcParams["font.size"] = 8  # General font size
-plt.rcParams["axes.labelsize"] = 10  # Axis label size
+plt.rcParams["axes.labelsize"] = 8  # Axis label size
 plt.rcParams["xtick.labelsize"] = 8  # Tick labels
 plt.rcParams["ytick.labelsize"] = 8
 plt.rcParams["legend.fontsize"] = 8
@@ -35,10 +35,12 @@ plt.rcParams["ytick.major.width"] = 1
 
 plt.rc("axes", unicode_minus=False)
 
-WIDTH = 87.5 * 0.03937  # 85 mm ≈ 3.35 inches
+# WIDTH = 87.5 * 0.03937  # 85 mm ≈ 3.35 inches
+WIDTH = 60 * 0.03937  # 180 mm ≈ 7.08 inches
+
 HEIGHT = WIDTH * 0.75  # Adjust aspect ratio (3:2 or 4:3 is ideal)
 
-def load_data(project, mode, algorithm, growth_year, start_day, location):
+def load_data(project, mode, algorithm, growth_year, start_day, location, model_names):
     """
     Load and organize data from CSV files based on specified parameters.
     This function reads CSV files from a hierarchical directory structure organized by project,
@@ -77,17 +79,18 @@ def load_data(project, mode, algorithm, growth_year, start_day, location):
     base_path = os.path.join("data", project, mode, algorithm)
     noise_levels = [d for d in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, d))]
     noise_levels.sort(key=lambda x: float(x))
+    print(noise_levels)
     data_dict = {}
     # Initialize dictionary to store DataFrames for each noise level and file
     data_dict = {noise_level: {} for noise_level in noise_levels}
     # Get all CSV files from the first noise level folder (assuming same files in all folders)
-    for noise_level in noise_levels:
+    for i, noise_level in enumerate(noise_levels):
         folder_path = os.path.join(base_path, noise_level)
         csv_files = [f for f in os.listdir(folder_path) if f.endswith('.csv') 
-                    and growth_year in f 
-                    and start_day in f 
-                    and location in f]
-
+                and growth_year in f 
+                and start_day in f 
+                and location in f
+                and model_names[i] in f.lower()]
         if csv_files:
             try:
                 data_dict[noise_level] = pd.read_csv(os.path.join(folder_path, csv_files[0]))
@@ -98,16 +101,25 @@ def load_data(project, mode, algorithm, growth_year, start_day, location):
             print(f"No matching CSV file found in {folder_path}")
     return data_dict
 
-def plot_cumulative_reward(final_metrics, col2plot):
+def plot_cumulative_reward(final_metrics, col2plot, ylabel=None):
 
     fig, ax = plt.subplots(figsize=(WIDTH, HEIGHT), dpi=300)
-    colors =[ "#003366", "#A60000"]
+    colors =[ "#003366", "#A60000", "grey"]
+    labels = ["PPO", "SAC", "RB baseline"]
     # ax.plot(final_rewards.index, final_rewards[f"Cumulative {col2plot}"], "o-", label=col2plot)
     for i, (algorithm, final_rewards) in enumerate(final_metrics.items()):
-        ax.errorbar(final_rewards.index, final_rewards[f"Cumulative {col2plot}"], yerr=final_rewards[f"std {col2plot}"], fmt="o-", markersize=4, color=colors[i], label=algorithm.upper(), capsize=0)
+                # ax.errorbar(final_rewards.index, final_rewards[f"Cumulative {col2plot}"], yerr=final_rewards[f"std {col2plot}"], fmt="o-", markersize=4, color=colors[i], label=algorithm.upper(), capsize=5)
 
-    ax.set_xlabel(r"Noise Level $(\sigma)$")
-    ax.set_ylabel(col2plot)
+        mean = final_rewards[f"Cumulative {col2plot}"]
+        std = (final_rewards[f"std {col2plot}"])
+        ax.plot(final_rewards.index, mean, '-', color=colors[i], label=labels[i], markersize=4)
+        ax.fill_between(final_rewards.index, mean-std, mean+std, alpha=0.2, color=colors[i])
+    
+    ax.set_xlabel(r"Uncertainty $(\delta)$")
+    if ylabel:
+        ax.set_ylabel(ylabel)
+    else:
+        ax.set_ylabel(f"Cumulative {col2plot.lower()[:-1]}")
     ax.legend()
     # plt.show()
     plt.tight_layout()
@@ -117,11 +129,14 @@ def plot_cumulative_reward(final_metrics, col2plot):
 def compute_cumulative_metrics(data_dict):
     columns_to_sum = [
         'cFruit', 'Rewards', 'EPI', 'Revenue', 'Heat costs', 'CO2 costs',
-        'Elec costs', 'temp_violation', 'co2_violation', 'rh_violation'
+        'Elec costs', 'temp_violation', 'co2_violation', 'rh_violation', 'Penalty'
     ]
 
     # Process each noise level's data
     for noise_level, data in data_dict.items():
+        # Add a penalty column that sums all violations
+        if all(col in data.columns for col in ['temp_violation', 'co2_violation', 'rh_violation']):
+            data['Penalty'] = data['temp_violation'] + data['co2_violation'] + data['rh_violation']
         # Group by episode and compute cumsum within each episode
         for col in columns_to_sum:
             if col in data.columns:
@@ -136,23 +151,29 @@ def compute_cumulative_metrics(data_dict):
                 episode_finals = data.groupby('episode')[f'cumsum {col}'].last()
                 # Calculate mean and std
                 final_rewards.loc[noise_level, f'Cumulative {col}'] = episode_finals.mean()
-                final_rewards.loc[noise_level, f'std {col}'] = episode_finals.std()
+                final_rewards.loc[noise_level, f'std {col}'] = 3.291 * episode_finals.std() / np.sqrt(len(episode_finals))
 
     return final_rewards
 
 def main(args):
-    algorithms = ["ppo", "sac"]
-
+    algorithms = ["ppo", "sac", "rb_baseline"]
+    model_names = [["hopeful-wind-295","light-wave-296","ruby-star-297","eager-resonance-298","rural-eon-300","stellar-durian-301","copper-dawn-303"],
+                    ["distinctive-frost-299","stoic-moon-302","graceful-dream-304","copper-frog-305","warm-flower-306","sunny-sky-307","leafy-cloud-308"],
+                    ["rb_baseline", "rb_baseline", "rb_baseline", "rb_baseline", "rb_baseline", "rb_baseline", "rb_baseline"]]
     final_metrics  = {}
-    for algorithm in algorithms:
+    for i, algorithm in enumerate(algorithms):
         # data_dict = load_data(args.project, args.mode, args.algorithm, args.growth_year, args.start_day, args.location)
-        data_dict = load_data(args.project, args.mode, algorithm, args.growth_year, args.start_day, args.location)
+        data_dict = load_data(args.project, args.mode, algorithm, args.growth_year, args.start_day, args.location, model_names[i])
         final_rewards = compute_cumulative_metrics(data_dict)
         final_metrics[algorithm] = final_rewards
 
     # final_rewards = compute_cumulative_metrics(data_dict)
-    plot_cumulative_reward(final_metrics, col2plot="Rewards")
-    plot_cumulative_reward(final_metrics, col2plot="EPI")
+    plot_cumulative_reward(final_metrics, col2plot="Rewards", ylabel="Cumulative reward")
+    plot_cumulative_reward(final_metrics, col2plot="EPI", ylabel=r"Cumulative EPI (EU/m$^2$)")
+    plot_cumulative_reward(final_metrics, col2plot="temp_violation")
+    plot_cumulative_reward(final_metrics, col2plot="co2_violation")
+    plot_cumulative_reward(final_metrics, col2plot="rh_violation")
+    plot_cumulative_reward(final_metrics, col2plot="Penalty", ylabel="Cumulative penalty")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Plot cost metrics from different models")

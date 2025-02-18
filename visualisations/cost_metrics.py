@@ -72,14 +72,16 @@ def costs_plot(data):
 
     # Plot bars for each model
     for i, model in enumerate(models):
+        
         values = [data[data["model"] == model][metric].sum() for metric in metrics]
+        print(values)
         ax.bar([x + i * bar_width for x in index], values, bar_width, 
                label=model, color=colors[i])
 
     # Customize plot
     # ax.set_title("Cost Metrics Comparison Across Models")
 
-    ax.set_ylabel(r"Cost (EU/m$^2$)")
+    ax.set_ylabel(r"Cumulative cost (EU/m$^2$)")
     ax.set_xticks([x + bar_width for x in index])
     xlabels = ["EPI", "Revenue", "Heat", "Electricity", r"CO$_2$"]
     ax.set_xticklabels(xlabels, rotation=0)
@@ -97,7 +99,7 @@ def violations_plot(data):
     n_metrics = len(metrics)
 
     # Set up the plot
-    fig, ax = plt.subplots(figsize=(width, height),dpi=300)
+    fig, ax = plt.subplots(figsize=(width, height), dpi=300)
     bar_width = 0.25
     index = range(n_metrics)
     colors = ["#003366", "#0066CC","#4394E5"]
@@ -106,11 +108,12 @@ def violations_plot(data):
     # Plot bars for each model
     for i, model in enumerate(models):
         values = [data[data["model"] == model][metric].sum() for metric in metrics]
+        print(values)
         ax.bar([x + i * bar_width for x in index], values, bar_width, 
                label=model, color=colors[i])
 
     # Customize plot
-    ax.set_ylabel("Cumulative violation")
+    ax.set_ylabel("Cumulative penalty")
     ax.set_xticks([x + bar_width for x in index])
     xlabels = ["Temperature", r"CO$_2$", "Relative Humidity"]
     ax.set_xticklabels(xlabels, rotation=0)

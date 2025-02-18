@@ -3,7 +3,7 @@ from gl_gym.environments.tomato_env import TomatoEnv
 from gl_gym.common.utils import load_env_params
 import numpy as np
 import pandas as pd
-import time
+from time import time
 
 def interpolate_weather_data(weather, env_base_params):
     """
@@ -80,6 +80,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--env_id", type=str, default="TomatoEnv")
     parser.add_argument("--env_config_path", type=str, default="gl_gym/configs/envs/")
+    parser.add_argument("--save_state", default=True, action=argparse.BooleanOptionalAction, help="Save the state results")
+    parser.add_argument("--save_time", default=True, action=argparse.BooleanOptionalAction, help="Save the timing")
     args = parser.parse_args()
 
     env_base_params, env_specific_params = load_env_params(args.env_id, args.env_config_path)
@@ -90,7 +92,7 @@ if __name__ == "__main__":
     env_base_params["end_train_year"] = 2009
     env_base_params["start_train_day"] = 0
     env_base_params["end_train_day"] = 0
-    env_base_params["season_length"] = 5
+    env_base_params["season_length"] = 10
     env_base_params["nu"] = 6
     env_base_params["nd"] = 14
     env_base_params["dt"] = 300
@@ -108,54 +110,60 @@ if __name__ == "__main__":
     indoor = [23.7, 1291.822759273841, 1907.926700562060]
 
     def run_simulation():
-        print(env.N)
         env.reset(seed=env_seed)
         env.weather_data = weather
         env.p = set_matlab_params(env.p)
-        print(env.p[171])
         env.x = init_mat_state(env.weather_data[0], indoor)
         # env.set_crop_state(cBuf=0, cLeaf=0.7*crop_DM, cStem=0.25*crop_DM, cFruit=0.05*crop_DM, tCanSum=0)
 
         done = False
-        time_start = time.time()
         Xs = [np.copy(env.x)]
         Us = [np.copy(env.u)]
+        start = time()
         for _ in range(env.N):
 
             # x, done = env.step_raw_control(controls[env.timestep])
-            try:
-                x, done = env.step_raw_control_pipeinput(controls[env.timestep])
-            except IndexError:
-                breakpoint()
+            x, done = env.step_raw_control_pipeinput(controls[env.timestep])
             Xs.append(x)
             Us.append(env.u)
         Xs = np.array(Xs)
         Us = np.array(Us)
-        return Xs, Us
+        end = time()
+        elapsed_time = (end - start)
+        return Xs, Us, elapsed_time
 
     # Time the execution of the function
-    Xs, Us = run_simulation()
-    # save elapsed times to csv
-    state_columns = [
-        "co2Air", "co2Top", "tAir", "tTop", "tCan", "tCovIn", "tCovE",
-        "tThScr", "tFlr", "tPipe", "tSo1", "tSo2", "tSo3", "tSo4", "tSo5", 
-        "vpAir", "vpTop", "tLamp", "tIntLamp", "tGroPipe", "tBlScr", "tCan24",
-        "cBuf", "cLeaf", "cStem", "cFruit", "tCanSum", "time"
-    ]
+    elapsed_times = []
+    for _ in range(10):
+        Xs, Us, elapsed_time = run_simulation()
+        elapsed_times.append(elapsed_time)
+    df = pd.DataFrame(elapsed_times, columns=["elapsed_time"])
+    df.to_csv("data/AgriControl/run_times/gl_gym.csv", index=False)
 
-    states = pd.DataFrame(np.array(Xs), columns=state_columns)
-    states.to_csv("data/AgriControl/comparison/gl_gym/states_no_growPipe2009.csv", index=False)
 
-    weather_cols = [
-        "glob_rad", "temp", "vpout", "co2out", 
-        "wind", "tsky", "tso", "dli", 
-        "isday", "isday_smooth", "tPipe", 
-        "tGroPipe", "pipeSwitchOff", "groPipeSwitchOff"
-    ]
+    if args.save_state:
 
-    weather_data = pd.DataFrame(env.weather_data, columns=weather_cols)
-    weather_data.to_csv("data/AgriControl/comparison/gl_gym/weather_no_growPipe2009.csv", index=False)
+        # save elapsed times to csv
+        state_columns = [
+            "co2Air", "co2Top", "tAir", "tTop", "tCan", "tCovIn", "tCovE",
+            "tThScr", "tFlr", "tPipe", "tSo1", "tSo2", "tSo3", "tSo4", "tSo5", 
+            "vpAir", "vpTop", "tLamp", "tIntLamp", "tGroPipe", "tBlScr", "tCan24",
+            "cBuf", "cLeaf", "cStem", "cFruit", "tCanSum", "time"
+        ]
 
-    controls_cols = ["uBoil", "uCO2", "uThScr", "uVent", "uLamp", "uBlScr"]
-    controls_data = pd.DataFrame(controls, columns=controls_cols)
-    controls_data.to_csv("data/AgriControl/comparison/gl_gym/controls_no_growPipe2009.csv", index=False)
+        states = pd.DataFrame(np.array(Xs), columns=state_columns)
+        states.to_csv("data/AgriControl/comparison/gl_gym/states_pipe2009.csv", index=False)
+
+        weather_cols = [
+            "glob_rad", "temp", "vpout", "co2out", 
+            "wind", "tsky", "tso", "dli", 
+            "isday", "isday_smooth", "tPipe", 
+            "tGroPipe", "pipeSwitchOff", "groPipeSwitchOff"
+        ]
+
+        weather_data = pd.DataFrame(env.weather_data, columns=weather_cols)
+        weather_data.to_csv("data/AgriControl/comparison/gl_gym/weather_pipe2009.csv", index=False)
+
+        controls_cols = ["uBoil", "uCO2", "uThScr", "uVent", "uLamp", "uBlScr"]
+        controls_data = pd.DataFrame(controls, columns=controls_cols)
+        controls_data.to_csv("data/AgriControl/comparison/gl_gym/controls_pipe2009.csv", index=False)

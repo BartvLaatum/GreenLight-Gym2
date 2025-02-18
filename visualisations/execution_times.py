@@ -42,7 +42,7 @@ def convert_to_fps(times):
     return 1 / time_per_step
 
 # Read the CSV files
-cpp_times = pd.read_csv("data/AgriControl/run_times/cpp_model.csv")
+cpp_times = pd.read_csv("data/AgriControl/run_times/gl_gym.csv")
 glplus_times = pd.read_csv("data/AgriControl/run_times/glplus.csv")
 gl_matlab_times = pd.read_csv("data/AgriControl/run_times/gl_matlab.csv")
 
@@ -74,17 +74,10 @@ bars = ax.bar(models, means, yerr=stds, color=colors, alpha=1)
 
 # Customize plot
 ax.set_ylabel("Steps per second")
-ax.set_yscale("log")
-ylim = ax.get_ylim()
-ax.set_ylim(10, ylim[1])
-# Add value labels on top of bars
-# for bar in bars:
-#     height = bar.get_height()
-#     ax.text(bar.get_x() + bar.get_width()/2., height/2,
-#             f'{height:.0f}',
-#             ha='center', va='bottom', color='black')
+ax.set_yticks([0, 500, 1000, 1500, 2000])
+ax.set_ylim(0, 2000)
 plt.tight_layout()
-
+print(means)
 print("factor of speed up over GL Matlab: ", cpp_mean/gl_matlab_mean)
 print("factor of speed up over GL+: ", cpp_mean/glplus_mean)
 plt.savefig('figures/AgriControl/run_times/fps.svg', format='svg', dpi=300, bbox_inches='tight')
