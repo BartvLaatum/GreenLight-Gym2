@@ -15,7 +15,7 @@ def parametric_crop_uncertainty(parameters, uncertainty, RNG):
     # The following crop parameters in the parameter vector are perturbed
     indices = np.arange(128, 162)
     parameters = np.array(parameters)
-    noise = RNG.uniform(-uncertainty, uncertainty, size=indices.shape)
+    noise = RNG.uniform(-uncertainty/2, uncertainty/2, size=indices.shape)
     parameters[indices] += noise*parameters[indices]
 
     # cLeafMax is dependent of laiMax and sla

@@ -121,10 +121,10 @@ def plot_cumulative_reward(final_metrics, col2plot, ylabel=None):
     else:
         ax.set_ylabel(f"Cumulative {col2plot.lower()[:-1]}")
     ax.legend()
-    # plt.show()
     plt.tight_layout()
-    fig.savefig(f"figures/AgriControl/stochastic/{col2plot}_cumulative_reward.png")
-    fig.savefig(f"figures/AgriControl/stochastic/{col2plot}_cumulative_reward.svg", format="svg", dpi=300)
+    plt.show()
+    # fig.savefig(f"figures/AgriControl/stochastic/{col2plot}_cumulative_reward.png")
+    # fig.savefig(f"figures/AgriControl/stochastic/{col2plot}_cumulative_reward.svg", format="svg", dpi=300)
 
 def compute_cumulative_metrics(data_dict):
     columns_to_sum = [

@@ -115,7 +115,7 @@ if __name__ == "__main__":
         sim_column = np.full((result_data.shape[0], 1), sim)
         result_data = np.column_stack((result_data, sim_column))
 
-        result.update_result(result_data, sim)
+        result.update_result(result_data)
 
     start_day = eval_env.get_attr("start_day")[0]
     growth_year = eval_env.get_attr("growth_year")[0]

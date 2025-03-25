@@ -167,7 +167,7 @@ class GreenLightEnv(gym.Env):
         """
         Seed the environment.
         """
-        seeding.np_random(seed)
+        self._np_random, self._np_random_seed = seeding.np_random(seed)
 
     @abstractmethod
     def reset(self, seed: Optional[int] = None) -> Tuple[np.ndarray, Dict[str, Any]]:
