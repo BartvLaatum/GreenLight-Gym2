@@ -1,34 +1,70 @@
 # GreenLight-Gym 2.0
 
-This repository is a reimplementation of the state-of-the-art greenhouse model in C++ with bindings for Python.
+## Reinforcement learning benchmark environment for control of greenhouse production systems 
 
-The model is wrapped in the Gymnasium environment to experiment (reinforcement) learning-based controllers.
+### Summary
 
-Since the GreenLight model is implemented in CasADi, also *advanced* control techniques like MPC are available.
+This repository is a reimplementation of the high-tech greenhouse model [GreenLight](https://github.com/davkat1/GreenLight) in `C++` with bindings for Python. The environment is desinged to train reinforcement learning models to control greenhouse crop production systems.
 
-# Evaluate RL models
 
+The code in this repository was used for the following [preprint](https://arxiv.org/abs/2410.05336) that has been accepted by [The 8th IFAC Conference on 
+Sensing, Control and Automation Technologies for Agriculture](https://agricontrol25.sf.ucdavis.edu/).
+
+✏ author: Bart van Laatum
+
+📧 e-mail: bart.vanlaatum@wur.nl
+___
+
+### Installation
+
+1. **Clone the repository**
 ```shell
-python experiments/evaluate_rl.py --project AgriControl --env_id TomatoEnv --model_name wise-elevator-233 --algorithm ppo
+git clone https://github.com/yourusername/GreenLight-Gym.git
+cd GreenLight-Gym
 ```
 
-```shell
-python experiments/evaluate_rl.py --project AgriControl --env_id TomatoEnv --model_name different-frog-235 --algorithm sac
-```
-
-
-Extract wandb information.
+2. **Setup a Python virtual environment** (for instance using anaconda)
 
 ```shell
-python processing/extract_wand_data.py --project AgriControl --group sac_det
+conda create -n greenlight_gym python==3.11
+```
+___
+
+### Repository Structure
+
+- The `gl_gym/` folder contains:
+
+    - Environment code under [`environments`](./gl_gym/environments) (models, dynamics, parameters, and utility functions).
+    - Configuration files under [`configs`](./gl_gym/configs).
+    - Common utility functions under [`common`](./gl_gym/common).
+- The `experiments/` folder contains:
+
+    - Experiment scripts (e.g. RL training or evaluation – see `experiments/rl.sh`).
+
+- The `RL/` folder contains:
+    - The experiment manager (RL/experiment_manager.py) that sets up training, evaluation, hyperparameter tuning (using Weights & Biases), etc.
+___
+### Usage
+
+1. **Running an RL Experiment**
+
+To start a new reinforcement learning experiment using (for example) PPO on the Tomato environment, run:
+
+```shell
+python RL/experiment_manager.py --env_id TomatoEnv --algorithm ppo
 ```
 
-Plotting the cost and state violation metrics 
+2. **Evaluation of Trained Models**
+You can evaluate pre-trained models using the evaluation scripts provided in the experiments folder `evaluate_rl.py`:
+
 ```shell
-python visualisations/cost_metrics.py --project AgriControl --mode deterministic --growth_year 2010 --start_day 59 --location Amsterdam
+python experiments/evaluate_rl.py --project PROJECT_NAME --env_id TomatoEnv --model_name YOUR_MODEL_NAME --algorithm ppo
 ```
 
-Plotting parametric uncertainties
-```shell
-python visualisations/param_uncertainty.py --project AgriControl --mode stochastic --growth_year 2010 --start_day 59 --location Amsterdam
-```
+3. **Visualizations**
+    - **Plotting**: The repository includes scripts under [visualisations](./visualisations/) for plotting learning curves and cost metrics
+___
+
+### Notes
+
+Adjust paths in `setup.py` if your libraries (like `CasADi`) are installed in different locations. The repository is designed as a reinforcement learning environment for greenhouse crop production. The environment ([TomatoEnv](./gl_gym/environments/tomato_env.py)) are configurable via the config files in envs. 
