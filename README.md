@@ -17,19 +17,54 @@ ___
 
 ### Installation
 
+**Prerequisites**
+
+Before installing and using the repository, make sure your system has the following:
+
+- **C++ Compiler:**  
+  A C++ compiler that supports C++17 (for example, GCC 7 or later, or Clang 6 or later).
+
+- **CasADi Library:**  
+  Install the [CasADi](https://web.casadi.org/) library. On Linux you can download and install the precompiled CasADi libraries. For example:
+  
+  ```shell
+  wget https://web.casadi.org/files/casadi-py3-linux-64bit-release.tar.gz
+  tar -xzvf casadi-py3-linux-64bit-release.tar.gz
+  sudo cp libcasadi.so /usr/local/lib/
+  sudo ldconfig
+  ```
+
+- **Weights & Biases Account:**  
+  A free account on [Weights & Biases](https://wandb.ai) is required to track experiments when using the provided RL scripts.
+
+
 1. **Clone the repository**
-```shell
-git clone https://github.com/yourusername/GreenLight-Gym.git
-cd GreenLight-Gym
-```
+    ```shell
+    git clone https://github.com/yourusername/GreenLight-Gym.git
+    cd GreenLight-Gym
+    ```
 
-2. **Setup a Python virtual environment** (for instance using anaconda)
+2. **Setup a Python virtual environment** 
 
-```shell
-conda create -n greenlight_gym python==3.11
-```
+    For instance, using anaconda
+
+    ```shell
+    conda create -n greenlight_gym python==3.11
+    conda activate greenlight_gym
+    ```
+
+3. **Install the repository in Editable Mode**
+
+   This repository is set up for an editable install using pip. From the root directory run:
+
+   ```shell
+   pip install -e .
+   ```
+
+   This command uses the setup.py file to build the C++ module (with dynamic paths) and install all Python packages. Adjust paths in `setup.py` if your libraries (like CasADi) are installed in different locations.
+
+
 ___
-
 ### Repository Structure
 
 - The `gl_gym/` folder contains:
