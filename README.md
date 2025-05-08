@@ -2,6 +2,8 @@
 
 ## Reinforcement learning benchmark environment for control of greenhouse production systems 
 
+![GreenLight](./images/GLGymArchitecture2.png)
+___
 ### Summary
 
 This repository is a reimplementation of the high-tech greenhouse model [GreenLight](https://github.com/davkat1/GreenLight) in `C++` with bindings for Python. The environment is desinged to train reinforcement learning models to control greenhouse crop production systems.
@@ -103,3 +105,19 @@ ___
 ### Notes
 
 Adjust paths in `setup.py` if your libraries (like `CasADi`) are installed in different locations. The repository is designed as a reinforcement learning environment for greenhouse crop production. The environment ([TomatoEnv](./gl_gym/environments/tomato_env.py)) are configurable via the config files in envs. 
+
+## Citing GreenLight-Gym
+
+If you this repository and/or its accompanying article usefull, please cite it in your publications
+
+```bibtex
+@misc{vanlaatum2024greenlightgymreinforcementlearningbenchmark,
+      title={GreenLight-Gym: Reinforcement learning benchmark environment for control of greenhouse production systems}, 
+      author={Bart van Laatum and Eldert J. van Henten and Sjoerd Boersma},
+      year={2025},
+      eprint={2410.05336},
+      archivePrefix={arXiv},
+      primaryClass={eess.SY},
+      url={https://arxiv.org/abs/2410.05336}, 
+}
+```
