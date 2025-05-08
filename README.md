@@ -2,7 +2,7 @@
 
 ## Reinforcement learning benchmark environment for control of greenhouse production systems 
 
-![GreenLight](./images/GLGymArchitecture2.png)
+![GreenLight](./images/GLGymArchitecture2.svg)
 ___
 ### Summary
 
