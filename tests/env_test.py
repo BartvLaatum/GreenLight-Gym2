@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 from gl_gym.environments.tomato_env import TomatoEnv
-from RL.utils import load_env_params
+from gl_gym.RL.utils import load_env_params
 
 class TestTomatoEnv(unittest.TestCase):
     def setUp(self):

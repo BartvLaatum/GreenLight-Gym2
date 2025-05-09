@@ -73,7 +73,7 @@ if __name__ == "__main__":
         result_data = evaluate_controller(eval_env, rb_controller, rank=sim)
         sim_column = np.full((result_data.shape[0], 1), sim)
         result_data = np.column_stack((result_data, sim_column))
-        result.update_result(result_data, sim)
+        result.update_result(result_data)
 
         # data.append(results_data)
 
