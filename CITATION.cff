@@ -1,7 +1,7 @@
 # CITATION.cff
 cff-version: 1.2.0
 message: "If you use this software or refer to this paper in your work, please cite it as below."
-version: "v1.0"
+type: Preprint
 preferred-citation:
   title: "GreenLight-Gym: Reinforcement learning benchmark environment for control of greenhouse production systems"
   authors:
