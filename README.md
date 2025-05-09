@@ -25,11 +25,12 @@ Sensing, Control and Automation Technologies for Agriculture](https://agricontro
 
 Before installing and using the repository, make sure your system has the following:
 
+- **Weights & Biases Account:**  
+  A free account on [Weights & Biases](https://wandb.ai) is required to track experiments when using the provided RL scripts.
+
 - **C++ Compiler:**  
   A C++ compiler that supports C++17 (for example, GCC 7 or later, or Clang 6 or later).
 
-- **Weights & Biases Account:**  
-  A free account on [Weights & Biases](https://wandb.ai) is required to track experiments when using the provided RL scripts.
 
 - **CasADi Library:**  
   Install the [CasADi](https://web.casadi.org/) library. On Linux you can download and install the pre-build CasADi libraries.
@@ -91,9 +92,7 @@ ___
 
    This command uses the setup.py file to build the C++ module (with dynamic paths) and install all Python packages. Adjust paths in `setup.py` if your libraries (like CasADi) are installed in different locations.
 
-
-___
-### Repository Structure
+## Repository Structure
 
 - The `gl_gym/` folder contains:
     - Environment code under [`environments`](./gl_gym/environments) (models, dynamics, parameters, and utility functions).
@@ -105,8 +104,8 @@ ___
 
 - The `RL/` folder contains:
     - The experiment manager (RL/experiment_manager.py) that sets up training, evaluation, hyperparameter tuning (using Weights & Biases), etc.
-___
-### Usage
+
+## Usage
 
 1. **Running an RL Experiment**
 
@@ -125,11 +124,10 @@ python experiments/evaluate_rl.py --project PROJECT_NAME --env_id TomatoEnv --mo
 
 3. **Visualizations**
     - **Plotting**: The repository includes scripts under [visualisations](./visualisations/) for plotting learning curves and cost metrics
-___
-
+__
 ### Notes
 
-Adjust paths in `setup.py` if your libraries (like `CasADi`) are installed in different locations. The repository is designed as a reinforcement learning environment for greenhouse crop production. The environment ([TomatoEnv](./gl_gym/environments/tomato_env.py)) are configurable via the config files in envs. 
+Adjust paths in `setup.py` if your libraries (like `CasADi`) are installed in different locations. The repository is designed as a reinforcement learning environment for greenhouse crop production. The environment ([TomatoEnv](./gl_gym/environments/tomato_env.py)) and the RL algorithms configurable via the config files in envs.
 
 ## Future
 
