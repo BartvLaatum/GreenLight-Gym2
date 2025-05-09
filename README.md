@@ -28,6 +28,9 @@ Before installing and using the repository, make sure your system has the follow
 - **C++ Compiler:**  
   A C++ compiler that supports C++17 (for example, GCC 7 or later, or Clang 6 or later).
 
+- **Weights & Biases Account:**  
+  A free account on [Weights & Biases](https://wandb.ai) is required to track experiments when using the provided RL scripts.
+
 - **CasADi Library:**  
   Install the [CasADi](https://web.casadi.org/) library. On Linux you can download and install the pre-build CasADi libraries.
 
@@ -59,11 +62,9 @@ Before installing and using the repository, make sure your system has the follow
 
   Insert the right path where CasADi is installed `/path/to/`.
 
-  > NOTE: For Windows users installing CasADi is a bit more tricky. Your best shot is using [`vcpkg`](https://vcpkg.io/en/).
+  > NOTE: Windows and macOS users installing CasADi is a bit more tricky. For Windows your best shot is using [`vcpkg`](https://vcpkg.io/en/). Please let me know whether you succeed the installation, such that we can add it to this installation guide.
 
-- **Weights & Biases Account:**  
-  A free account on [Weights & Biases](https://wandb.ai) is required to track experiments when using the provided RL scripts.
-
+___
 
 1. **Clone the repository**
     ```shell
@@ -95,12 +96,11 @@ ___
 ### Repository Structure
 
 - The `gl_gym/` folder contains:
-
     - Environment code under [`environments`](./gl_gym/environments) (models, dynamics, parameters, and utility functions).
     - Configuration files under [`configs`](./gl_gym/configs).
     - Common utility functions under [`common`](./gl_gym/common).
-- The `experiments/` folder contains:
 
+- The `experiments/` folder contains:
     - Experiment scripts (e.g. RL training or evaluation – see `experiments/rl.sh`).
 
 - The `RL/` folder contains:
@@ -130,6 +130,26 @@ ___
 ### Notes
 
 Adjust paths in `setup.py` if your libraries (like `CasADi`) are installed in different locations. The repository is designed as a reinforcement learning environment for greenhouse crop production. The environment ([TomatoEnv](./gl_gym/environments/tomato_env.py)) are configurable via the config files in envs. 
+
+## Future
+
+We plan to extend GreenLight-Gym with the following features:
+
+- **Python-native Model Implementation:**  
+  Develop a pure Python version of the greenhouse model for easier maintenance, faster prototyping, and broader accessibility.
+
+- **Model Predictive Control (MPC):**  
+  Integrate MPC as an additional control baseline to benchmark against reinforcement learning algorithms.
+
+- **Additional Crop Models:**  
+  Add support for more crop types (e.g., cucumber, lettuce) to enable multi-crop benchmarking and research.
+
+- **Adding more realistic energy systems:**  
+  Precisely model the greenhouse energy consumption for heating, cooling, ventilation and lighting, via [EnergyPlus](https://energyplus.net/).
+
+- **Improved Visualization Tools:**  
+  Enhance the visualization suite for better analysis of experiments and model performance.
+
 
 ## Citing GreenLight-Gym
 
