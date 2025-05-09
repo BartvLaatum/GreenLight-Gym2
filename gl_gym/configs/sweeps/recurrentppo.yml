@@ -1,0 +1,57 @@
+TomatoEnv:
+  method: random
+  metric:
+    name: rollout/ep_rew_mean
+    goal: maximize
+
+  parameters:
+    policy:
+      value: MlpLstmPolicy
+    batch_size:
+      values: [64, 128, 256, 512, 1024]
+    learning_rate:
+      distribution: log_uniform_values
+      min: !!float 1e-6
+      max: !!float 1e-3
+    n_steps:
+      values: [512, 1024, 2048, 4096]
+    gamma_offset:
+      value: 0.0369
+    gae_lambda:
+      distribution: uniform
+      min: 0.9
+      max: 0.999
+    clip_range:
+      values: [0.1, 0.2, 0.3, 0.4, 0.5]
+    ent_coef:
+      distribution: log_uniform_values
+      min: !!float 1e-5
+      max: !!float 1e-1
+    vf_coef:
+      distribution: uniform
+      min: !!float 0.1
+      max: !!float 1.0
+    n_epochs:
+      value: 8
+    use_sde:
+      value: False
+    sde_sample_freq:
+      value: 0
+    target_kl:
+      value: null
+    normalize_advantage:
+      value: True
+
+    pi:
+      values: [64, 128, 256, 512, 1024]
+    vf:
+      values: [64, 128, 256, 512, 1024]
+
+    lstm_hidden_size:
+      values: [64, 128, 256, 512]
+    enable_critic_lstm:
+      value: True
+    optimizer_kwargs: 
+      value: {amsgrad: True}
+    activation_fn:
+      values: [silu, relu, tanh]          

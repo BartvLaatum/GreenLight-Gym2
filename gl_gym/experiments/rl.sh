@@ -4,7 +4,7 @@
 cd /home/bart/Documents/phd-code-projects/GL-Gym2.0
 
 # Run the experiment manager with command line arguments
-python RL/experiment_manager.py \
+python gl_gym/RL/experiment_manager.py \
     --project AgriControl \
     --env_id TomatoEnv \
     --algorithm ppo \
@@ -18,7 +18,7 @@ python RL/experiment_manager.py \
     --save_env
 
 # Run the experiment manager with command line arguments
-python RL/experiment_manager.py \
+python gl_gym/RL/experiment_manager.py \
     --project AgriControl \
     --env_id TomatoEnv \
     --algorithm sac \

@@ -34,7 +34,7 @@ Before installing and using the repository, make sure your system has the follow
 - **CasADi Library:**  
   Install the [CasADi](https://web.casadi.org/) library. On Linux you can download and install the pre-build CasADi libraries.
 
-  Download the Linux Octave version from the release [website](https://web.casadi.org/get/). Make sure to grab `CasADi <= 3.5.5` since those have pre-built version (i.e., Binary Tarball). Extrat it somewhere convenient:
+  Download the Linux Octave version from the release [website](https://web.casadi.org/get/). Make sure to grab `CasADi <= 3.5.5` since those have pre-built version (i.e., Binary Tarball). Extract it somewhere convenient:
   
   ```shell
   sudo mkdir -p /opt/casadi-3.5.5
@@ -44,8 +44,8 @@ Before installing and using the repository, make sure your system has the follow
   Move contents into `/usr/local` so that headers go to `/usr/local/include/casadi` and libs to `/usr/local/lib`:
 
   ```shell
-  sudo cp -r /opt/casadi-3.7.0-linux64-octave7.3.0/include/* /usr/local/include/
-  sudo cp    /opt/casadi-3.7.0-linux64-octave7.3.0/lib/libcasadi.so* /usr/local/lib/
+  sudo cp -r /opt/casadi-3.5.5/include/* /usr/local/include/
+  sudo cp    /opt/casadi-3.5.5/lib/libcasadi.so* /usr/local/lib/
   ```
   
   Refresh linker cache
@@ -97,12 +97,8 @@ ___
     - Environment code under [`environments`](./gl_gym/environments) (models, dynamics, parameters, and utility functions).
     - Configuration files under [`configs`](./gl_gym/configs).
     - Common utility functions under [`common`](./gl_gym/common).
-
-- The `experiments/` folder contains:
-    - Experiment scripts (e.g. RL training or evaluation – see `experiments/rl.sh`).
-
-- The `RL/` folder contains:
-    - The experiment manager (RL/experiment_manager.py) that sets up training, evaluation, hyperparameter tuning (using Weights & Biases), etc.
+    - The [`experiments/`](./gl_gym/experiments) folder contains: Experiment scripts (e.g. RL training or evaluation – see `gl_gym/experiments/rl.sh`). 
+    - The [`RL/`](./gl_gym/RL) folder contains, the experiment manager (experiment_manager.py) that sets up training, evaluation, hyperparameter tuning (using Weights & Biases), etc.
 
 ## Usage
 
@@ -111,14 +107,14 @@ ___
 To start a new reinforcement learning experiment using (for example) PPO on the Tomato environment, run:
 
 ```shell
-python RL/experiment_manager.py --env_id TomatoEnv --algorithm ppo
+python gl_gym/RL/experiment_manager.py --env_id TomatoEnv --algorithm ppo
 ```
 
 2. **Evaluation of Trained Models**
 You can evaluate pre-trained models using the evaluation scripts provided in the experiments folder `evaluate_rl.py`:
 
 ```shell
-python experiments/evaluate_rl.py --project PROJECT_NAME --env_id TomatoEnv --model_name YOUR_MODEL_NAME --algorithm ppo
+python gl_gym/experiments/evaluate_rl.py --project PROJECT_NAME --env_id TomatoEnv --model_name YOUR_MODEL_NAME --algorithm ppo
 ```
 
 3. **Visualizations**

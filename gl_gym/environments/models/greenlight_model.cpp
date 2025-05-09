@@ -50,6 +50,8 @@ struct GreenLight
         opts["compiler"] = "shell";
         opts["abstol"] = 1e-6;
         opts["reltol"] = 1e-6;
+        opts["t0"] = 0.0;
+        opts["tf"] = dt;
         opts["jit_cleanup"] = true;
         jit_options["flags"] = "-O3";
         jit_options["cleanup"] = true;   // Some CasADi versions recognize this
@@ -59,7 +61,7 @@ struct GreenLight
         integrator_func = integrator(
             "integrator_func", "cvodes",
             {{"x", x}, {"p", input_args_sym}, {"ode", dxdt}},
-            0., dt, opts
+            opts
         );
 
         // Create a wrapper function that takes (x, u, d, p) as input
