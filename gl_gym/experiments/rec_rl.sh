@@ -6,7 +6,7 @@ echo "PYTHONPATH set to: $PYTHONPATH"
 cd /home/bart/Documents/phd-code-projects/GL-Gym2.0
 
 # Run the experiment manager with command line arguments
-python RL/experiment_manager.py \
+python gl_gym/RL/experiment_manager.py \
     --project GenerlizedWeather \
     --env_id TomatoEnv \
     --algorithm recurrentppo \

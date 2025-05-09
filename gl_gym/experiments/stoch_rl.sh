@@ -14,7 +14,7 @@ for i in "${!models[@]}"; do
     model="${models[$i]}"
     scale="${uncertainty_scales[$i]}"
     echo "Evaluating model: $model with uncertainty scale: $scale"
-    python experiments/evaluate_rl.py --project AgriControl --env_id TomatoEnv --model "$model" --mode stochastic --uncertainty_scale "$scale" --algorithm ppo
+    python gl_gym/experiments/evaluate_rl.py --project AgriControl --env_id TomatoEnv --model "$model" --mode stochastic --uncertainty_scale "$scale" --algorithm ppo
 done
 
 echo "All evaluations completed!"

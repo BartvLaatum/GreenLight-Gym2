@@ -15,7 +15,7 @@ from sb3_contrib import RecurrentPPO
 from stable_baselines3.common.noise import NormalActionNoise, OrnsteinUhlenbeckActionNoise
 
 from gl_gym.common.utils import load_model_hyperparams
-from RL.utils import (
+from gl_gym.RL.utils import (
     load_env_params, 
     wandb_init, 
     make_vec_env, 

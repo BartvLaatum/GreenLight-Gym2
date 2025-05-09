@@ -8,7 +8,7 @@ import numpy as np
 from stable_baselines3 import PPO, SAC
 from stable_baselines3.common.vec_env import VecNormalize, DummyVecEnv
 
-from RL.utils import make_vec_env
+from gl_gym.RL.utils import make_vec_env
 from gl_gym.common.results import Results
 from gl_gym.common.utils import load_env_params, load_model_hyperparams
 
