@@ -2,11 +2,14 @@
 
 ## Reinforcement learning benchmark environment for control of greenhouse production systems 
 
-![GreenLight](./images/GLGymArchitecture2.svg)
-___
-### Summary
+<p align="center">
+  <img src="./images/GLGymArchitecture2.svg" alt="GreenLight" width="700"/>
+</p>
 
-This repository is a reimplementation of the high-tech greenhouse model [GreenLight](https://github.com/davkat1/GreenLight) in `C++` with bindings for Python. The environment is desinged to train reinforcement learning models to control greenhouse crop production systems.
+
+## Summary
+
+**This repository is a reimplementation of the high-tech greenhouse model [GreenLight](https://github.com/davkat1/GreenLight) in `C++` with bindings for Python. The environment is designed to train reinforcement learning models to control greenhouse crop production systems.**
 
 
 The code in this repository was used for the following [preprint](https://arxiv.org/abs/2410.05336) that has been accepted by [The 8th IFAC Conference on 
@@ -15,9 +18,8 @@ Sensing, Control and Automation Technologies for Agriculture](https://agricontro
 ✏ author: Bart van Laatum
 
 📧 e-mail: bart.vanlaatum@wur.nl
-___
 
-### Installation
+## Installation
 
 **Prerequisites**
 
@@ -27,14 +29,37 @@ Before installing and using the repository, make sure your system has the follow
   A C++ compiler that supports C++17 (for example, GCC 7 or later, or Clang 6 or later).
 
 - **CasADi Library:**  
-  Install the [CasADi](https://web.casadi.org/) library. On Linux you can download and install the precompiled CasADi libraries. For example:
+  Install the [CasADi](https://web.casadi.org/) library. On Linux you can download and install the pre-build CasADi libraries.
+
+  Download the Linux Octave version from the release [website](https://web.casadi.org/get/). Make sure to grab `CasADi <= 3.5.5` since those have pre-built version (i.e., Binary Tarball). Extrat it somewhere convenient:
   
   ```shell
-  wget https://web.casadi.org/files/casadi-py3-linux-64bit-release.tar.gz
-  tar -xzvf casadi-py3-linux-64bit-release.tar.gz
-  sudo cp libcasadi.so /usr/local/lib/
+  sudo mkdir -p /opt/casadi-3.5.5
+  sudo tar xzf casadi-linux-octave-6.1.0-v3.5.5.tar.gz -C /opt/casadi-3.5.5 --strip-components=1
+  ```
+
+  Move contents into `/usr/local` so that headers go to `/usr/local/include/casadi` and libs to `/usr/local/lib`:
+
+  ```shell
+  sudo cp -r /opt/casadi-3.7.0-linux64-octave7.3.0/include/* /usr/local/include/
+  sudo cp    /opt/casadi-3.7.0-linux64-octave7.3.0/lib/libcasadi.so* /usr/local/lib/
+  ```
+  
+  Refresh linker cache
+  ```shell
   sudo ldconfig
   ```
+
+  Additionally, you should ensure that the correct path is set:
+
+  ```shell
+  export CASADI_LIB=/path/to/casadi/lib
+  export CPLUS_INCLUDE_PATH=/path/to/casadi/include
+  ```
+
+  Insert the right path where CasADi is installed `/path/to/`.
+
+  > NOTE: For Windows users installing CasADi is a bit more tricky. Your best shot is using [`vcpkg`](https://vcpkg.io/en/).
 
 - **Weights & Biases Account:**  
   A free account on [Weights & Biases](https://wandb.ai) is required to track experiments when using the provided RL scripts.
@@ -111,7 +136,7 @@ Adjust paths in `setup.py` if your libraries (like `CasADi`) are installed in di
 If you this repository and/or its accompanying article usefull, please cite it in your publications
 
 ```bibtex
-@misc{vanlaatum2024greenlightgymreinforcementlearningbenchmark,
+@misc{vanlaatum2025greenlightgymreinforcementlearningbenchmark,
       title={GreenLight-Gym: Reinforcement learning benchmark environment for control of greenhouse production systems}, 
       author={Bart van Laatum and Eldert J. van Henten and Sjoerd Boersma},
       year={2025},
