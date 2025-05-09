@@ -1,57 +1,30 @@
-DwarfTomatoes:          # Tuned
+TomatoEnv:
+  n_envs: 8
+  total_timesteps: 2_000_000
   policy: MlpLstmPolicy # Policy for LSTM network
   n_steps: 2048         # we update after n_steps calls of step() function. in the case of N envs --> N * n_steps
-  batch_size: 512
-  n_epochs: 10
-  gamma: 0.99
-  gae_lambda: 0.959
-  clip_range: 0.25
+  batch_size: 128
+  n_epochs: 8
+  gamma: 0.9631
+  gae_lambda: 0.9167
+  clip_range: 0.2
   normalize_advantage: True
-  ent_coef: 0.00021
-  vf_coef: 0.254
+  ent_coef: 0.05434
+  vf_coef: 0.8225
   max_grad_norm: 0.3
   use_sde: False
   sde_sample_freq: 8
   target_kl: null
 
   policy_kwargs: {net_arch: {pi: [256, 256], vf: [128, 128]},
-                  optimizer_class: ADAM,
+                  optimizer_class: adam,
                   optimizer_kwargs: {amsgrad: True},
-                  activation_fn: Tanh,
+                  activation_fn: silu,
                   log_std_init: np.log(1), # np.log(1) results in policy std of 1, where exp(log(0.5)) = 0.5, 
                   lstm_hidden_size: 64,
                   n_lstm_layers: 1,
-                  shared_lstm: False,            # We use shared lstm for actor and critic
-                  enable_critic_lstm: True,     # We don't use SEPARATE lstm for critic
+                  shared_lstm: False,            # We don't use a shared lstm for actor and critic
+                  enable_critic_lstm: True,     # We do use lstm for the critic
           }
 
-  learning_rate_schedule: {initial_learning_rate: 1.e-4, final_learning_rate: 2.e-5, final_progress: 0.2}
-
-DwarfTomatoesObs:        # Tuned
-  policy: MlpLstmPolicy # Policy for LSTM network
-  n_steps: 2048         # we update after n_steps calls of step() function. in the case of N envs --> N * n_steps
-  batch_size: 256
-  n_epochs: 8
-  gamma: 0.99
-  gae_lambda: 0.959
-  clip_range: 0.25
-  normalize_advantage: True
-  ent_coef: 0.00021
-  vf_coef: 0.254
-  max_grad_norm: 0.3
-  use_sde: False
-  sde_sample_freq: 8
-  target_kl: null
-
-  policy_kwargs: {net_arch: {pi: [256, 256], vf: [512, 512]},
-                  optimizer_class: ADAM,
-                  optimizer_kwargs: {amsgrad: True},
-                  activation_fn: Tanh,
-                  log_std_init: np.log(1), # np.log(1) results in policy std of 1, where exp(log(0.5)) = 0.5, 
-                  lstm_hidden_size: 256,
-                  n_lstm_layers: 1,
-                  shared_lstm: False,            # We use shared lstm for actor and critic
-                  enable_critic_lstm: True,     # We don't use SEPARATE lstm for critic
-          }
-
-  learning_rate_schedule: {initial_learning_rate: 5.e-5, final_learning_rate: 8.e-6, final_progress: 0.5}
+  learning_rate: 2.e-5
