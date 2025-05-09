@@ -1,21 +1,22 @@
 # CITATION.cff
 cff-version: 1.2.0
 message: "If you use this software or refer to this paper in your work, please cite it as below."
-title: "GreenLight-Gym: Reinforcement learning benchmark environment for control of greenhouse production systems"
 version: "v1.0"
-authors:
-  - family-names: "van Laatum"
-    given-names: "Bart"
-  - family-names: "van Henten"
-    given-names: "Eldert J."
-  - family-names: "Boersma"
-    given-names: "Sjoerd"
-year: 2025
-month: 5
-date-published: 2025-05-10
-eprint: "2410.05336"
-archive-prefix: "arXiv"
-primary-class: "eess.SY"
-url: "https://arxiv.org/abs/2410.05336"
-languages:
-  - en
+preferred-citation:
+  title: "GreenLight-Gym: Reinforcement learning benchmark environment for control of greenhouse production systems"
+  authors:
+    - family-names: "van Laatum"
+      given-names: "Bart"
+    - family-names: "van Henten"
+      given-names: "Eldert J."
+    - family-names: "Boersma"
+      given-names: "Sjoerd"
+  year: 2025
+  month: 5
+  date-published: 2025-05-10
+  eprint: "2410.05336"
+  archive-prefix: "arXiv"
+  primary-class: "eess.SY"
+  url: "https://arxiv.org/abs/2410.05336"
+  languages:
+    - en
