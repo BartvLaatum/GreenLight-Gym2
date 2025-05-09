@@ -9,7 +9,7 @@
 
 ## Summary
 
-**This repository is a reimplementation of the high-tech greenhouse model [GreenLight](https://github.com/davkat1/GreenLight) in `C++` with bindings for Python. The environment is designed to train reinforcement learning models to control greenhouse crop production systems.**
+**This repository is a reimplementation of the high-tech greenhouse model [GreenLight](https://github.com/davkat1/GreenLight) in `C++` with bindings for Python. The environment is designed to train reinforcement learning models to control greenhouse crop production systems. GreenLight-Gym 2.0 is an updated version **
 
 
 The code in this repository was used for the following [preprint](https://arxiv.org/abs/2410.05336) that has been accepted by [The 8th IFAC Conference on 
@@ -151,9 +151,9 @@ We plan to extend GreenLight-Gym with the following features:
   Enhance the visualization suite for better analysis of experiments and model performance.
 
 
-## Citing GreenLight-Gym
+## Citation
 
-If you this repository and/or its accompanying article usefull, please cite it in your publications
+If you find this repository and/or its accompanying article usefull, please cite it in your publications
 
 ```bibtex
 @misc{vanlaatum2025greenlightgymreinforcementlearningbenchmark,
