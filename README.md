@@ -32,35 +32,33 @@ Before installing and using the repository, make sure your system has the follow
 
 
 - **CasADi Library:**  
-  Install the [CasADi](https://web.casadi.org/) library. On Linux you can download and install the pre-build CasADi libraries.
-
-  Download the Linux Octave version from the release [website](https://web.casadi.org/get/). Make sure to grab `CasADi <= 3.5.5` since those have pre-built version (i.e., Binary Tarball). Extract it somewhere convenient:
-  
-  ```shell
-  sudo mkdir -p /opt/casadi-3.5.5
-  sudo tar xzf casadi-linux-octave-6.1.0-v3.5.5.tar.gz -C /opt/casadi-3.5.5 --strip-components=1
-  ```
-
-  Move contents into `/usr/local` so that headers go to `/usr/local/include/casadi` and libs to `/usr/local/lib`:
+  Install the [CasADi](https://web.casadi.org/) library. This work builds on CasADi version 3.6.7. Linux machines can build the CasADi from the source following the next instructions:
 
   ```shell
-  sudo cp -r /opt/casadi-3.5.5/include/* /usr/local/include/
-  sudo cp    /opt/casadi-3.5.5/lib/libcasadi.so* /usr/local/lib/
-  ```
-  
-  Refresh linker cache
-  ```shell
+  # 1. Clone the repo and checkout v3.6.7
+  git clone https://github.com/casadi/casadi.git  
+  cd casadi
+  git checkout a2d71bf # switch to version 3.6.7
+
+  # 2. Create a build directory
+  mkdir build && cd build
+
+  # 3. Configure with CMake
+  cmake .. \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_INSTALL_PREFIX=/usr/local
+
+  # 4. Build & install
+  make -j$(nproc)
+  sudo make install
+
+  # 5. Refresh the linker cache
   sudo ldconfig
   ```
+  This installs:
 
-  Additionally, you should ensure that the correct path is set:
-
-  ```shell
-  export CASADI_LIB=/path/to/casadi/lib
-  export CPLUS_INCLUDE_PATH=/path/to/casadi/include
-  ```
-
-  Insert the right path where CasADi is installed `/path/to/`.
+  - Headers into /usr/local/include/casadi
+  - Shared library libcasadi.so* into /usr/local/lib
 
   > NOTE: Windows and macOS users installing CasADi is a bit more tricky. For Windows your best shot is using [`vcpkg`](https://vcpkg.io/en/). Please let me know whether you succeed the installation, such that we can add it to this installation guide.
 
