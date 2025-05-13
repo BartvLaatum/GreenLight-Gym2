@@ -32,7 +32,7 @@ Before installing and using the repository, make sure your system has the follow
 
 
 - **CasADi Library:**  
-  Install the [CasADi](https://web.casadi.org/) library. This work builds on CasADi version 3.6.7. Linux machines can build the CasADi from the source following the next instructions:
+  Install the [CasADi](https://web.casadi.org/) library. This work builds on CasADi version 3.6.7. Linux machines can build CasADi from the source using these instructions:
 
   #### 1. Clone the repo and checkout v3.6.7
   ```shell
@@ -46,22 +46,22 @@ Before installing and using the repository, make sure your system has the follow
   mkdir build && cd build
   ```
 
-  # 3. Configure with CMake; 
+  #### 3. Configure with CMake; 
   ```shell
-  # make sure to install casadi in /usr/local since setup.py searches for that path when binding the python script with C++.
+  # make sure to install casadi in `/usr/local` since setup.py searches for that path when binding the C++ script with Python.
   cmake .. \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX=/usr/local
   ```
 
+  #### 4. Build & install
   ```shell
-  # 4. Build & install
   make -j$(nproc)
   sudo make install
   ```
   
+  #### 5. Refresh the linker cache
   ```shell
-  # 5. Refresh the linker cache
   sudo ldconfig
   ```
 
@@ -79,9 +79,9 @@ ___
     cd GreenLight-Gym
     ```
 
-2. **Setup a Python virtual environment** 
+2. **Setup a Python virtual environment**
 
-    For instance, using anaconda
+    For instance, using anaconda:
 
     ```shell
     conda create -n greenlight_gym python==3.11
