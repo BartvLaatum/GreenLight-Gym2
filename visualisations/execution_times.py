@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-import cmcrameri.cm as cmc
+# import cmcrameri.cm as cmc
 
 ### Latex font in plots
 # Ensure text is converted to paths
@@ -80,7 +80,7 @@ plt.tight_layout()
 print(means)
 print("factor of speed up over GL Matlab: ", cpp_mean/gl_matlab_mean)
 print("factor of speed up over GL+: ", cpp_mean/glplus_mean)
-plt.savefig('figures/AgriControl/run_times/fps.svg', format='svg', dpi=300, bbox_inches='tight')
-plt.savefig('figures/AgriControl/run_times/fps.png', format='png', bbox_inches='tight')
+# plt.savefig('figures/AgriControl/run_times/fps.svg', format='svg', dpi=300, bbox_inches='tight')
+# plt.savefig('figures/AgriControl/run_times/fps.png', format='png', bbox_inches='tight')
 
-# plt.show()
+plt.show()

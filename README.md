@@ -32,49 +32,56 @@ Before installing and using the repository, make sure your system has the follow
 
 
 - **CasADi Library:**  
-  Install the [CasADi](https://web.casadi.org/) library. On Linux you can download and install the pre-build CasADi libraries.
+  Install the [CasADi](https://web.casadi.org/) library. This work builds on CasADi version 3.6.7. Linux machines can build CasADi from the source using these instructions:
 
-  Download the Linux Octave version from the release [website](https://web.casadi.org/get/). Make sure to grab `CasADi <= 3.5.5` since those have pre-built version (i.e., Binary Tarball). Extract it somewhere convenient:
-  
+  #### 1. Clone the repo and checkout v3.6.7
   ```shell
-  sudo mkdir -p /opt/casadi-3.5.5
-  sudo tar xzf casadi-linux-octave-6.1.0-v3.5.5.tar.gz -C /opt/casadi-3.5.5 --strip-components=1
+  git clone https://github.com/casadi/casadi.git  
+  cd casadi
+  git checkout a2d71bf # switch to the commit linked to v3.6.7
   ```
 
-  Move contents into `/usr/local` so that headers go to `/usr/local/include/casadi` and libs to `/usr/local/lib`:
-
+  #### 2. Create a build directory
   ```shell
-  sudo cp -r /opt/casadi-3.5.5/include/* /usr/local/include/
-  sudo cp    /opt/casadi-3.5.5/lib/libcasadi.so* /usr/local/lib/
+  mkdir build && cd build
+  ```
+
+  #### 3. Configure with CMake; 
+  ```shell
+  # make sure to install casadi in `/usr/local` since setup.py searches for that path when binding the C++ script with Python.
+  cmake .. \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_INSTALL_PREFIX=/usr/local
+  ```
+
+  #### 4. Build & install
+  ```shell
+  make -j$(nproc)
+  sudo make install
   ```
   
-  Refresh linker cache
+  #### 5. Refresh the linker cache
   ```shell
   sudo ldconfig
   ```
 
-  Additionally, you should ensure that the correct path is set:
+  This installs:
 
-  ```shell
-  export CASADI_LIB=/path/to/casadi/lib
-  export CPLUS_INCLUDE_PATH=/path/to/casadi/include
-  ```
-
-  Insert the right path where CasADi is installed `/path/to/`.
+  - Headers into /usr/local/include/casadi
+  - Shared library libcasadi.so* into /usr/local/lib
 
   > NOTE: Windows and macOS users installing CasADi is a bit more tricky. For Windows your best shot is using [`vcpkg`](https://vcpkg.io/en/). Please let me know whether you succeed the installation, such that we can add it to this installation guide.
-
 ___
 
 1. **Clone the repository**
     ```shell
-    git clone https://github.com/yourusername/GreenLight-Gym.git
+    git clone https://github.com/BartvLaatum/GreenLight-Gym2.git
     cd GreenLight-Gym
     ```
 
-2. **Setup a Python virtual environment** 
+2. **Setup a Python virtual environment**
 
-    For instance, using anaconda
+    For instance, using anaconda:
 
     ```shell
     conda create -n greenlight_gym python==3.11
@@ -110,6 +117,8 @@ To start a new reinforcement learning experiment using (for example) PPO on the 
 python gl_gym/RL/experiment_manager.py --env_id TomatoEnv --algorithm ppo
 ```
 
+> NOTE: The environment uses CasADi's code generation function to speed up the execution time. This generates $N$ `*.c`, `*.o` and `*.so` files. Unfortunately, these are not automatically deleted after training.
+
 2. **Evaluation of Trained Models**
 You can evaluate pre-trained models using the evaluation scripts provided in the experiments folder `evaluate_rl.py`:
 
@@ -118,9 +127,44 @@ python gl_gym/experiments/evaluate_rl.py --project PROJECT_NAME --env_id TomatoE
 ```
 
 3. **Visualizations**
-    - **Plotting**: The repository includes scripts under [visualisations](./visualisations/) for plotting learning curves and cost metrics
+    - **Plotting**: The repository includes scripts under [visualisations](./visualisations/) for plotting learning curves and cost metrics. 
+    - Before, generating any plots you must have evaluated your RL agents with `evaluate_rl.py` and a rule-based baseline with `evaluate_baseline.py`
+
+
+    #### Time-series of trajectories.
+    Compares the state and control input trajectories for $N$ consecutive days.
+    ```shell
+    python visualisations/trajectories.py --project PROJECT_NAME --MODE --ppo_name PPO_MODEL_NAME --sac_name SAC_MODEL_NAME --growth_year GROWTH_YEAR --start_day START_DAY --location LOCATION --n_days2plot NUMBER_OF_DAY_TO_VISUALIZE --uncertainty_value UNCERTAINTY_VALUE
+    ```    
+    <p align="center">
+      <img src="./images/timeseries_state.png" alt="Time series state" width="400"/>
+    </p>
+
+
+
+    #### Bar plot the performance metrics.
+    Creates a bar plot of controller performance regarding cost en constraints metrics.
+    ```shell
+    python visualisations/cost_metrics.py --project PROJECT_NAME --MODE --uncertainty_value UNCERTAINTY_VALUE --growth_year GROWTH_YEAR --start_day START_DAY --location LOCATION
+    ```
+    #### Example of comparing SAC, PPO and rule-based agent (RB) on economic performance indicator (EPI) metrics.
+    <p align="center">
+      <img src="./images/cost_metrics_comparison.png" alt="Cost Metrics Comparison" width="400"/>
+    </p>
+
+    #### Line plot the performance metrics over parametric uncertainty scale.
+    Visualizes how the cumulative reward changes with different levels of parametric uncertainty in the environment by comparing controller performance.
+    ```shell
+    python visualisations/param_uncertainty.py --project PROJECT_NAME --mode MODE --growth_year GROWTH_YEAR --start_day START_DAY --location LOCATION
+    ```
+      #### Example of comparing SAC, PPO and rule-based agent (RB) on the cumulative reward trained per parametric uncertainty environment.
+    <p align="center">
+      <img src="./images/cumulative_reward.png" alt="Performance uncertainty" width="400"/>
+    </p>
+
+> Note that the other three scripts in `visualisations/` require additional data, which can be made available upon request.
 __
-### Notes
+### Additional notes
 
 Adjust paths in `setup.py` if your libraries (like `CasADi`) are installed in different locations. The repository is designed as a reinforcement learning environment for greenhouse crop production. The environment ([TomatoEnv](./gl_gym/environments/tomato_env.py)) and the RL algorithms configurable via the config files in envs.
 

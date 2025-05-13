@@ -33,6 +33,7 @@ plt.rcParams['ytick.major.width'] = 2
 plt.rc('axes', unicode_minus=False)
 PPO_COLOR = "#003366"
 SAC_COLOR = "#A60000"
+RB_COLOR = 'grey'
 
 def state_plot(days2plot, time_steps, dt):
     # Plot key state variables over time for all controllers
@@ -48,24 +49,26 @@ def state_plot(days2plot, time_steps, dt):
         # Left column (first time period)
         axes[i,0].plot(time_steps[:end_idx], ppo_df[var][:end_idx], color=PPO_COLOR, label="PPO", alpha=0.8)
         axes[i,0].plot(time_steps[:end_idx], sac_df[var][:end_idx], color=SAC_COLOR, label="SAC", alpha=0.8)
+        axes[i,0].plot(time_steps[:end_idx], rb_df[var][:end_idx], color=RB_COLOR, label="RB", alpha=0.8)
         axes[i,0].axhline(y=constraints[i][0], color='gray', linestyle='--', alpha=0.5)
         axes[i,0].axhline(y=constraints[i][1], color='gray', linestyle='--', alpha=0.5)
         axes[i,0].set_ylabel(label)
-        
+
         # Right column (second time period)
         axes[i,1].plot(time_steps[-end_idx:], ppo_df[var][-end_idx:], color=PPO_COLOR, label="PPO", alpha=0.8)
         axes[i,1].plot(time_steps[-end_idx:], sac_df[var][-end_idx:], color=SAC_COLOR, label="SAC", alpha=0.8)
+        axes[i,1].plot(time_steps[-end_idx:], rb_df[var][-end_idx:], color=RB_COLOR, label="RB", alpha=0.8)
         axes[i,1].axhline(y=constraints[i][0], color='gray', linestyle='--', alpha=0.5)
         axes[i,1].axhline(y=constraints[i][1], color='gray', linestyle='--', alpha=0.5)
 
     # Format x-axis to show hours
     for ax in axes.flatten():
-        ax.xaxis.set_major_formatter(plt.matplotlib.dates.DateFormatter('%D%H'))
-        ax.xaxis.set_major_locator(plt.matplotlib.dates.HourLocator(interval=6))
+        ax.xaxis.set_major_formatter(plt.matplotlib.dates.DateFormatter('%D'))
+        ax.xaxis.set_major_locator(plt.matplotlib.dates.HourLocator(interval=24))
 
     # Set x-label for bottom plots only
-    axes[2,0].set_xlabel("Time of day (hours)")
-    axes[2,1].set_xlabel("Time of day (hours)")
+    axes[2,0].set_xlabel("Date")
+    axes[2,1].set_xlabel("Date")
 
     axes[0,0].legend()
     plt.tight_layout()
@@ -74,77 +77,83 @@ def state_plot(days2plot, time_steps, dt):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--project", type=str, default="AgriControl", help="Wandb project name")
-    parser.add_argument("--stochastic", action="store_true", help="Whether to run the experiment in stochastic mode")
+    parser.add_argument("--mode", type=str, choices=["deterministic", "stochastic"], required=True, help="Simulation mode")
     parser.add_argument("--ppo_name", type=str, required=True, help="Name of the ppo model to visualize")
     parser.add_argument("--sac_name", type=str, required=True, help="Name of the sac model to visualize")
     parser.add_argument("--growth_year", type=str, required=True, help="Growth year to visualize")
     parser.add_argument("--start_day", type=str, required=True, help="Start day of the year to visualize")
     parser.add_argument("--location", type=str, required=True, help="location to visualize")
+    parser.add_argument("--uncertainty_value", help="Parameter uncertainty scale the agent was trained with")
     parser.add_argument("--n_days2plot", type=int, required=True, help="Number of days to visualize")
     args = parser.parse_args()
 
     # load dir
-    if args.stochastic:
+    if args.mode == "stochastic":
         load_dir = f"data/{args.project}/stochastic"
     else:
         load_dir = f"data/{args.project}/deterministic"
 
+    if args.mode == "stochastic":
+        if args.uncertainty_value is None:
+            raise ValueError("Uncertainty value must be provided for stochastic mode.")
+    elif not args.mode == "determinisitc":
+        args.uncertainty_value = ""
+
     # File paths
-    ppo_file = f"{load_dir}/ppo-{args.ppo_name}-{args.growth_year}{args.start_day}-{args.location}.csv"
-    sac_file = f"{load_dir}/sac-{args.sac_name}-{args.growth_year}{args.start_day}-{args.location}.csv" 
-    rb_file = f"{load_dir}/rb_baseline-{args.growth_year}{args.start_day}-{args.location}.csv"
+    ppo_file = f"{load_dir}/ppo/{args.uncertainty_value}/{args.ppo_name}-{args.growth_year}{args.start_day}-{args.location}.csv"
+    sac_file = f"{load_dir}/sac/{args.uncertainty_value}/{args.sac_name}-{args.growth_year}{args.start_day}-{args.location}.csv" 
+    rb_file = f"{load_dir}/rb_baseline/{args.uncertainty_value}/rb_baseline-{args.growth_year}{args.start_day}-{args.location}.csv"
 
     # Load data
     ppo_df = pd.read_csv(ppo_file)[:-1]
     sac_df = pd.read_csv(sac_file)[:-1]
-    rb_df = pd.read_csv(rb_file)
+    rb_df = pd.read_csv(rb_file)[:-1]
     dt = 900
 
     # Convert start_day and create timestamps
     start_date = pd.to_datetime(f"{args.growth_year}-01-01") + pd.Timedelta(days=int(args.start_day))
     time_steps = [start_date + pd.Timedelta(seconds=int(i*dt)) for i in range(len(ppo_df))]
+    end_idx = int(args.n_days2plot * (86400/dt))
 
-    # Display basic information about the datasets
-    ppo_df.head(), sac_df.head(), rb_df.head()
     state_plot(args.n_days2plot, time_steps, dt)
 
 
-        # Plot control actions over time for all controllers
-    fig, axes = plt.subplots(3, 2, figsize=(12, 10), sharex=True)
+    # Plot control actions over time for all controllers
+    fig, axes = plt.subplots(1, 3, figsize=(12, 10), sharex=True)
 
     # Plot boiler usage
-    axes[0, 0].plot(time_steps, ppo_df["uBoil"], label="PPO", alpha=0.8)
-    axes[0, 0].plot(time_steps, sac_df["uBoil"], label="SAC", alpha=0.8)
-    axes[0, 0].plot(time_steps, rb_df["uBoil"], label="Rule-Based", alpha=0.8)
-    axes[0, 0].set_ylabel("Boiler Usage (uBoil)")
-    axes[0, 0].set_title("Boiler Usage Over Time")
-    axes[0, 0].legend()
+    axes[0].plot(time_steps[:end_idx], ppo_df[:end_idx]["uBoil"], label="PPO", alpha=0.8)
+    axes[0].plot(time_steps[:end_idx], sac_df[:end_idx]["uBoil"], label="SAC", alpha=0.8)
+    axes[0].plot(time_steps[:end_idx], rb_df[:end_idx]["uBoil"], label="Rule-Based", alpha=0.8)
+    axes[0].set_ylabel("Boiler Usage (uBoil)")
+    axes[0].set_title("Boiler Usage Over Time")
+    axes[0].legend()
 
     # Plot CO2 injection
-    axes[0, 1].plot(time_steps, ppo_df["uCo2"], label="PPO", alpha=0.8)
-    axes[0, 1].plot(time_steps, sac_df["uCo2"], label="SAC", alpha=0.8)
-    axes[0, 1].plot(time_steps, rb_df["uCo2"], label="Rule-Based", alpha=0.8)
-    axes[0, 1].set_ylabel("CO2 Injection (uCo2)")
-    axes[0, 1].set_title("CO2 Injection Over Time")
+    axes[1].plot(time_steps[:end_idx], ppo_df[:end_idx]["uCo2"], label="PPO", alpha=0.8)
+    axes[1].plot(time_steps[:end_idx], sac_df[:end_idx]["uCo2"], label="SAC", alpha=0.8)
+    axes[1].plot(time_steps[:end_idx], rb_df[:end_idx]["uCo2"], label="Rule-Based", alpha=0.8)
+    axes[1].set_ylabel("CO2 Injection (uCo2)")
+    axes[1].set_title("CO2 Injection Over Time")
 
     # Plot thermal screen usage
-    axes[1, 1].plot(time_steps, ppo_df["uThScr"], label="PPO", alpha=0.8)
-    axes[1, 1].plot(time_steps, sac_df["uThScr"], label="SAC", alpha=0.8)
-    axes[1, 1].plot(time_steps, rb_df["uThScr"], label="Rule-Based", alpha=0.8)
-    axes[1, 1].set_ylabel("Thermal Screen Usage (uThScr)")
-    axes[1, 1].set_xlabel("Time Step")
-    axes[1, 1].set_title("Thermal Screen Usage Over Time")
+    axes[2].plot(time_steps[:end_idx], ppo_df[:end_idx]["uThScr"], label="PPO", alpha=0.8)
+    axes[2].plot(time_steps[:end_idx], sac_df[:end_idx]["uThScr"], label="SAC", alpha=0.8)
+    axes[2].plot(time_steps[:end_idx], rb_df[:end_idx]["uThScr"], label="Rule-Based", alpha=0.8)
+    axes[2].set_ylabel("Thermal Screen Usage (uThScr)")
+    axes[2].set_xlabel("Time Step")
+    axes[2].set_title("Thermal Screen Usage Over Time")
 
     plt.tight_layout()
-    # plt.show()
+    plt.show()
 
 
         # Plot control actions over time for all controllers
     fig, axes = plt.subplots(1, 1, figsize=(12, 10), sharex=True)
     # Plot temperature
-    axes.plot(time_steps, ppo_df["cFruit"], label="PPO", alpha=0.8)
-    axes.plot(time_steps, sac_df["cFruit"], label="SAC", alpha=0.8)
-    axes.plot(time_steps, rb_df["cFruit"], label="Rule-Based", alpha=0.8)
+    axes.plot(time_steps[:end_idx], ppo_df[:end_idx]["cFruit"], label="PPO", alpha=0.8)
+    axes.plot(time_steps[:end_idx], sac_df[:end_idx]["cFruit"], label="SAC", alpha=0.8)
+    axes.plot(time_steps[:end_idx], rb_df[:end_idx]["cFruit"], label="Rule-Based", alpha=0.8)
     axes.set_ylabel("Fruit weight DM (mg/m^2)")
     # axes.set_title("Greenhouse Air Temperature Over Time")
     axes.legend()

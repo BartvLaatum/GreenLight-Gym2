@@ -19,9 +19,6 @@ class TestTomatoEnv(unittest.TestCase):
         obs, info = self.env.reset(seed=42)
         max_reward = 0.328 * 900 * 1e-6 / 0.065 * 1.6
         self.assertAlmostEqual(self.env.reward.max_profit, max_reward)
-        print(self.env.reward.min_profit)
-        print(self.env.reward.max_profit)
-        print(self.env.reward.scale_reward(self.env.reward.profit, self.env.reward.min_profit, self.env.reward.max_profit))
         self.assertEqual(self.env.reward.variable_costs, 0)
         # Check observation space
         action = np.ones(self.env.nu)*1
@@ -31,7 +28,6 @@ class TestTomatoEnv(unittest.TestCase):
 
         violations = self.env.reward.output_violations()
         scaled_violations = self.env.reward.scale_reward(violations, self.env.reward.min_state_violations, self.env.reward.max_state_violations)
-        print(violations, scaled_violations)
 
     def test_reset(self):
         """Test environment reset functionality"""

@@ -3,7 +3,6 @@ import os
 
 import pandas as pd
 import matplotlib.pyplot as plt
-import cmcrameri.cm as cmc
 from matplotlib.backends.backend_svg import FigureCanvasSVG
 
 ### Latex font in plots
@@ -43,12 +42,18 @@ def load_data(args):
     base_path = os.path.join(f"data/{args.project}", args.mode)
 
     def load_and_label(folder, model_name):
-        files = [f for f in os.listdir(os.path.join(base_path, folder)) if
+        # For stochastic mode with uncertainty, adjust the path
+        if args.mode == "stochastic" and hasattr(args, 'uncertainty_value') and args.uncertainty_value > 0:
+            folder_path = os.path.join(base_path, folder, str(args.uncertainty_value))
+        else:
+            folder_path = os.path.join(base_path, folder)
+
+        files = [f for f in os.listdir(folder_path) if
                  all(x in f for x in [args.growth_year, args.start_day, args.location]) and f.endswith(".csv")]
         if not files:
-            print(f"Warning: No data found for {model_name} in {folder}")
+            print(f"Warning: No data found for {model_name} in {folder_path}")
             return pd.DataFrame()  # Return an empty DataFrame if no file is found
-        filepath = os.path.join(base_path, folder, files[0])
+        filepath = os.path.join(folder_path, files[0])
         data = pd.read_csv(filepath)
         data["model"] = model_name
         return data
@@ -61,6 +66,7 @@ def load_data(args):
 
 def costs_plot(data):
     metrics = ["EPI", "Revenue", "Heat costs", "Elec costs", "CO2 costs"]
+    print(data.keys())
     models = data["model"].unique()
     n_metrics = len(metrics)
 
@@ -89,9 +95,10 @@ def costs_plot(data):
     # Adjust layout and save
     plt.tight_layout()
     fig.canvas = FigureCanvasSVG(fig)
-    plt.savefig(f"figures/{args.project}/{args.mode}/cost_metrics_comparison.svg", format="svg", dpi=300)
-    plt.savefig(f"figures/{args.project}/{args.mode}/cost_metrics_comparison.png")
-    plt.close()
+    # plt.savefig(f"figures/{args.project}/{args.mode}/cost_metrics_comparison.svg", format="svg", dpi=300)
+    # plt.savefig(f"figures/{args.project}/{args.mode}/cost_metrics_comparison.png")
+    # plt.close()
+    plt.show()
 
 def violations_plot(data):
     metrics = ["temp_violation", "co2_violation", "rh_violation"]
@@ -124,9 +131,10 @@ def violations_plot(data):
     # Adjust layout and save
     plt.tight_layout()
     fig.canvas = FigureCanvasSVG(fig)
-    plt.savefig(f"figures/{args.project}/{args.mode}/violations_metrics_comparison.svg", format="svg", dpi=300, metadata={"Creator": "Illustrator"})
-    plt.savefig(f"figures/{args.project}/{args.mode}/violations_metrics_comparison.png")
-    plt.close()
+    # plt.savefig(f"figures/{args.project}/{args.mode}/violations_metrics_comparison.svg", format="svg", dpi=300, metadata={"Creator": "Illustrator"})
+    # plt.savefig(f"figures/{args.project}/{args.mode}/violations_metrics_comparison.png")
+    # plt.close()
+    plt.show()
 
 def main(args):
     data = load_data(args)
@@ -137,9 +145,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Plot cost metrics from different models")
     parser.add_argument("--project", type=str, required=True, help="Path to project folder")
     parser.add_argument("--mode", type=str, choices=["deterministic", "stochastic"], required=True, help="Simulation mode")
+    parser.add_argument("--uncertainty_value", type=float, help="Parameter uncertainty scale the agent was trained with")
     parser.add_argument("--growth_year", type=str, required=True, help="Growth year")
     parser.add_argument("--start_day", type=str, required=True, help="Start day")
     parser.add_argument("--location", type=str, required=True, help="Location")
     args = parser.parse_args()
 
+    if args.mode == "stochastic":
+        if args.uncertainty_value is None:
+            raise ValueError("Uncertainty value must be provided for stochastic mode.")
     main(args)

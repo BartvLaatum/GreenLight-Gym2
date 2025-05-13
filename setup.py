@@ -1,75 +1,44 @@
 import os
-import sysconfig
-from setuptools import setup, find_packages, Command
-from setuptools.command.build_ext import build_ext as _build_ext
-from pybind11.setup_helpers import Pybind11Extension, build_ext
+from setuptools import setup, find_packages, Extension
+from pybind11 import get_include as get_pybind_include
+from pybind11.setup_helpers import build_ext
 
-# Use dynamic include directories
-include_dirs = [
-    os.getcwd(),                              # Current directory
-    sysconfig.get_path("include"),            # Python's include directory
-    # pybind11 include directory (automatically detects platform-specific path)
-    # This replaces any hard-coded path for pybind11
-]
-try:
-    # Get pybind11 include path
-    import pybind11
-    include_dirs.append(pybind11.get_include())
-except ImportError:
-    pass  # User will get an error if pybind11 is not installed
+# Determine CasADi installation prefix (override via env vars if needed)
+casadi_prefix = "/usr/local"
+casadi_include = os.path.join(casadi_prefix, "include")
+casadi_lib = os.path.join(casadi_prefix, "lib")
 
-# Define the path for the C++ module
-module_path = "gl_gym/environments/models/greenlight_model.cpp"
-
-ext_modules = [
-    Pybind11Extension(
-        "gl_gym.environments.models.greenlight_model",
-        [module_path],
-        include_dirs=include_dirs,
-        libraries=["casadi"],
-        library_dirs=[
-            # Use Python's LIBDIR if available, or let users set $CASADI_LIB if needed
-            sysconfig.get_config_var('LIBDIR') or "/usr/local/lib",
-            os.environ.get("CASADI_LIB", "/usr/local/lib")
-        ],
-        extra_compile_args=[
-            "-std=c++17",
-            "-O3"
-        ],
-        extra_link_args=[
-            "-Wl,-rpath," + (os.environ.get("CASADI_LIB", "/usr/local/lib"))
-        ],
-    )
-]
-
-class build_ext(_build_ext):
-    def build_extensions(self):
-        os.makedirs(self.build_lib, exist_ok=True)
-        super().build_extensions()
-
-class BuildCPPOnlyCommand(Command):
-    description = "Build only the C++ extensions."
-    user_options = []
-    def initialize_options(self):
-        pass
-    def finalize_options(self):
-        pass
-    def run(self):
-        self.run_command('build_ext')
-
+# Read runtime requirements from requirements.txt
 def read_requirements():
-    with open('requirements.txt') as req_file:
-        return req_file.read().splitlines()
+    with open("requirements.txt") as f:
+        return [line.strip() for line in f if line.strip() and not line.startswith("#")]
+
+# Define C++ extension modules
+ext_modules = [
+    Extension(
+        "gl_gym.environments.models.greenlight_model",
+        ["gl_gym/environments/models/greenlight_model.cpp"],
+        include_dirs=[get_pybind_include(), casadi_include],
+        library_dirs=[casadi_lib],
+        libraries=["casadi"],
+        language="c++",
+        extra_compile_args=["-std=c++17", "-fPIC"],
+    ),
+    # Add other C++/pybind11 extensions below
+]
 
 setup(
     name="gl_gym",
-    version="0.1",
-    description="Gymnasium environment for greenhouse climate control, underlying dynamical model in C++ with Python bindings.",
-    packages=find_packages(),
-    include_package_data=True,
-    ext_modules=ext_modules,
-    cmdclass={
-        'build_ext': build_ext,
-    },
+    version="0.1.0",
+    description=(
+        "Gymnasium environments for greenhouse climate control, "
+        "with C++ core via CasADi"
+    ),
+    packages=find_packages(include=["gl_gym"]),
     install_requires=read_requirements(),
+    setup_requires=["pybind11>=2.6.0"],
+    ext_modules=ext_modules,
+    cmdclass={"build_ext": build_ext},
+    include_package_data=True,
+    zip_safe=False,
 )
