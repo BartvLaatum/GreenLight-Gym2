@@ -4,9 +4,9 @@ from pybind11 import get_include as get_pybind_include
 from pybind11.setup_helpers import build_ext
 
 # Determine CasADi installation prefix (override via env vars if needed)
-casadi_prefix = os.environ.get("CASADI_PREFIX", "/usr/local")
-casadi_include = os.environ.get("CASADI_INCLUDE", os.path.join(casadi_prefix, "include"))
-casadi_lib = os.environ.get("CASADI_LIB", os.path.join(casadi_prefix, "lib"))
+casadi_prefix = "/usr/local"
+casadi_include = os.path.join(casadi_prefix, "include")
+casadi_lib = os.path.join(casadi_prefix, "lib")
 
 # Read runtime requirements from requirements.txt
 def read_requirements():

@@ -34,39 +34,48 @@ Before installing and using the repository, make sure your system has the follow
 - **CasADi Library:**  
   Install the [CasADi](https://web.casadi.org/) library. This work builds on CasADi version 3.6.7. Linux machines can build the CasADi from the source following the next instructions:
 
+  #### 1. Clone the repo and checkout v3.6.7
   ```shell
-  # 1. Clone the repo and checkout v3.6.7
   git clone https://github.com/casadi/casadi.git  
   cd casadi
-  git checkout a2d71bf # switch to version 3.6.7
+  git checkout a2d71bf # switch to the commit linked to v3.6.7
+  ```
 
-  # 2. Create a build directory
+  #### 2. Create a build directory
+  ```shell
   mkdir build && cd build
+  ```
 
-  # 3. Configure with CMake
+  # 3. Configure with CMake; 
+  ```shell
+  # make sure to install casadi in /usr/local since setup.py searches for that path when binding the python script with C++.
   cmake .. \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX=/usr/local
+  ```
 
+  ```shell
   # 4. Build & install
   make -j$(nproc)
   sudo make install
-
+  ```
+  
+  ```shell
   # 5. Refresh the linker cache
   sudo ldconfig
   ```
+
   This installs:
 
   - Headers into /usr/local/include/casadi
   - Shared library libcasadi.so* into /usr/local/lib
 
   > NOTE: Windows and macOS users installing CasADi is a bit more tricky. For Windows your best shot is using [`vcpkg`](https://vcpkg.io/en/). Please let me know whether you succeed the installation, such that we can add it to this installation guide.
-
 ___
 
 1. **Clone the repository**
     ```shell
-    git clone https://github.com/yourusername/GreenLight-Gym.git
+    git clone https://github.com/BartvLaatum/GreenLight-Gym2.git
     cd GreenLight-Gym
     ```
 
@@ -107,6 +116,8 @@ To start a new reinforcement learning experiment using (for example) PPO on the 
 ```shell
 python gl_gym/RL/experiment_manager.py --env_id TomatoEnv --algorithm ppo
 ```
+
+> NOTE: The environment uses CasADi's code generation function to speed up the execution time. This generates $N$ `*.c`, `*.o` and `*.so` files. Unfortunately, these are not automatically deleted after training.
 
 2. **Evaluation of Trained Models**
 You can evaluate pre-trained models using the evaluation scripts provided in the experiments folder `evaluate_rl.py`:
