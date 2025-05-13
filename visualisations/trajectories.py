@@ -63,12 +63,12 @@ def state_plot(days2plot, time_steps, dt):
 
     # Format x-axis to show hours
     for ax in axes.flatten():
-        ax.xaxis.set_major_formatter(plt.matplotlib.dates.DateFormatter('%D%H'))
-        ax.xaxis.set_major_locator(plt.matplotlib.dates.HourLocator(interval=6))
+        ax.xaxis.set_major_formatter(plt.matplotlib.dates.DateFormatter('%D'))
+        ax.xaxis.set_major_locator(plt.matplotlib.dates.HourLocator(interval=24))
 
     # Set x-label for bottom plots only
-    axes[2,0].set_xlabel("Time of day (hours)")
-    axes[2,1].set_xlabel("Time of day (hours)")
+    axes[2,0].set_xlabel("Date")
+    axes[2,1].set_xlabel("Date")
 
     axes[0,0].legend()
     plt.tight_layout()
