@@ -54,11 +54,11 @@ struct GreenLight
         jit_options["flags"] = "-O3";
         jit_options["cleanup"] = true;   // Some CasADi versions recognize this
         opts["jit_options"] = jit_options;
-
+        SXDict input_output{{"x", x}, {"p", input_args_sym}, {"ode", dxdt}};
         // Create the integrator
         integrator_func = integrator(
             "integrator_func", "cvodes",
-            {{"x", x}, {"p", input_args_sym}, {"ode", dxdt}},
+            input_output,
             0.0, dt, opts
         );
 
