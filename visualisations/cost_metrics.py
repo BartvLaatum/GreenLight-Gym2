@@ -151,4 +151,7 @@ if __name__ == "__main__":
     parser.add_argument("--location", type=str, required=True, help="Location")
     args = parser.parse_args()
 
+    if args.mode == "stochastic":
+        if args.uncertainty_value is None:
+            raise ValueError("Uncertainty value must be provided for stochastic mode.")
     main(args)
