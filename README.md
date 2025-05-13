@@ -47,8 +47,8 @@ Before installing and using the repository, make sure your system has the follow
   ```
 
   #### 3. Configure with CMake; 
+  Make sure to install casadi in `/usr/local` since setup.py searches for that path when binding the C++ script with Python.
   ```shell
-  # make sure to install casadi in `/usr/local` since setup.py searches for that path when binding the C++ script with Python.
   cmake .. \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX=/usr/local
@@ -70,13 +70,14 @@ Before installing and using the repository, make sure your system has the follow
   - Headers into /usr/local/include/casadi
   - Shared library libcasadi.so* into /usr/local/lib
 
+
   > NOTE: Windows and macOS users installing CasADi is a bit more tricky. For Windows your best shot is using [`vcpkg`](https://vcpkg.io/en/). Please let me know whether you succeed the installation, such that we can add it to this installation guide.
 ___
 
 1. **Clone the repository**
     ```shell
     git clone https://github.com/BartvLaatum/GreenLight-Gym2.git
-    cd GreenLight-Gym
+    cd GreenLight-Gym2
     ```
 
 2. **Setup a Python virtual environment**
@@ -101,9 +102,9 @@ ___
 ## Repository Structure
 
 - The `gl_gym/` folder contains:
-    - Environment code under [`environments`](./gl_gym/environments) (models, dynamics, parameters, and utility functions).
-    - Configuration files under [`configs`](./gl_gym/configs).
-    - Common utility functions under [`common`](./gl_gym/common).
+    - Environment code under [`environments/`](./gl_gym/environments) (models, dynamics, parameters, and utility functions).
+    - Configuration files under [`configs/`](./gl_gym/configs).
+    - Common utility functions under [`common/`](./gl_gym/common).
     - The [`experiments/`](./gl_gym/experiments) folder contains: Experiment scripts (e.g. RL training or evaluation – see `gl_gym/experiments/rl.sh`). 
     - The [`RL/`](./gl_gym/RL) folder contains, the experiment manager (experiment_manager.py) that sets up training, evaluation, hyperparameter tuning (using Weights & Biases), etc.
 
