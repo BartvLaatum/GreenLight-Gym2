@@ -127,9 +127,44 @@ python gl_gym/experiments/evaluate_rl.py --project PROJECT_NAME --env_id TomatoE
 ```
 
 3. **Visualizations**
-    - **Plotting**: The repository includes scripts under [visualisations](./visualisations/) for plotting learning curves and cost metrics
+    - **Plotting**: The repository includes scripts under [visualisations](./visualisations/) for plotting learning curves and cost metrics. 
+    - Before, generating any plots you must have evaluated your RL agents with `evaluate_rl.py` and a rule-based baseline with `evaluate_baseline.py`
+
+
+    #### Time-series of trajectories.
+    Compares the state and control input trajectories for $N$ consecutive days.
+    ```shell
+    python visualisations/trajectories.py --project PROJECT_NAME --MODE --ppo_name PPO_MODEL_NAME --sac_name SAC_MODEL_NAME --growth_year GROWTH_YEAR --start_day START_DAY --location LOCATION --n_days2plot NUMBER_OF_DAY_TO_VISUALIZE --uncertainty_value UNCERTAINTY_VALUE
+    ```    
+    <p align="center">
+      <img src="./images/timeseries_state.png" alt="Time series state" width="400"/>
+    </p>
+
+
+
+    #### Bar plot the performance metrics.
+    Creates a bar plot of controller performance regarding cost en constraints metrics.
+    ```shell
+    python visualisations/cost_metrics.py --project PROJECT_NAME --MODE --uncertainty_value UNCERTAINTY_VALUE --growth_year GROWTH_YEAR --start_day START_DAY --location LOCATION
+    ```
+    #### Example of comparing SAC, PPO and rule-based agent (RB) on economic performance indicator (EPI) metrics.
+    <p align="center">
+      <img src="./images/cost_metrics_comparison.png" alt="Cost Metrics Comparison" width="400"/>
+    </p>
+
+    #### Line plot the performance metrics over parametric uncertainty scale.
+    Visualizes how the cumulative reward changes with different levels of parametric uncertainty in the environment by comparing controller performance.
+    ```shell
+    python visualisations/param_uncertainty.py --project PROJECT_NAME --mode MODE --growth_year GROWTH_YEAR --start_day START_DAY --location LOCATION
+    ```
+      #### Example of comparing SAC, PPO and rule-based agent (RB) on the cumulative reward trained per parametric uncertainty environment.
+    <p align="center">
+      <img src="./images/cumulative_reward.png" alt="Performance uncertainty" width="400"/>
+    </p>
+
+> Note that the other three scripts in `visualisations/` require additional data, which can be made available upon request.
 __
-### Notes
+### Additional notes
 
 Adjust paths in `setup.py` if your libraries (like `CasADi`) are installed in different locations. The repository is designed as a reinforcement learning environment for greenhouse crop production. The environment ([TomatoEnv](./gl_gym/environments/tomato_env.py)) and the RL algorithms configurable via the config files in envs.
 
