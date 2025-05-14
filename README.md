@@ -154,7 +154,7 @@ python gl_gym/experiments/evaluate_rl.py --project PROJECT_NAME --env_id TomatoE
     </p>
 
     #### Line plot the performance metrics over parametric uncertainty scale.
-    Visualizes how the cumulative reward changes with different levels of parametric uncertainty in the environment by comparing controller performance.
+    Visualizes how the cumulative reward changes with different levels of parametric uncertainty in the environment by comparing controller performance. NOTE: Don't forget to update variable `model_names` to the correct model names in [`param_uncertainty.py`](./visualisations/param_uncertainty.py). 
     ```shell
     python visualisations/param_uncertainty.py --project PROJECT_NAME --mode MODE --growth_year GROWTH_YEAR --start_day START_DAY --location LOCATION
     ```
