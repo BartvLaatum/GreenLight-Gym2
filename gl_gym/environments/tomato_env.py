@@ -2,12 +2,16 @@
 from typing import Any, Dict, List, Optional, Tuple, SupportsFloat
 
 import numpy as np
+import casadi as ca
 from gymnasium import spaces
 
 from gl_gym.environments.base_env import GreenLightEnv
 from gl_gym.environments.observations import *
 from gl_gym.environments.rewards import BaseReward, GreenhouseReward
-from gl_gym.environments.models.greenlight_model import GreenLight
+# from gl_gym.environments.models.greenlight_model import GreenLight
+
+from gl_gym.environments.models.utils import define_model
+
 from gl_gym.environments.utils import load_weather_data, init_state
 from gl_gym.environments.parameters import init_default_params
 from gl_gym.environments.noise import parametric_crop_uncertainty
@@ -46,7 +50,14 @@ class TomatoEnv(GreenLightEnv):
         self.observation_space = self._generate_observation_space()
         self.action_space = self._generate_action_space()
 
-        self.gl_model = GreenLight(self.nx, self.nu, self.nd, self.num_params, self.dt)
+        # self.gl_model = GreenLight(self.nx, self.nu, self.nd, self.num_params, self.dt)
+        self.F = define_model(
+            nx=self.nx,
+            nu=self.nu,
+            nd=self.nd,
+            n_params=self.num_params,
+            dt=self.dt,
+        )
 
         self.constraints_low = np.array([
             constraints["co2_min"],
@@ -117,7 +128,11 @@ class TomatoEnv(GreenLightEnv):
         self.u = self.action_to_control(action)
         params = parametric_crop_uncertainty(self.p, self.uncertainty_scale, self._np_random)
         try:
-            self.x = self.gl_model.evalF(self.x, self.u, self.weather_data[self.timestep], params)
+            p_dyn = ca.vertcat(ca.DM(self.weather_data[self.timestep]), params)
+            res = self.F(x0=ca.DM(self.x), u=ca.DM(self.u), p=p_dyn)
+            self.x = res["xf"].full().flatten()
+
+            # self.x = self.gl_model.evalF(self.x, self.u, self.weather_data[self.timestep], params)
         except:
             print("Error in ODE approximation")
             self.terminated = True
@@ -148,7 +163,8 @@ class TomatoEnv(GreenLightEnv):
     def step_raw_control(self, control: np.ndarray):
         self.u = control
         params = parametric_crop_uncertainty(self.p, self.uncertainty_scale, self._np_random)
-        self.x = self.gl_model.evalF(self.x, self.u, self.weather_data[self.timestep], params)
+        self.x = self.F(self.x, self.u, self.weather_data[self.timestep], params)
+        # self.x = self.gl_model.evalF(self.x, self.u, self.weather_data[self.timestep], params)
 
         # update time
         self.day_of_year += (self.dt/self.c) % 365
@@ -175,7 +191,8 @@ class TomatoEnv(GreenLightEnv):
     def step_raw_control_pipeinput(self, control: np.ndarray):
         self.u = control
 
-        self.x = self.gl_model.evalF(self.x, self.u, self.weather_data[self.timestep], self.p)
+        self.x = self.F(self.x, self.u, self.weather_data[self.timestep], self.p)
+        # self.x = self.gl_model.evalF(self.x, self.u, self.weather_data[self.timestep], self.p)
 
         if self._terminalState():
             self.terminated = True
@@ -221,7 +238,14 @@ class TomatoEnv(GreenLightEnv):
             "controls": self.u,
         }
 
-    def set_crop_state(self, cBuf: float, cLeaf: float, cStem: float, cFruit: float, tCanSum: float):
+    def set_crop_state(
+        self,
+        cBuf: float,
+        cLeaf: float,
+        cStem: float,
+        cFruit: float,
+        tCanSum: float
+    ) -> None:
         self.x[22] = cBuf
         self.x[23] = cLeaf
         self.x[24] = cStem
@@ -230,7 +254,6 @@ class TomatoEnv(GreenLightEnv):
 
     def reset(self, seed: Optional[int] = None) -> Tuple[np.ndarray, Dict[str, Any]]:
         super().reset(seed=seed)
-
 
         # pick a random growth year and start day if we are training
         if self.training:
@@ -264,7 +287,6 @@ class TomatoEnv(GreenLightEnv):
         self.x_prev = np.copy(self.x)
         self.timestep = 0
         self.obs = self._get_obs()
-
 
         self.terminated = False
         return self.obs, {}
