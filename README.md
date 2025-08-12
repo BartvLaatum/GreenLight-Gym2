@@ -9,70 +9,28 @@
 
 ## Summary
 
-**This repository is a reimplementation of the high-tech greenhouse model [GreenLight](https://github.com/davkat1/GreenLight) with `CasADi` in `C++` with bindings for `Python`. The environment is designed to train reinforcement learning models to control greenhouse crop production systems.**
+**This repository is a reimplementation of the high-tech greenhouse model [GreenLight](https://github.com/davkat1/GreenLight) in the automatic differentiation tool `CasADi`. The environment is designed to train reinforcement learning models to control greenhouse crop production systems.**
 
 The code in this repository was used for the following [preprint](https://arxiv.org/abs/2410.05336) that has been accepted by [The 8th IFAC Conference on 
 Sensing, Control and Automation Technologies for Agriculture](https://agricontrol25.sf.ucdavis.edu/).
+
+📄 preprint: https://arxiv.org/abs/2410.05336
 
 ✏ author: Bart van Laatum
 
 📧 e-mail: bart.vanlaatum@wur.nl
 
-## Installation
+### 📣 What changed in v0.2
 
-**Prerequisites**
+Since we have moved from v0.1 to v0.2 this repository now fully relies on `Python`. Therefore, no complicated builds and pre-requirements are needed anymore. And one should be able to install and run this project on any platform (Windows, Ubuntu, MacOS). In summary:
 
-Before installing and using the repository, make sure your system has the following:
+> - **Python-native models**: no C++/CasADi build needed.
+> - Cross-platform install via `pip`.
+> - The previous C++ implementation is still available as **v0.1** (Ubuntu-focused).
+>
+> 🔗 For the C++/CasADi version, use tag **v0.1** (see Releases) and its README.
 
-- **Weights & Biases Account:**  
-  A free account on [Weights & Biases](https://wandb.ai) is required to track experiments when using the provided RL scripts.
-
-- **C++ Compiler:**  
-  A C++ compiler that supports C++17 (for example, GCC 7 or later, or Clang 6 or later).
-
-
-- **CasADi Library:**  
-  Install the [CasADi](https://web.casadi.org/) library. This work builds on CasADi version 3.6.7. Linux machines can build CasADi from the source using these instructions:
-
-  #### 1. Clone the repo and checkout v3.6.7
-  ```shell
-  git clone https://github.com/casadi/casadi.git  
-  cd casadi
-  git checkout a2d71bf # switch to the commit linked to v3.6.7
-  ```
-
-  #### 2. Create a build directory
-  ```shell
-  mkdir build && cd build
-  ```
-
-  #### 3. Configure with CMake; 
-  Make sure to install casadi in `/usr/local` since setup.py searches for that path when binding the C++ script with Python.
-  ```shell
-  cmake .. \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX=/usr/local
-  ```
-
-  #### 4. Build & install
-  ```shell
-  make -j$(nproc)
-  sudo make install
-  ```
-  
-  #### 5. Refresh the linker cache
-  ```shell
-  sudo ldconfig
-  ```
-
-  This installs:
-
-  - Headers into /usr/local/include/casadi
-  - Shared library libcasadi.so* into /usr/local/lib
-
-
-  > NOTE: Windows and macOS users installing CasADi is a bit more tricky. For Windows your best shot is using [`vcpkg`](https://vcpkg.io/en/). Please let me know whether you succeed the installation, such that we can add it to this installation guide.
-___
+## Installation (v0.2, Python-native)
 
 1. **Clone the repository**
     ```shell
@@ -82,7 +40,7 @@ ___
 
 2. **Setup a Python virtual environment**
 
-    For instance, using anaconda:
+    For instance, using anaconda (or `python -m venv`)
 
     ```shell
     conda create -n greenlight_gym python==3.11
@@ -97,37 +55,44 @@ ___
    pip install -e .
    ```
 
-   This command uses the setup.py file to build the C++ module (with dynamic paths) and install all Python packages. Adjust paths in `setup.py` if your libraries (like CasADi) are installed in different locations.
-
 ## Repository Structure
 
 - The `gl_gym/` folder contains:
     - Environment code under [`environments/`](./gl_gym/environments) (models, dynamics, parameters, and utility functions).
     - Configuration files under [`configs/`](./gl_gym/configs).
     - Common utility functions under [`common/`](./gl_gym/common).
-    - The [`experiments/`](./gl_gym/experiments) folder contains: Experiment scripts (e.g. RL training or evaluation – see `gl_gym/experiments/rl.sh`). 
     - The [`RL/`](./gl_gym/RL) folder contains, the experiment manager (experiment_manager.py) that sets up training, evaluation, hyperparameter tuning (using Weights & Biases), etc.
+    - The [`experiments/`](./gl_gym/experiments) folder contains: Experiment `Python` scripts (e.g. RL training or evaluation)
+    - These experiments scripts can be called through bash scripts placed in [`run_scripts/`](./run_scripts). 
 
 ## Usage
 
 1. **Running an RL Experiment**
 
-To start a new reinforcement learning experiment using (for example) PPO on the Tomato environment, run:
+To start a new reinforcement learning experiment run. One can change the environment, model, etc via the flags in that bash script.
 
-```shell
-python gl_gym/RL/experiment_manager.py --env_id TomatoEnv --algorithm ppo
+In the configuration files one can change hyperparameters for [`PPO`](./gl_gym/configs/agents/ppo.yml) or the [`environment`](./gl_gym/configs/envs/TomatoEnv.yml) specific parameters.
+
+```bash
+bash run_scripts/rl.sh
 ```
 
-> NOTE: The environment uses CasADi's code generation function to speed up the execution time. This generates $N$ `*.c`, `*.o` and `*.so` files. Unfortunately, these are not automatically deleted after training.
-
 2. **Evaluation of Trained Models**
-You can evaluate pre-trained models using the evaluation scripts provided in the experiments folder `evaluate_rl.py`:
+You can evaluate trained models using the evaluation scripts provided in the experiments folder `evaluate_rl.py`:
 
 ```shell
 python gl_gym/experiments/evaluate_rl.py --project PROJECT_NAME --env_id TomatoEnv --model_name YOUR_MODEL_NAME --algorithm ppo
 ```
 
-3. **Visualizations**
+3. **Evaluation of Baseline Controller**
+You can evaluate the rule-based baseline controller for different levels of parametric uncertainty through the following bash script:
+
+```bash
+bash run_scripts/eval_baseline.sh
+```
+
+
+4. **Visualizations**
     - **Plotting**: The repository includes scripts under [visualisations](./visualisations/) for plotting learning curves and cost metrics. 
     - Before, generating any plots you must have evaluated your RL agents with `evaluate_rl.py` and a rule-based baseline with `evaluate_baseline.py`
 
@@ -140,8 +105,6 @@ python gl_gym/experiments/evaluate_rl.py --project PROJECT_NAME --env_id TomatoE
     <p align="center">
       <img src="./images/timeseries_state.png" alt="Time series state" width="400"/>
     </p>
-
-
 
     #### Bar plot the performance metrics.
     Creates a bar plot of controller performance regarding cost en constraints metrics.
@@ -164,17 +127,13 @@ python gl_gym/experiments/evaluate_rl.py --project PROJECT_NAME --env_id TomatoE
     </p>
 
 > Note that the other three scripts in `visualisations/` require additional data, which can be made available upon request.
-__
-### Additional notes
 
-Adjust paths in `setup.py` if your libraries (like `CasADi`) are installed in different locations. The repository is designed as a reinforcement learning environment for greenhouse crop production. The environment ([TomatoEnv](./gl_gym/environments/tomato_env.py)) and the RL algorithms configurable via the config files in envs.
-
-## Future
+## Future road map
 
 We plan to extend GreenLight-Gym with the following features:
 
-- **Python-native Model Implementation:**  
-  Develop a pure Python version of the greenhouse model for easier maintenance, faster prototyping, and broader accessibility.
+- [x] ~~**Python-native Model Implementation:**~~
+  Develop a pure Python version of the greenhouse model for easier maintenance, faster prototyping, and broader accessibility. *(Implemented in v0.2)*
 
 - **Model Predictive Control (MPC):**  
   Integrate MPC as an additional control baseline to benchmark against reinforcement learning algorithms.

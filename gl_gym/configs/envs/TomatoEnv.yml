@@ -22,7 +22,7 @@ GreenLightEnv:
 
 TomatoEnv:
   reward_function: GreenhouseReward       # reward function to use
- 
+
   observation_modules: [                  # observation modules to use
     IndoorClimateObservations,   
     BasicCropObservations, 

@@ -2,12 +2,9 @@
 export PYTHONPATH=$(pwd)
 echo "PYTHONPATH set to: $PYTHONPATH"
 
-# Navigate to the experiment manager directory
-cd /home/bart/Documents/phd-code-projects/GL-Gym2.0
-
 # Run the experiment manager with command line arguments
 python gl_gym/RL/experiment_manager.py \
-    --project GenerlizedWeather \
+    --project AgriControl \
     --env_id TomatoEnv \
     --algorithm recurrentppo \
     --group rec-ppo-det \
@@ -18,4 +15,4 @@ python gl_gym/RL/experiment_manager.py \
     --device cpu \
     --save_model \
     --save_env \
-    --hyperparameter_tuning
+    # --hyperparameter_tuning

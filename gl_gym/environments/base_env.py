@@ -9,7 +9,6 @@ from gymnasium.utils import seeding
 
 from gl_gym.environments.observations import BaseObservations
 from gl_gym.environments.rewards import BaseReward
-from gl_gym.environments.models.greenlight_model import GreenLight
 
 class GreenLightEnv(gym.Env):
     """
@@ -34,7 +33,7 @@ class GreenLightEnv(gym.Env):
         training (bool, optional): whether we are training or testing. Defaults to True.
         options (Dict[str, Any], optional): options for the GreenLight model. Defaults to {}.
     """
-    gl_model: GreenLight
+    # gl_model: GreenLight
     growth_year: int
     start_day: int
     reward_function: BaseReward
