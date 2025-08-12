@@ -163,8 +163,9 @@ class TomatoEnv(GreenLightEnv):
     def step_raw_control(self, control: np.ndarray):
         self.u = control
         params = parametric_crop_uncertainty(self.p, self.uncertainty_scale, self._np_random)
-        self.x = self.F(self.x, self.u, self.weather_data[self.timestep], params)
-        # self.x = self.gl_model.evalF(self.x, self.u, self.weather_data[self.timestep], params)
+        p_dyn = ca.vertcat(ca.DM(self.weather_data[self.timestep]), params)
+        res = self.F(x0=ca.DM(self.x), u=ca.DM(self.u), p=p_dyn)
+        self.x = res["xf"].full().flatten()
 
         # update time
         self.day_of_year += (self.dt/self.c) % 365
