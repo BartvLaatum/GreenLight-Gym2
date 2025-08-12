@@ -1,7 +1,32 @@
 [build-system]
-requires = ["setuptools", "pybind11"]
+requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
-[project.optional-dependencies]
-py-models = [
-  "casadi==3.6.7"
+
+[project]
+name = "gl_gym"
+version = "0.2.0"
+description = "GreenLight-Gym environment with Python-native models"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "Bart van Laatum" }]
+keywords = ["reinforcement-learning", "greenhouse", "control", "gymnasium"]
+dependencies = [
+  "numpy>=1.24",
+  "scipy>=1.10",
+  "pandas>=1.5",
+  "gymnasium>=0.29",
+  "matplotlib>=3.7",
+  "tqdm>=4.65",
+  "wandb>=0.16"  # if you keep W&B hooks in the repo
+  "stable-baselines3>=2.0"  # if used by RL scripts
 ]
+
+[project.urls]
+Homepage = "https://github.com/BartvLaatum/GreenLight-Gym2"
+Documentation = "https://github.com/BartvLaatum/GreenLight-Gym2#readme"
+Changelog = "https://github.com/BartvLaatum/GreenLight-Gym2/releases"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["gl_gym*"]
