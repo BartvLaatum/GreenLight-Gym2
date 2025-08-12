@@ -12,14 +12,15 @@ license = { file = "LICENSE" }
 authors = [{ name = "Bart van Laatum" }]
 keywords = ["reinforcement-learning", "greenhouse", "control", "gymnasium"]
 dependencies = [
-  "numpy>=1.24",
-  "scipy>=1.10",
-  "pandas>=1.5",
-  "gymnasium>=0.29",
+  "casadi=3.6.7"
+  "numpy==1.26.4",
+  "scipy==1.15",
+  "pandas==2.2.3",
+  "gymnasium==1.0.0",
   "matplotlib>=3.7",
-  "tqdm>=4.65",
-  "wandb>=0.16"  # if you keep W&B hooks in the repo
-  "stable-baselines3>=2.0"  # if used by RL scripts
+  "tqdm>=4.67.1",
+  "wandb>=0.19.11"  # if you keep W&B hooks in the repo
+  "stable-baselines3>=2.7"  # if used by RL scripts
 ]
 
 [project.urls]
