@@ -9,28 +9,40 @@
 
 ## Summary
 
-**This repository is a reimplementation of the high-tech greenhouse model [GreenLight](https://github.com/davkat1/GreenLight) in the automatic differentiation tool `CasADi`. The environment is designed to train reinforcement learning models to control greenhouse crop production systems.**
+GreenLight-Gym is a benchmark simulation environment for **training and evaluating reinforcement learning (RL) controllers** in high-tech greenhouse crop production systems.
 
-The code in this repository was used for the following [preprint](https://arxiv.org/abs/2410.05336) that has been accepted by [The 8th IFAC Conference on 
-Sensing, Control and Automation Technologies for Agriculture](https://agricontrol25.sf.ucdavis.edu/).
+It is based on the validated high-tech greenhouse model [GreenLight](https://github.com/davkat1/GreenLight), and provides:
 
-📄 preprint: https://arxiv.org/abs/2410.05336
+- Realistic greenhouse climate and crop dynamics for RL research.
+- Implementation in the automatic differentiation tool CasADi for increased simulation speeds.
+- Baseline rule-based controllers for benchmarking.
+- Configurable experiments with reproducible setups.
+- Visualizations tolls for analysis.
 
-✏ author: Bart van Laatum
+<!-- The code in this repository was used for the following [preprint](https://arxiv.org/abs/2410.05336) that has been accepted by [The 8th IFAC Conference on 
+Sensing, Control and Automation Technologies for Agriculture](https://agricontrol25.sf.ucdavis.edu/). -->
 
-📧 e-mail: bart.vanlaatum@wur.nl
+This repository was used in the following accepted conference paper:
+📄 [Preprint](https://arxiv.org/abs/2410.05336): [The 8th IFAC Conference on Sensing, Control and Automation Technologies for Agriculture](https://agricontrol25.sf.ucdavis.edu/)
 
-### 📣 What changed in v0.2
+✏ Author: Bart van Laatum
 
-Since we have moved from v0.1 to v0.2 this repository now fully relies on `Python`. Therefore, no complicated builds and pre-requirements are needed anymore. And one should be able to install and run this project on any platform (Windows, Ubuntu, MacOS). In summary:
+📧 E-mail: bart.vanlaatum@wur.nl
 
-> - **Python-native models**: no C++/CasADi build needed.
-> - Cross-platform install via `pip`.
-> - The previous C++ implementation is still available as **v0.1** (Ubuntu-focused).
+### 📣 What’s New in v0.2
+
+v0.2 marks a shift from the v0.1 C++ build to a pure Python-native model:
+
+> - [x] No C++ build that only works for Ubuntu.
+> - [x] Easy installation for operating systems Windows, Linux, and maxOS via `pip install -e .`
 >
-> 🔗 For the C++/CasADi version, use tag **v0.1** (see Releases) and its README.
+> 🔗 For the C++ version of the GreenLight models, use **v0.1** release tag and its README.
 
-## Installation (v0.2, Python-native)
+## Installation
+
+### Requirements
+- Python >= 3.10 (tested on 3.11).
+- Recommended: `conda` or `venv` for environment management.
 
 1. **Clone the repository**
     ```shell
@@ -58,12 +70,12 @@ Since we have moved from v0.1 to v0.2 this repository now fully relies on `Pytho
 ## Repository Structure
 
 - The `gl_gym/` folder contains:
-    - Environment code under [`environments/`](./gl_gym/environments) (models, dynamics, parameters, and utility functions).
-    - Configuration files under [`configs/`](./gl_gym/configs).
-    - Common utility functions under [`common/`](./gl_gym/common).
-    - The [`RL/`](./gl_gym/RL) folder contains, the experiment manager (experiment_manager.py) that sets up training, evaluation, hyperparameter tuning (using Weights & Biases), etc.
-    - The [`experiments/`](./gl_gym/experiments) folder contains: Experiment `Python` scripts (e.g. RL training or evaluation)
-    - These experiments scripts can be called through bash scripts placed in [`run_scripts/`](./run_scripts). 
+  - Environment code under [`environments/`](./gl_gym/environments) (models, dynamics, parameters, and utility functions).
+  - Configuration files under [`configs/`](./gl_gym/configs).
+  - Common utility functions under [`common/`](./gl_gym/common).
+  - The [`RL/`](./gl_gym/RL) folder contains, the experiment manager (experiment_manager.py) that sets up training, evaluation, hyperparameter tuning (using Weights & Biases), etc.
+  - The [`experiments/`](./gl_gym/experiments) folder contains: Experiment `Python` scripts (e.g. RL training or evaluation)
+- The experiments scripts can be called through bash scripts placed in [`run_scripts/`](./run_scripts). 
 
 ## Usage
 
@@ -150,7 +162,7 @@ We plan to extend GreenLight-Gym with the following features:
 
 ## Citation
 
-If you find this repository and/or its accompanying article usefull, please cite it in your publications
+If you find this repository and/or its accompanying article usefull, please cite it in your publications.
 
 ```bibtex
 @misc{vanlaatum2025greenlightgymreinforcementlearningbenchmark,
