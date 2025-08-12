@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Navigate to the experiment manager directory
-cd /home/bart/Documents/phd-code-projects/GL-Gym2.0
-
 # Run the experiment manager with command line arguments
 python gl_gym/RL/experiment_manager.py \
     --project AgriControl \

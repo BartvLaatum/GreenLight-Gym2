@@ -7,20 +7,22 @@ name = "gl_gym"
 version = "0.2.0"
 description = "GreenLight-Gym environment with Python-native models"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = { file = "LICENSE" }
 authors = [{ name = "Bart van Laatum" }]
 keywords = ["reinforcement-learning", "greenhouse", "control", "gymnasium"]
 dependencies = [
-  "casadi=3.6.7"
+  "casadi==3.6.7",
   "numpy==1.26.4",
   "scipy==1.15",
   "pandas==2.2.3",
   "gymnasium==1.0.0",
-  "matplotlib>=3.7",
-  "tqdm>=4.67.1",
-  "wandb>=0.19.11"  # if you keep W&B hooks in the repo
-  "stable-baselines3>=2.7"  # if used by RL scripts
+  "matplotlib==3.7",
+  "tqdm==4.67.1",
+  "wandb==0.19.11",  # if you keep W&B hooks in the repo
+  "stable-baselines3==2.6",  # if used by RL scripts
+  "sb3_contrib==2.6",
+  "tensorboard==2.18.0",
 ]
 
 [project.urls]
