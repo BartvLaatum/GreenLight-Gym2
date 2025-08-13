@@ -70,13 +70,15 @@ v0.2 marks a shift from the v0.1 C++ build to a pure Python-native model:
 
 ## Repository Structure
 
-- The `gl_gym/` folder contains:
-  - Environment code under [`environments/`](./gl_gym/environments) (models, dynamics, parameters, and utility functions).
-  - Configuration files under [`configs/`](./gl_gym/configs).
-  - Common utility functions under [`common/`](./gl_gym/common).
-  - The [`RL/`](./gl_gym/RL) folder contains, the experiment manager (experiment_manager.py) that sets up training, evaluation, hyperparameter tuning (using Weights & Biases), etc.
-  - The [`experiments/`](./gl_gym/experiments) folder contains: Experiment `Python` scripts (e.g. RL training or evaluation)
-- The experiments scripts can be called through bash scripts placed in [`run_scripts/`](./run_scripts). 
+| Folder                 | Description                                                      |
+| ---------------------- | ---------------------------------------------------------------- |
+| `gl_gym/environments/` | Environment definitions: models, parameters, rewards, observations|
+| `gl_gym/configs/`      | YAML configuration files for agents and environments             |
+| `gl_gym/common/`       | Shared utility functions                                         |
+| `gl_gym/RL/`           | Experiment manager, training setup, W\&B integration             |
+| `gl_gym/experiments/`  | Python experiment scripts (training, evaluation)                 |
+| `run_scripts/`         | Bash wrappers for experiment scripts                             |
+| `visualisations/`      | Plotting and analysis scripts                                    |
 
 ## Usage
 
