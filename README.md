@@ -84,13 +84,13 @@ v0.2 marks a shift from the v0.1 C++ build to a pure Python-native model:
 
 1. **Running an RL Experiment**
 
-To start a new reinforcement learning experiment run users can either directly run a Python script, or run a bash script in [`run_scripts/`](./run_scripts/) that calls an Python script. The environment, model, etc can be changed via flags in the command line arguments.
+To start a new reinforcement learning experiment, users can either directly run a Python script or run a bash script in [`run_scripts/`](./run_scripts/) that calls a Python script. The environment, model, etc. can be changed via flags in the command line arguments.
 
-The following command trains the PPO agent on the TomatoEnv environment, saves the best and the last model and accompanying environment normalization statistics. The hyperparameter tuning flag is optional. One can adjust hyperparameter tuning settings in the files in [`sweeps/`](./gl_gym/configs/sweeps/).
+The following command trains the PPO agent on the TomatoEnv environment, saves the best and the last model, and accompanying environment normalization statistics. The hyperparameter tuning flag is optional. One can adjust hyperparameter tuning settings in the files in [`sweeps/`](./gl_gym/configs/sweeps/).
 
 ```bash
   python gl_gym/RL/experiment_manager.py
-      --project AgriControl
+      --project PROJECT_NAME
       --env_id TomatoEnv
       --algorithm ppo
       --group ppo_det
@@ -109,6 +109,8 @@ The bash script equivalent:
 ```bash
 bash run_scripts/rl.sh
 ```
+
+> Note: This run will initialze a Weights and Biases run. Users are queried to either login to their account, create an account or continue without visualizations and model logging.
 
 2. **Evaluation of Trained Models**
 You can evaluate trained models using the evaluation scripts provided in the experiments folder `evaluate_rl.py`:
