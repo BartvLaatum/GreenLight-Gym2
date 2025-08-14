@@ -21,16 +21,17 @@ dependencies = [
   "matplotlib==3.10.5",
   "torch>=2.0.0",
   "tqdm==4.67.1",
-  "wandb==0.19.11",  # if you keep W&B hooks in the repo
+  "wandb==0.19.11",
   "PyYAML>=6.0.2",
   "requests>=2.32.4",
-  "stable-baselines3==2.1.0",  # if used by RL scripts
+  "stable-baselines3==2.1.0",
   "sb3_contrib==2.1.0",
-  "timezonefinder==8.0.0",
   "pytz>=2019.3",
-  "setuptools>=45.2.0",
   "tensorboard==2.18.0",
 ]
+
+[project.optional-dependencies]
+timezone = ["timezonefinder==8.0.0"]   # users install with: pip install .[timezone]
 
 [project.urls]
 Homepage = "https://github.com/BartvLaatum/GreenLight-Gym2"
