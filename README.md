@@ -84,9 +84,27 @@ v0.2 marks a shift from the v0.1 C++ build to a pure Python-native model:
 
 1. **Running an RL Experiment**
 
-To start a new reinforcement learning experiment run. One can change the environment, model, etc via the flags in that bash script.
+To start a new reinforcement learning experiment run users can either directly run a Python script, or run a bash script in [`run_scripts/`](./run_scripts/) that calls an Python script. The environment, model, etc can be changed via flags in the command line arguments.
 
-In the configuration files one can change hyperparameters for [`PPO`](./gl_gym/configs/agents/ppo.yml) or the [`environment`](./gl_gym/configs/envs/TomatoEnv.yml) specific parameters.
+The following command trains the PPO agent on the TomatoEnv environment, saves the best and the last model and accompanying environment normalization statistics. The hyperparameter tuning flag is optional. One can adjust hyperparameter tuning settings in the files in [`sweeps/`](./gl_gym/configs/sweeps/).
+
+```bash
+  python gl_gym/RL/experiment_manager.py
+      --project AgriControl
+      --env_id TomatoEnv
+      --algorithm ppo
+      --group ppo_det
+      --n_eval_episodes 1
+      --n_evals 10
+      --env_seed 666
+      --model_seed 666
+      --device cpu
+      --save_model
+      --save_env
+      # --hyperparameter_tuning
+```
+
+The bash script equivalent:
 
 ```bash
 bash run_scripts/rl.sh
@@ -106,6 +124,7 @@ You can evaluate the rule-based baseline controller for different levels of para
 bash run_scripts/eval_baseline.sh
 ```
 
+> Note that this is called through a bash script. Windows users should execute a bash script via Git bash.
 
 4. **Visualizations**
     - **Plotting**: The repository includes scripts under [visualisations](./visualisations/) for plotting learning curves and cost metrics. 
