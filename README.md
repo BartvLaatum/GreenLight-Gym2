@@ -89,18 +89,18 @@ To start a new reinforcement learning experiment, users can either directly run 
 The following command trains the PPO agent on the TomatoEnv environment, saves the best and the last model, and accompanying environment normalization statistics. The hyperparameter tuning flag is optional. One can adjust hyperparameter tuning settings in the files in [`sweeps/`](./gl_gym/configs/sweeps/).
 
 ```bash
-  python gl_gym/RL/experiment_manager.py
-      --project PROJECT_NAME
-      --env_id TomatoEnv
-      --algorithm ppo
-      --group ppo_det
-      --n_eval_episodes 1
-      --n_evals 10
-      --env_seed 666
-      --model_seed 666
-      --device cpu
-      --save_model
-      --save_env
+  python gl_gym/RL/experiment_manager.py \
+      --project PROJECT_NAME \
+      --env_id TomatoEnv \
+      --algorithm ppo \
+      --group ppo_det \
+      --n_eval_episodes 1 \
+      --n_evals 10 \
+      --env_seed 666 \
+      --model_seed 666 \
+      --device cpu \
+      --save_model \
+      --save_env \
       # --hyperparameter_tuning
 ```
 
