@@ -118,6 +118,8 @@ class CustomWandbCallback(EvalCallback):
                 "lamp_violation": np.zeros(self.n_eval_episodes)
             }
 
+            self.eval_env.env_method("_reset_eval_idx")
+
             episode_rewards, episode_lengths, add_info = evaluate_policy(
                 self.model,
                 self.eval_env,
