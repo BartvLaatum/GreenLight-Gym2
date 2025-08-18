@@ -152,8 +152,8 @@ python gl_gym/RL/experiment_manager.py
 
 Notes on I/O:
 
-- Models are saved to: `train_data/PROJECT_NAME/ALGORITHM/[stochastic/deterministic]/MODEL_NAME/models/best_model.zip`.
-- Environments normalization statistics are saved to: `train_data/PROJECT_NAME/ALGORITHM/[stochastic/deterministic]/MODEL_NAME/envs/best_vecnormalize.pkl`.
+- Models are saved to: `train_data/PROJECT_NAME/ALGORITHM/[stochasticORdeterministic]/MODEL_NAME/models/best_model.zip`.
+- Environments normalization statistics are saved to: `train_data/PROJECT_NAME/ALGORITHM/[stochasticORdeterministic]/MODEL_NAME/envs/best_vecnormalize.pkl`.
 
 
 Bash script equivalent:
