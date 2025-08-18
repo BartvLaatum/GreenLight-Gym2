@@ -46,7 +46,15 @@ def get_obs_names(env):
     return obs_names
 
 class ExperimentManager:
-    """Class to manage reinforcement learning experiments."""
+    """Manages the full RL run lifecycle.
+
+    Responsibilities:
+    - Load env and agent configs
+    - Build vectorized train/eval environments (with normalization)
+    - Instantiate the SB3 model (PPO/SAC/RecurrentPPO)
+    - Run training, evaluation callbacks, and persistence
+    - Optionally perform W&B hyperparameter sweeps
+    """
     def __init__(
         self,
         env_id,
@@ -66,25 +74,26 @@ class ExperimentManager:
         hp_tuning=False,
         device="cpu"
     ):
-        """
-        Initialize the ExperimentManager with the given parameters.
+        """Initialize the manager.
 
         Args:
-            env_id (str): ID of the environment to train on.
-            project (str): Wandb project name.
-            group (str): Wandb group name.
-            total_timesteps (int): Total number of timesteps for training.
-            n_eval_episodes (int): Number of episodes to evaluate the agent.
-            num_cpus (int): Number of CPUs to use during training.
-            n_evals (int): Number of evaluations during training.
-            algorithm (str): RL algorithm to use.
-            env_seed (int): Seed for the environment.
-            model_seed (int): Seed for the model.
-            save_model (bool): Whether to save the model.
-            save_env (bool): Whether to save the environment.
-            continue_training (bool): Whether to continue training from a saved model.
-            continued_project (str): Project name of the saved model to continue training from.
-            continued_runname (str): Run name of the saved model to continue training from.
+            env_id: Environment ID (e.g., `TomatoEnv`).
+            project: W&B project name.
+            env_base_params: Dict of base env settings (from `configs/envs`).
+            env_specific_params: Dict of task-specific settings (from `configs/envs`).
+            hyperparameters: Agent hyperparams (from `configs/agents`). Must include
+                `total_timesteps` and `n_envs`; remaining keys are passed to SB3.
+            group: W&B group name.
+            n_eval_episodes: Episodes per evaluation.
+            n_evals: Number of evaluations over training.
+            algorithm: One of `ppo`, `sac`, `recurrentppo`.
+            env_seed: RNG seed for environment.
+            model_seed: RNG seed for model.
+            stochastic: If True, logs under `stochastic/` else `deterministic/`.
+            save_model: Persist trained model artifacts.
+            save_env: Persist VecNormalize stats.
+            hp_tuning: If True, run a W&B sweep instead of a single training run.
+            device: Torch device (e.g., `cpu`, `cuda`, `cuda:0`).
         """
         self.env_id = env_id
         self.project = project
@@ -135,8 +144,9 @@ class ExperimentManager:
             self.initialise_model()
 
     def init_envs(self, gamma):
-        """
-        Initialize training and evaluation environments
+        """Create vectorized train and eval environments with VecNormalize.
+
+        Normalization uses the provided discount `gamma` to compute returns.
         """
         self.monitor_filename = None
         vec_norm_kwargs = {
@@ -172,12 +182,7 @@ class ExperimentManager:
 
 
     def initialise_model(self):
-        """
-        Initialize the model for training or continued training.
-
-        Args:
-            runname (str): Name of the run.
-        """
+        """Instantiate the SB3 model and configure TensorBoard logging."""
         if self.stochastic:
             tensorboard_log = f"train_data/{self.project}/{self.algorithm}/stochastic/logs/{self.run.name}"
         else:
@@ -195,16 +200,12 @@ class ExperimentManager:
 
     def build_model_parameters(self):
         """
-        Constructs and returns the model parameters for the reinforcement learning model.
+        Prepare SB3 constructor kwargs from config.
 
-        This method processes the hyperparameters provided during initialization to 
-        configure the model parameters. It handles the conversion of string identifiers 
-        for activation functions and optimizers into their respective classes. Additionally, 
-        it sets up action noise parameters if the SAC algorithm is used.
-
-        Returns:
-            dict: A dictionary containing the model parameters, including any necessary 
-                  conversions for activation functions, optimizers, and action noise.
+        - Maps strings in `policy_kwargs` (activation_fn, optimizer_class) to classes
+        - Evaluates `log_std_init` expressions
+        - For SAC, constructs the configured action noise
+        Returns: dict of model kwargs.
         """
         model_params = self.hyperparameters.copy()
 
@@ -242,8 +243,10 @@ class ExperimentManager:
 
     def build_model_hyperparameters(self, config):
         """
-        Builds RL model hyperparameters from a configuration file for Hyperparameter Tuning.
-        The config file is generated by sampling from hyperparameter sweep.
+        Convert a W&B sweep sample to SB3 kwargs.
+
+        Applies mappings for `gamma_offset`->`gamma`, net architectures, and (for SAC)
+        action noise. Populates `self.model_params`.
         """
         self.model_params = dict(config).copy()
         self.model_params["gamma"] = 1.0 - config["gamma_offset"]
@@ -290,9 +293,7 @@ class ExperimentManager:
         self.model_params["policy_kwargs"] = policy_kwargs
 
     def run_single_sweep(self):
-        """
-        Main function for hyperparameter tuning.
-        """
+        """Run one sweep trial: init envs, build params, train once."""
         with wandb.init(sync_tensorboard=True) as run:
             self.run = run
             self.config = wandb.config
@@ -302,10 +303,8 @@ class ExperimentManager:
             self.run_experiment()
 
     def hyperparameter_tuning(self):
-        """
-        Perform hyperparameter tuning for the model. Using the Sweep API from Weights and Biases.
-        """
-        self.total_timesteps = 1.5e6
+        """Launch a W&B sweep and run multiple sampled trials."""
+        self.total_timesteps = 1.5e6 # standard run for 1.5M time steps
         continue_sweep = False
         sweep_config = load_sweep_config(self.hyp_config_path, self.env_id, self.algorithm)
         if continue_sweep:
@@ -315,16 +314,10 @@ class ExperimentManager:
             wandb.agent(sweep_id, function=self.run_single_sweep, count=100)
 
     def run_experiment(self):
-        """
-        Executes the reinforcement learning experiment.
+        """Train for `total_timesteps`, evaluate periodically, and persist artifacts.
 
-        This method manages the training process of the RL model using the initialized
-        environments and model parameters. It sets up logging directories based on the 
-        experiment"s stochastic or deterministic nature, calculates evaluation frequency, 
-        and creates necessary callbacks for model evaluation and environment saving. 
-        The method then trains the model for the specified number of timesteps, saves 
-        the final model and environment normalization if required, and performs cleanup 
-        operations post-training.
+        Sets up logging dirs, evaluation callbacks, and saves the final model and
+        VecNormalize stats. Cleans up envs and W&B run afterwards.
         """
         if self.stochastic:
             model_log_dir = f"train_data/{self.project}/{self.algorithm}/stochastic/models/{self.run.name}/" if self.save_model else None
@@ -381,9 +374,6 @@ def main():
     parser.add_argument("--save_model", default=True, action=argparse.BooleanOptionalAction, help="Whether to save the model")
     parser.add_argument("--save_env", default=True, action=argparse.BooleanOptionalAction, help="Whether to save the environment")
     parser.add_argument("--hyperparameter_tuning", default=False, action=argparse.BooleanOptionalAction, help="Perform hyperparameter tuning")
-    # parser.add_argument("--continue_training", default=False, action=argparse.BooleanOptionalAction, help="Continue training from a saved model")
-    # parser.add_argument("--continued_project", type=str, default=None, help="Project name of the saved model to continue training from")
-    # parser.add_argument("--continued_runname", type=str, default=None, help="Runname of the saved model to continue training from")
     args = parser.parse_args()
 
     env_config_path = f"gl_gym/configs/envs/"
