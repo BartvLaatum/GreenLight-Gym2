@@ -5,9 +5,9 @@ This folder defines the greenhouse simulation environments, their observation mo
 - `base_env.py`: Defines the abstract base class `GreenLightEnv`.
 - `baseline.py`: Defines the rule-based baseline controller.
 - `noise.py`: Contains a function for randomly sampling tomato crop parameters.
-- `observations.py`: Observation modules you can mix-and-match.
+- `observations.py`: Individual observation modules you can mix, configure them in the configuration file.
 - `parameters.py`: Default greenhouse parameters (tuned for a Dutch Venlo greenhouse).
-- `rewards.py`: Reward functions. Default is `GreenhouseReward`.
+- `rewards.py`: Reward functions, possibility to create your own. Default is `GreenhouseReward`.
 - `tomato_env.py`: A concrete example environment (`TomatoEnv`) built on `GreenLightEnv`.
 - `utils.py`: Contains utility functions required by greenhouse systems.
 - `models/`: Underlying CasADi model setup.
@@ -96,7 +96,7 @@ class MyObservations(BaseObservations):
         ], dtype=np.float32)
 ```
 
-To use a new module with `TomatoEnv`, add its class to the `OBSERVATION_MODULES` dict in `tomato_env.py`, then list it by name in the env config `observation_modules` array.
+To use a new module with `TomatoEnv`, add its class to the `OBSERVATION_MODULES` dict in `tomato_env.py` or your own `<custom_env.py>`, then list it by name in the env config `observation_modules` array.
 
 ### Create a custom reward
 
@@ -119,7 +119,7 @@ class MyReward(BaseReward):
         return temp_term - lamp_pen
 ```
 
-To use a new reward with `TomatoEnv`, add it to the `REWARDS` dict in `tomato_env.py`, then select it by name in the env config via `reward_function` and pass parameters under `reward_params`.
+To use a new reward with `TomatoEnv`, add it to the `REWARDS` dict in `tomato_env.py` or your own `<custom_env.py>`, then select it by name in the env config via `reward_function` and pass parameters under `reward_params`.
 
 ### Hooking everything up via configuration
 
