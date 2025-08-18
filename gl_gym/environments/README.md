@@ -26,7 +26,7 @@ from gymnasium import spaces
 
 from gl_gym.environments.base_env import GreenLightEnv
 from gl_gym.environments.observations import BaseObservations, MyObservations
-from gl_gym.environments.rewards import BaseReward
+from gl_gym.environments.rewards import BaseReward, MyReward
 
 
 class MyEnv(GreenLightEnv):
