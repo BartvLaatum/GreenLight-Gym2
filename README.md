@@ -6,6 +6,14 @@
   <img src="./images/GLGymArchitecture2.svg" alt="GreenLight" width="700"/>
 </p>
 
+## Table of contents
+
+- [Summary](#summary)
+- [Installation](#installation)
+- [Repository Structure](#repository-structure)
+- [Usage](#usage)
+- [Future road map](#future-road-map)
+- [Citation](#citation)
 
 ## Summary
 
@@ -16,8 +24,13 @@ It is based on the validated high-tech greenhouse model [GreenLight](https://git
 - Realistic greenhouse climate and crop dynamics for RL research.
 - Implementation in the automatic differentiation tool CasADi for increased simulation speeds.
 - Baseline rule-based controllers for benchmarking.
-- Configurable experiments with reproducible setups.
-- Visualizations tolls for analysis.
+- Modular and design:
+  1. Create custom environments (child of `GreenLightEnv`)
+  2. Plug in your own Reward functions
+  3. Observation modules
+- Interchangable weather data: train/evaluate on your own location/year weather CSVs with simple folder conventions.
+- Configuration files to further customize environments: YAML configs for agents, environments, and W&B sweeps; easy hyperparameter tuning.
+- Visualization tools for analysis.
 
 This repository was used in the following accepted conference paper:
 
@@ -35,6 +48,7 @@ v0.2 marks a shift from the v0.1 C++ build to a pure Python-native model:
 > - [x] Easy installation for operating systems Windows, Linux, and maxOS via `pip install -e .`
 >
 > 🔗 For the C++ version of the GreenLight models, use **v0.1** release tag and its README.
+
 
 ## Installation
 
