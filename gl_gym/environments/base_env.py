@@ -17,7 +17,6 @@ class GreenLightEnv(gym.Env):
     Args:
         weather_data_dir (str): path to weather data
         location (str): location of the recorded weather data
-        data_source (str): source of the weather data
         nx (int): number of states 
         nd (int): number of disturbances
         h (float): [s] time step for the GreenLight solver
@@ -41,7 +40,6 @@ class GreenLightEnv(gym.Env):
         self,
         weather_data_dir: str,          # path to weather data
         location: str,                  # location of the recorded weather data
-        data_source: str,               # source of the weather data
         num_params: int,                # number of model parameters
         nx: int,                        # number of states
         nu: int,                        # number of control inputs
@@ -73,7 +71,6 @@ class GreenLightEnv(gym.Env):
         self.delta_u_max = np.ones(self.nu, dtype=np.float32) * delta_u_max
         self.weather_data_dir = weather_data_dir
         self.location = location
-        self.data_source = data_source
         self.dt = dt
         self.pred_horizon = pred_horizon
         self.Np = int(self.pred_horizon * self.c/self.dt)

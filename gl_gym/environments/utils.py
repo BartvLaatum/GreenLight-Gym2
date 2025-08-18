@@ -48,7 +48,6 @@ def init_state(d0, rhMax=90, time_in_days=0):
 def load_weather_data(
                         weatherDataDir: str,
                         location: str,
-                        source: str,
                         growthYear: int,
                         startDay: int,
                         nDays: int,
@@ -64,10 +63,12 @@ def load_weather_data(
 
     Args:
         weatherDataDir  - path to raw weather data
+        location        - location of the weather data
+        growthYear      - start of the growth year of the simulation
         startDay        - at which day of the year do we start the simulation
         nDays           - how many days do we simulate forward in time
-        Np              - prediction horizon [days]
-        h               - sample time of the solver
+        predHorizon     - prediction horizon [days]
+        h               - sample time of the solver in seconds
         nd              - number of weather variables
     
     Returns:
@@ -83,7 +84,7 @@ def load_weather_data(
         d[8]: isDay         Whether it is day or night [0,1]
         d[9]: isDaySmooth   Whether it is day or night [0,1] with a smooth transition
     """
-    weatherDataPath = join(join(weatherDataDir, location), source + str(growthYear)) + ".csv"
+    weatherDataPath = join(join(weatherDataDir, location), str(growthYear)) + ".csv"
 
     c = 86400      # seconds in a day
     CO2_PPM = 400  # assumed constant outdoor co2 concentration [ppm]
@@ -97,7 +98,7 @@ def load_weather_data(
 
     # check whether we exceed data length and we are in the final season
     if N0+Ns+Np > len(time):
-        rawWeather = expandWeatherData(weatherDataDir, rawWeather, location, source, growthYear, time, dt)
+        rawWeather = expandWeatherData(weatherDataDir, rawWeather, location, growthYear, time, dt)
     weatherData = np.zeros((Ns+Np, nd))                                         # preallocate weather data matrix
     time = rawWeather["time"].values[N0:N0+Ns+Np]                               # time since start of the year in [s]
     weatherData[:, 0] = rawWeather["global radiation"][N0:N0+Ns+Np]             # iGlob
@@ -128,7 +129,6 @@ def expandWeatherData(
                     weatherDataDir: str, 
                     rawWeather: pd.DataFrame,
                     location: str,
-                    source: str,
                     growthYear: int,
                     time: ArrayLike,
                     dt: SupportsFloat,
@@ -140,14 +140,13 @@ def expandWeatherData(
         weatherDataDir  - path to raw weather data
         rawWeather      - current weather data
         location        - location of the greenhouse
-        source          - source of the weather data (e.g. KNMI)
         growthYear      - year of the growth season
         time            - time since start of the year in [s]
         dt              - sample period of weather data [s]
     Returns:
         rawWeather      - weather data for the next year appended to the current weather data
     """
-    weatherDataPath = join(join(weatherDataDir, location), source + str(growthYear+1)) + ".csv"
+    weatherDataPath = join(join(weatherDataDir, location), str(growthYear+1)) + ".csv"
     newRawWeather = pd.read_csv(weatherDataPath, sep=",")
     newRawWeather["time"] += time[-1] + dt
     rawWeather = pd.concat([rawWeather, newRawWeather.iloc[:, :]])
