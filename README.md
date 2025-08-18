@@ -129,7 +129,7 @@ Placeholders and flags:
 - **MODEL_SEED**: Random seed for model initialization and training (e.g., `666`).
 - **DEVICE**: Compute device (`cpu`, `cuda`, or `cuda:0`, etc.).
 - **--save_model**: Passing this flag saves the trained model.
-- **--save_env**: Passing this flag save the environment normalization stats.
+- **--save_env**: Passing this flag saves the environment normalization stats.
 - **--stochastic**: Passing this optional flag saves the model and environment in a folder named `stochastic`, otherwise in `deterministic`.
 - **--hyperparameter_tuning**: Optional. Run hyperparameter tuning using sweep configs in [`sweeps/`](./gl_gym/configs/sweeps/) instead of a single training run.
 
@@ -150,6 +150,12 @@ python gl_gym/RL/experiment_manager.py
   --save_env
 ```
 
+Notes on I/O:
+
+- Models are saved to: `train_data/PROJECT_NAME/ALGORITHM/[stochastic/deterministic]/MODEL_NAME/models/best_model.zip`.
+- Environments normalization statistics are saved to: `train_data/PROJECT_NAME/ALGORITHM/[stochastic/deterministic]/MODEL_NAME/envs/best_vecnormalize.pkl`.
+
+
 Bash script equivalent:
 
 ```bash
@@ -168,7 +174,7 @@ python gl_gym/experiments/evaluate_rl.py \
   --project PROJECT_NAME \
   --env_id ENV_ID \
   --model_name MODEL_NAME \
-  --algorithm ALGORITHM_NAME \
+  --algorithm ALGORITHM \
   --mode MODE \
   --uncertainty_scale UNCERTAINTY_SCALE
 ```
@@ -177,8 +183,8 @@ Placeholders and flags:
 
 - **PROJECT_NAME**: W&B project name used for organizing training outputs (e.g., `AgriControl`).
 - **ENV_ID**: Environment ID used for training the model (e.g., `TomatoEnv`).
-- **MODEL_NAME**: The trained model run folder name under `train_data/PROJECT/ALGORITHM/MODE/models/` (e.g., `cosmic-music-45`).
-- **ALGORITHM_NAME**: Algorithm used for training. Supported for evaluation: `ppo`, `sac`.
+- **MODEL_NAME**: The trained model run folder name under `train_data/PROJECT/ALGORITHM/MODE/models/` (e.g., `cosmic-music-1`).
+- **ALGORITHM**: Algorithm used for training. Supported for evaluation: `ppo`, `sac`.
 - **MODE**: Evaluation mode; choose `deterministic` or `stochastic`. This must match the mode used during training.
 - **UNCERTAINTY_SCALE**: Required numeric value controlling environment stochasticity during evaluation.
   - If `MODE=deterministic`, set `UNCERTAINTY_SCALE` to `0.0` (enforced by the script).
@@ -186,8 +192,8 @@ Placeholders and flags:
 
 Notes on I/O:
 
-- Models are loaded from: `train_data/PROJECT_NAME/ALGORITHM_NAME/MODE/models/MODEL_NAME/best_model.zip`.
-- Results are saved to: `data/PROJECT_NAME/MODE/ALGORITHM_NAME/[UNCERTAINTY_SCALE/](for stochastic)/<auto-named>.csv`.
+- Models are loaded from: `train_data/PROJECT_NAME/ALGORITHM/MODE/models/MODEL_NAME/best_model.zip`.
+- Results are saved to: `data/PROJECT_NAME/MODE/ALGORITHM/MODE/UNCERTAINTY_SCALE](if stochastic)/<MODEL_NAME+GROWTH_YEAR+START_DAY+LOCATION>.csv`.
 
 Examples:
 
@@ -239,7 +245,7 @@ Placeholders and flags:
 
 Notes on I/O:
 
-- Results are saved to: `data/PROJECT_NAME/MODE/rb_baseline/` and, for stochastic mode, under `.../UNCERTAINTY_SCALE/`.
+- Results are saved to: `data/PROJECT_NAME/MODE/rb_baseline/UNCERTAINTY_SCALE(if stochastic)/rb_baseline-GROWTH-YEAR+START_DAY-LOCATION`.
 
 Examples:
 
