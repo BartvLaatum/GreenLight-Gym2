@@ -3,7 +3,6 @@
 GreenLightEnv:
   weather_data_dir: gl_gym/environments/weather # path to weather data
   location: Amsterdam             # location of the recorded weather data
-  data_source: KNMI               # source of the weather data
   num_params: 208                 # number of model parameters
   nx: 28                          # number of states
   nu: 6                           # number of control inputs
