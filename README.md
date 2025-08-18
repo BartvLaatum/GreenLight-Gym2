@@ -21,14 +21,14 @@ GreenLight-Gym is a benchmark simulation environment for **training and evaluati
 
 It is based on the validated high-tech greenhouse model [GreenLight](https://github.com/davkat1/GreenLight), and provides:
 
-- Realistic greenhouse climate and crop dynamics for RL research.
+- Realistic greenhouse climate and crop dynamics for RL research on greenhouse production control.
 - Implementation in the automatic differentiation tool CasADi for increased simulation speeds.
 - Baseline rule-based controllers for benchmarking.
-- Modular and design:
+- Modular and flexible:
   1. Create custom environments (child of `GreenLightEnv`)
   2. Plug in your own Reward functions
   3. Observation modules
-- Interchangable weather data: train/evaluate on your own location/year weather CSVs with simple folder conventions.
+- Interchangeable weather data: train/evaluate on your own location/year weather CSVs with simple folder conventions.
 - Configuration files to further customize environments: YAML configs for agents, environments, and W&B sweeps; easy hyperparameter tuning.
 - Visualization tools for analysis.
 
