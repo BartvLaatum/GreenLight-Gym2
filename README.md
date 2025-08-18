@@ -19,9 +19,6 @@ It is based on the validated high-tech greenhouse model [GreenLight](https://git
 - Configurable experiments with reproducible setups.
 - Visualizations tolls for analysis.
 
-<!-- The code in this repository was used for the following [preprint](https://arxiv.org/abs/2410.05336) that has been accepted by [The 8th IFAC Conference on 
-Sensing, Control and Automation Technologies for Agriculture](https://agricontrol25.sf.ucdavis.edu/). -->
-
 This repository was used in the following accepted conference paper:
 
 📄 [Preprint](https://arxiv.org/abs/2410.05336): [The 8th IFAC Conference on Sensing, Control and Automation Technologies for Agriculture](https://agricontrol25.sf.ucdavis.edu/)
@@ -72,8 +69,8 @@ v0.2 marks a shift from the v0.1 C++ build to a pure Python-native model:
 
 | Folder                 | Description                                                      |
 | ---------------------- | ---------------------------------------------------------------- |
-| `gl_gym/environments/` | Environment definitions: models, parameters, rewards, observations|
-| `gl_gym/configs/`      | YAML configuration files for agents and environments             |
+| [`gl_gym/environments/`](./gl_gym/environments/) | Environment definitions: models, parameters, rewards, observations. See the detailed [environments README](./gl_gym/environments/README.md).|
+| [`gl_gym/configs/`](./gl_gym/configs/)      | YAML configuration files for agents, environments, and sweeps. See the detailed [configs README](./gl_gym/configs/README.md).             |
 | `gl_gym/common/`       | Shared utility functions                                         |
 | `gl_gym/RL/`           | Experiment manager, training setup, W\&B integration             |
 | `gl_gym/experiments/`  | Python experiment scripts (training, evaluation)                 |
@@ -81,6 +78,7 @@ v0.2 marks a shift from the v0.1 C++ build to a pure Python-native model:
 | `visualisations/`      | Plotting and analysis scripts                                    |
 
 ## Usage
+
 
 ### 1. **Running an RL Experiment**
 
@@ -379,6 +377,41 @@ Before generating any plots you must have evaluated your RL agents with `evaluat
   </p>
 
 > Note that the other three scripts in `visualisations/` require additional data, which can be made available upon request.
+
+### 5. **Using your own weather data (optional)**
+
+You can plug in custom weather recordings and train on them.
+
+- **Directory layout**: Place CSVs under `gl_gym/environments/weather/<LOCATION>/` named `<YEAR>.csv`.
+  - Example: `gl_gym/environments/weather/Spain/2001.csv`
+
+- **CSV headers (exact names)**: The file must have a header row with at least these columns. Extra columns are ignored.
+
+  ```
+  time,global radiation,air temperature,sky temperature,wind speed,RH
+  ```
+
+- **Columns and units their**:
+  1. `time`: seconds since Jan 1st 00:00:00 of that year (e.g., 0, 300, 600, ...)
+  2. `global radiation`: W/m^2
+  3. `wind speed`: m/s
+  4. `air temperature`: °C
+  5. `sky temperature`: °C
+  6. `?? - unused column`: Fill with zeros
+  7. `CO2 concentration`: ppm
+  8. `day number`: Day of the year
+  9. `RH`: %
+
+  - Sampling interval: 300 s (5 min) recommended. A constant step is required; the environment will resample internally to its solver step.
+  - If your want multi-year simulations, also provide `<YEAR+n>.csv` in the same folder.
+
+- **Configure the environment**: Edit `gl_gym/configs/envs/TomatoEnv.yml` under `GreenLightEnv`:
+  - `weather_data_dir`: keep default (`gl_gym/environments/weather`) or point to your data root
+  - `location`: set to your folder name (e.g., `Spain`)
+  - `start_train_year` / `end_train_year`: set to the year(s) you have CSVs for (e.g., `2001`)
+  - Optionally update `eval_options.location` and `eval_options.eval_years` to match
+
+After this, run training as usual (see below). The environment will load `.../<LOCATION>/<YEAR>.csv`.
 
 ## Future road map
 
