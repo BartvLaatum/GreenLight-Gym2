@@ -82,85 +82,296 @@ v0.2 marks a shift from the v0.1 C++ build to a pure Python-native model:
 
 ## Usage
 
-1. **Running an RL Experiment**
+### 1. **Running an RL Experiment**
 
-To start a new reinforcement learning experiment, users can either directly run a Python script or run a bash script in [`run_scripts/`](./run_scripts/) that calls a Python script. The environment, model, etc. can be changed via flags in the command line arguments.
+To start a new reinforcement learning experiment, you can either call the Python entrypoint directly or use the bash wrapper in [`run_scripts/`](./run_scripts/). Configure the environment, algorithm, logging, and runtime behavior via the command-line flags below.
 
-The following command trains the PPO agent on the TomatoEnv environment, saves the best and the last model, and accompanying environment normalization statistics. The hyperparameter tuning flag is optional. One can adjust hyperparameter tuning settings in the files in [`sweeps/`](./gl_gym/configs/sweeps/).
+Quick start (with placeholders):
 
 ```bash
-  python gl_gym/RL/experiment_manager.py \
-      --project PROJECT_NAME \
-      --env_id TomatoEnv \
-      --algorithm ppo \
-      --group ppo_det \
-      --n_eval_episodes 1 \
-      --n_evals 10 \
-      --env_seed 666 \
-      --model_seed 666 \
-      --device cpu \
-      --save_model \
-      --save_env \
-      # --hyperparameter_tuning
+python gl_gym/RL/experiment_manager.py \
+  --project PROJECT_NAME \
+  --env_id ENV_ID \
+  --algorithm ALGORITHM_NAME \
+  --group GROUP_NAME \
+  --n_eval_episodes N_EVAL_EPISODES \
+  --n_evals N_EVALS \
+  --env_seed ENV_SEED \
+  --model_seed MODEL_SEED \
+  --device DEVICE \
+  --save_model \
+  --save_env \
+  [--stochastic] \
+  [--hyperparameter_tuning]
 ```
 
-The bash script equivalent:
+Placeholders and flags:
+
+- **PROJECT_NAME**: W&B project name used for logging and for organizing output paths (e.g., `AgriControl`).
+- **ENV_ID**: Environment ID to train on (e.g., `TomatoEnv`).
+- **ALGORITHM_NAME**: RL algorithm to use. Supported: `ppo`, `sac`, `recurrentppo`.
+- **GROUP_NAME**: W&B group label to group runs (e.g., `ppo_det`).
+- **N_EVAL_EPISODES**: Number of episodes evaluated at each evaluation step (default: `1`).
+- **N_EVALS**: Number of evaluations performed across training (default: `10`).
+- **ENV_SEED**: Random seed for environment dynamics (e.g., `666`).
+- **MODEL_SEED**: Random seed for model initialization and training (e.g., `666`).
+- **DEVICE**: Compute device (`cpu`, `cuda`, or `cuda:0`, etc.).
+- **--save_model**: Passing this flag saves the trained model.
+- **--save_env**: Passing this flag save the environment normalization stats.
+- **--stochastic**: Passing this optional flag saves the model and environment in a folder named `stochastic`, otherwise in `deterministic`.
+- **--hyperparameter_tuning**: Optional. Run hyperparameter tuning using sweep configs in [`sweeps/`](./gl_gym/configs/sweeps/) instead of a single training run.
+
+Example:
+
+```bash
+python gl_gym/RL/experiment_manager.py \
+  --project AgriControl \
+  --env_id TomatoEnv \
+  --algorithm ppo \
+  --group ppo_det \
+  --n_eval_episodes 1 \
+  --n_evals 10 \
+  --env_seed 666 \
+  --model_seed 666 \
+  --device cpu \
+  --save_model \
+  --save_env
+```
+
+Bash script equivalent:
 
 ```bash
 bash run_scripts/rl.sh
 ```
 
-> Note: This run will initialze a Weights and Biases run. Users are queried to either login to their account, create an account or continue without visualizations and model logging.
+> Note: Running training will initialize a Weights & Biases session. You can log in, create an account, or proceed without logging to disable online visualizations and model logging.
 
-2. **Evaluation of Trained Models**
-You can evaluate trained models using the evaluation scripts provided in the experiments folder `evaluate_rl.py`:
+### 2. **Evaluation of Trained Models**
+You can evaluate trained models using `gl_gym/experiments/evaluate_rl.py`.
 
-```shell
-python gl_gym/experiments/evaluate_rl.py --project PROJECT_NAME --env_id TomatoEnv --model_name YOUR_MODEL_NAME --algorithm ppo
+Quick start (with placeholders):
+
+```bash
+python gl_gym/experiments/evaluate_rl.py \
+  --project PROJECT_NAME \
+  --env_id ENV_ID \
+  --model_name MODEL_NAME \
+  --algorithm ALGORITHM_NAME \
+  --mode MODE \
+  --uncertainty_scale UNCERTAINTY_SCALE
 ```
 
-3. **Evaluation of Baseline Controller**
-You can evaluate the rule-based baseline controller for different levels of parametric uncertainty through the following bash script:
+Placeholders and flags:
+
+- **PROJECT_NAME**: W&B project name used for organizing training outputs (e.g., `AgriControl`).
+- **ENV_ID**: Environment ID used for training the model (e.g., `TomatoEnv`).
+- **MODEL_NAME**: The trained model run folder name under `train_data/PROJECT/ALGORITHM/MODE/models/` (e.g., `cosmic-music-45`).
+- **ALGORITHM_NAME**: Algorithm used for training. Supported for evaluation: `ppo`, `sac`.
+- **MODE**: Evaluation mode; choose `deterministic` or `stochastic`. This must match the mode used during training.
+- **UNCERTAINTY_SCALE**: Required numeric value controlling environment stochasticity during evaluation.
+  - If `MODE=deterministic`, set `UNCERTAINTY_SCALE` to `0.0` (enforced by the script).
+  - If `MODE=stochastic`, use a non-negative float (e.g., `0.1`). The script will run multiple simulations (30 by default) with randomly sampled parameters for the crop model at each time step. The simulation results are aggregated.
+
+Notes on I/O:
+
+- Models are loaded from: `train_data/PROJECT_NAME/ALGORITHM_NAME/MODE/models/MODEL_NAME/best_model.zip`.
+- Results are saved to: `data/PROJECT_NAME/MODE/ALGORITHM_NAME/[UNCERTAINTY_SCALE/](for stochastic)/<auto-named>.csv`.
+
+Examples:
+
+- Deterministic evaluation
+
+```bash
+python gl_gym/experiments/evaluate_rl.py \
+  --project AgriControl \
+  --env_id TomatoEnv \
+  --model_name cosmic-music-1 \
+  --algorithm ppo \
+  --mode deterministic \
+  --uncertainty_scale 0.0
+```
+
+- Stochastic evaluation (runs 30 simulations and saves under `.../stochastic/.../<scale>/`)
+
+```bash
+python gl_gym/experiments/evaluate_rl.py \
+  --project AgriControl \
+  --env_id TomatoEnv \
+  --model_name cosmic-music-1 \
+  --algorithm ppo \
+  --mode stochastic \
+  --uncertainty_scale 0.1
+```
+
+### 3. **Evaluation of Baseline Controller**
+You can evaluate the rule-based baseline controller using `gl_gym/experiments/evaluate_baseline.py`.
+
+Quick start (with placeholders):
+
+```bash
+python gl_gym/experiments/evaluate_baseline.py \
+  --project PROJECT_NAME \
+  --env_id ENV_ID \
+  --mode MODE \
+  --uncertainty_scale UNCERTAINTY_SCALE
+```
+
+Placeholders and flags:
+
+- **PROJECT_NAME**: Project name used to organize outputs (e.g., `AgriControl`).
+- **ENV_ID**: Environment ID (e.g., `TomatoEnv`).
+- **MODE**: Choose `deterministic` or `stochastic`.
+- **UNCERTAINTY_SCALE**: Numeric value controlling environment stochasticity during evaluation.
+  - If `MODE=deterministic`, set to `0.0` for a single run.
+  - If `MODE=stochastic`, use a non-negative float (e.g., `0.1`). The script runs 30 simulations with randomly sampled parameters for the crop model at each time step and aggregates results.
+
+Notes on I/O:
+
+- Results are saved to: `data/PROJECT_NAME/MODE/rb_baseline/` and, for stochastic mode, under `.../UNCERTAINTY_SCALE/`.
+
+Examples:
+
+- Deterministic baseline evaluation
+
+```bash
+python gl_gym/experiments/evaluate_baseline.py \
+  --project AgriControl \
+  --env_id TomatoEnv \
+  --mode deterministic \
+  --uncertainty_scale 0.0
+```
+
+- Stochastic baseline evaluation (runs 30 simulations and saves under `.../stochastic/rb_baseline/<scale>/`)
+
+```bash
+python gl_gym/experiments/evaluate_baseline.py \
+  --project AgriControl \
+  --env_id TomatoEnv \
+  --mode stochastic \
+  --uncertainty_scale 0.1
+```
+
+Optional: A convenience bash script is available to sweep across multiple uncertainty scales:
 
 ```bash
 bash run_scripts/eval_baseline.sh
 ```
 
-> Note that this is called through a bash script. Windows users should execute a bash script via Git bash.
+> Note: On Windows, run the bash script via Git Bash.
 
-4. **Visualizations**
-    - **Plotting**: The repository includes scripts under [visualisations](./visualisations/) for plotting learning curves and cost metrics. 
-    - Before, generating any plots you must have evaluated your RL agents with `evaluate_rl.py` and a rule-based baseline with `evaluate_baseline.py`
+### 4. **Visualizations**
+**Plotting**: The repository includes scripts under [visualisations](./visualisations/) for plotting learning curves and cost metrics. 
+Before generating any plots you must have evaluated your RL agents with `evaluate_rl.py` and the rule-based baseline with `evaluate_baseline.py`.
 
+  #### Time-series of trajectories
+  Compares the state and control input trajectories for N consecutive days.
 
-    #### Time-series of trajectories.
-    Compares the state and control input trajectories for $N$ consecutive days.
-    ```shell
-    python visualisations/trajectories.py --project PROJECT_NAME --MODE --ppo_name PPO_MODEL_NAME --sac_name SAC_MODEL_NAME --growth_year GROWTH_YEAR --start_day START_DAY --location LOCATION --n_days2plot NUMBER_OF_DAY_TO_VISUALIZE --uncertainty_value UNCERTAINTY_VALUE
-    ```    
-    <p align="center">
-      <img src="./images/timeseries_state.png" alt="Time series state" width="400"/>
-    </p>
+  Quick start (with placeholders):
 
-    #### Bar plot the performance metrics.
-    Creates a bar plot of controller performance regarding cost en constraints metrics.
-    ```shell
-    python visualisations/cost_metrics.py --project PROJECT_NAME --MODE --uncertainty_value UNCERTAINTY_VALUE --growth_year GROWTH_YEAR --start_day START_DAY --location LOCATION
-    ```
-    #### Example of comparing SAC, PPO and rule-based agent (RB) on economic performance indicator (EPI) metrics.
-    <p align="center">
-      <img src="./images/cost_metrics_comparison.png" alt="Cost Metrics Comparison" width="400"/>
-    </p>
+  ```bash
+  python visualisations/trajectories.py \
+    --project PROJECT_NAME \
+    --mode MODE \
+    --ppo_name PPO_MODEL_NAME \
+    --sac_name SAC_MODEL_NAME \
+    --growth_year GROWTH_YEAR \
+    --start_day START_DAY \
+    --location LOCATION \
+    --n_days2plot N_DAYS2PLOT \
+    [--uncertainty_value UNCERTAINTY_SCALE]
+  ```
 
-    #### Line plot the performance metrics over parametric uncertainty scale.
-    Visualizes how the cumulative reward changes with different levels of parametric uncertainty in the environment by comparing controller performance. NOTE: Don't forget to update variable `model_names` to the correct model names in [`param_uncertainty.py`](./visualisations/param_uncertainty.py). 
-    ```shell
-    python visualisations/param_uncertainty.py --project PROJECT_NAME --mode MODE --growth_year GROWTH_YEAR --start_day START_DAY --location LOCATION
-    ```
-      #### Example of comparing SAC, PPO and rule-based agent (RB) on the cumulative reward trained per parametric uncertainty environment.
-    <p align="center">
-      <img src="./images/cumulative_reward.png" alt="Performance uncertainty" width="400"/>
-    </p>
+  - **PROJECT_NAME**: Project name (e.g., `AgriControl`).
+  - **MODE**: `deterministic` or `stochastic` (must match evaluation mode used when generating CSVs).
+  - **PPO_MODEL_NAME/SAC_MODEL_NAME**: Model run names used during evaluation (CSV filenames contain these).
+  - **GROWTH_YEAR/START_DAY/LOCATION**: Must match the evaluated CSV filenames.
+  - **N_DAYS2PLOT**: Number of days to display from start and end of the season.
+  - **UNCERTAINTY_SCALE**: Required if `MODE=stochastic`; omit for deterministic.
+
+  Example:
+
+  ```bash
+  python visualisations/trajectories.py \
+    --project AgriControl \
+    --mode deterministic \
+    --ppo_name cosmic-music-1 \
+    --sac_name distinctive-frost-2 \
+    --growth_year 2011 \
+    --start_day 1 \
+    --location Amsterdam \
+    --n_days2plot 7
+  ```
+
+  <p align="center">
+    <img src="./images/timeseries_state.png" alt="Time series state" width="400"/>
+  </p>
+
+  #### Bar plots of performance metrics
+  Compares cumulative cost and constraint metrics across controllers.
+
+  Quick start (with placeholders):
+
+  ```bash
+  python visualisations/cost_metrics.py \
+    --project PROJECT_NAME \
+    --mode MODE \
+    --growth_year GROWTH_YEAR \
+    --start_day START_DAY \
+    --location LOCATION \
+    [--uncertainty_value UNCERTAINTY_SCALE]
+  ```
+
+  - **PROJECT_NAME**: Project name (e.g., `AgriControl`).
+  - **MODE**: `deterministic` or `stochastic` (must match evaluation mode used when generating CSVs).
+  - **GROWTH_YEAR/START_DAY/LOCATION**: Must match the evaluated CSV filenames.
+  - **UNCERTAINTY_SCALE**: Required if `MODE=stochastic`; omit for deterministic.
+
+  Example:
+
+  ```bash
+  python visualisations/cost_metrics.py \
+    --project AgriControl \
+    --mode stochastic \
+    --growth_year 2011 \
+    --start_day 1 \
+    --location Amsterdam \
+    --uncertainty_value 0.1
+  ```
+
+  #### Performance across parametric uncertainty
+  Visualizes how cumulative metrics change with different levels of parametric uncertainty by comparing controllers.
+
+  Quick start (with placeholders):
+
+  ```bash
+  python visualisations/param_uncertainty.py \
+    --project PROJECT_NAME \
+    --mode MODE \
+    --growth_year GROWTH_YEAR \
+    --start_day START_DAY \
+    --location LOCATION
+  ```
+
+  - **PROJECT_NAME**: Project name (e.g., `AgriControl`).
+  - **MODE**: Typically `stochastic` (expects subfolders per uncertainty level).
+  - **GROWTH_YEAR/START_DAY/LOCATION**: Must match the evaluated CSV filenames.
+
+  Note: Update `model_names` inside [`visualisations/param_uncertainty.py`](./visualisations/param_uncertainty.py) to match your actual run names.
+
+  Example of comparing SAC, PPO, and rule-based (RB) on cumulative reward across uncertainty levels:
+
+  ```bash
+  python visualisations/param_uncertainty.py \
+    --project AgriControl \
+    --mode stochastic \
+    --growth_year 2011 \
+    --start_day 1 \
+    --location Amsterdam
+  ```
+
+  <p align="center">
+    <img src="./images/cumulative_reward.png" alt="Performance uncertainty" width="400"/>
+  </p>
 
 > Note that the other three scripts in `visualisations/` require additional data, which can be made available upon request.
 
