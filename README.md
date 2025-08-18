@@ -263,7 +263,7 @@ bash run_scripts/eval_baseline.sh
 **Plotting**: The repository includes scripts under [visualisations](./visualisations/) for plotting learning curves and cost metrics. 
 Before generating any plots you must have evaluated your RL agents with `evaluate_rl.py` and the rule-based baseline with `evaluate_baseline.py`.
 
-  #### Time-series of trajectories
+  #### ***1) Time-series of trajectories***
   Compares the state and control input trajectories for N consecutive days.
 
   Quick start (with placeholders):
@@ -306,7 +306,7 @@ Before generating any plots you must have evaluated your RL agents with `evaluat
     <img src="./images/timeseries_state.png" alt="Time series state" width="400"/>
   </p>
 
-  #### Bar plots of performance metrics
+  #### ***2) Bar plots of performance metrics***
   Compares cumulative cost and constraint metrics across controllers.
 
   Quick start (with placeholders):
@@ -338,7 +338,12 @@ Before generating any plots you must have evaluated your RL agents with `evaluat
     --uncertainty_value 0.1
   ```
 
-  #### Performance across parametric uncertainty
+  <p align="center">
+    <img src="./images/cost_metrics_comparison.png" alt="Performance uncertainty" width="400"/>
+  </p>
+
+
+  #### ***3) Performance across parametric uncertainty***
   Visualizes how cumulative metrics change with different levels of parametric uncertainty by comparing controllers.
 
   Quick start (with placeholders):
@@ -358,7 +363,7 @@ Before generating any plots you must have evaluated your RL agents with `evaluat
 
   Note: Update `model_names` inside [`visualisations/param_uncertainty.py`](./visualisations/param_uncertainty.py) to match your actual run names.
 
-  Example of comparing SAC, PPO, and rule-based (RB) on cumulative reward across uncertainty levels:
+  Example of comparing SAC, PPO, and rule-based (RB):
 
   ```bash
   python visualisations/param_uncertainty.py \
