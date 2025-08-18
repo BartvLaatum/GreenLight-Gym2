@@ -124,17 +124,17 @@ Placeholders and flags:
 Example:
 
 ```bash
-python gl_gym/RL/experiment_manager.py \
-  --project AgriControl \
-  --env_id TomatoEnv \
-  --algorithm ppo \
-  --group ppo_det \
-  --n_eval_episodes 1 \
-  --n_evals 10 \
-  --env_seed 666 \
-  --model_seed 666 \
-  --device cpu \
-  --save_model \
+python gl_gym/RL/experiment_manager.py
+  --project AgriControl
+  --env_id TomatoEnv
+  --algorithm ppo
+  --group ppo_det
+  --n_eval_episodes 1
+  --n_evals 10
+  --env_seed 666
+  --model_seed 666
+  --device cpu
+  --save_model
   --save_env
 ```
 
@@ -182,24 +182,24 @@ Examples:
 - Deterministic evaluation
 
 ```bash
-python gl_gym/experiments/evaluate_rl.py \
-  --project AgriControl \
-  --env_id TomatoEnv \
-  --model_name cosmic-music-1 \
-  --algorithm ppo \
-  --mode deterministic \
+python gl_gym/experiments/evaluate_rl.py
+  --project AgriControl
+  --env_id TomatoEnv
+  --model_name cosmic-music-1
+  --algorithm ppo
+  --mode deterministic
   --uncertainty_scale 0.0
 ```
 
 - Stochastic evaluation (runs 30 simulations and saves under `.../stochastic/.../<scale>/`)
 
 ```bash
-python gl_gym/experiments/evaluate_rl.py \
-  --project AgriControl \
-  --env_id TomatoEnv \
-  --model_name cosmic-music-1 \
-  --algorithm ppo \
-  --mode stochastic \
+python gl_gym/experiments/evaluate_rl.py
+  --project AgriControl
+  --env_id TomatoEnv
+  --model_name cosmic-music-1
+  --algorithm ppo
+  --mode stochastic
   --uncertainty_scale 0.1
 ```
 
@@ -234,20 +234,20 @@ Examples:
 - Deterministic baseline evaluation
 
 ```bash
-python gl_gym/experiments/evaluate_baseline.py \
-  --project AgriControl \
-  --env_id TomatoEnv \
-  --mode deterministic \
+python gl_gym/experiments/evaluate_baseline.py
+  --project AgriControl
+  --env_id TomatoEnv
+  --mode deterministic
   --uncertainty_scale 0.0
 ```
 
 - Stochastic baseline evaluation (runs 30 simulations and saves under `.../stochastic/rb_baseline/<scale>/`)
 
 ```bash
-python gl_gym/experiments/evaluate_baseline.py \
-  --project AgriControl \
-  --env_id TomatoEnv \
-  --mode stochastic \
+python gl_gym/experiments/evaluate_baseline.py
+  --project AgriControl
+  --env_id TomatoEnv
+  --mode stochastic
   --uncertainty_scale 0.1
 ```
 
@@ -291,14 +291,14 @@ Before generating any plots you must have evaluated your RL agents with `evaluat
   Example:
 
   ```bash
-  python visualisations/trajectories.py \
-    --project AgriControl \
-    --mode deterministic \
-    --ppo_name cosmic-music-1 \
-    --sac_name distinctive-frost-2 \
-    --growth_year 2011 \
-    --start_day 1 \
-    --location Amsterdam \
+  python visualisations/trajectories.py
+    --project AgriControl
+    --mode deterministic
+    --ppo_name cosmic-music-1
+    --sac_name distinctive-frost-2
+    --growth_year 2011
+    --start_day 1
+    --location Amsterdam
     --n_days2plot 7
   ```
 
@@ -329,12 +329,12 @@ Before generating any plots you must have evaluated your RL agents with `evaluat
   Example:
 
   ```bash
-  python visualisations/cost_metrics.py \
-    --project AgriControl \
-    --mode stochastic \
-    --growth_year 2011 \
-    --start_day 1 \
-    --location Amsterdam \
+  python visualisations/cost_metrics.py
+    --project AgriControl
+    --mode stochastic
+    --growth_year 2011
+    --start_day 1
+    --location Amsterdam
     --uncertainty_value 0.1
   ```
 
@@ -366,11 +366,11 @@ Before generating any plots you must have evaluated your RL agents with `evaluat
   Example of comparing SAC, PPO, and rule-based (RB):
 
   ```bash
-  python visualisations/param_uncertainty.py \
-    --project AgriControl \
-    --mode stochastic \
-    --growth_year 2011 \
-    --start_day 1 \
+  python visualisations/param_uncertainty.py
+    --project AgriControl
+    --mode stochastic
+    --growth_year 2011
+    --start_day 1
     --location Amsterdam
   ```
 
