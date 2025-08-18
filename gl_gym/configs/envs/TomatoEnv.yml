@@ -43,7 +43,6 @@ TomatoEnv:
     eval_days: [59]                    # days to evaluate the agent on
     eval_years: [2010]                  # year to evaluate the agent on
     location: Amsterdam                 # location of the greenhouse
-    data_source: KNMI                 # source of the weather data
 
   reward_params:
     fixed_greenhouse_cost: 15.
