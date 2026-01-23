@@ -1,44 +1,40 @@
 cff-version: 1.2.0
 message: "If you use this work, please cite it as below."
-title: "Stochastic model predictive control with reinforcement learning for greenhouse production systems under parametric uncertainty"
-type: journal-article
+title: "GreenLight-Gym: Reinforcement learning benchmark environment for control of greenhouse production systems"
+type: conference-paper
 authors:
   - family-names: "van Laatum"
     given-names: "Bart"
-  - family-names: "Msaad"
-    given-names: "Salim"
   - family-names: "van Henten"
     given-names: "Eldert J."
-  - family-names: "McAllister"
-    given-names: "Robert D."
   - family-names: "Boersma"
     given-names: "Sjoerd"
-doi: "10.1016/j.conengprac.2026.106787"
-url: "https://www.sciencedirect.com/science/article/pii/S0967066126000316"
-identifiers:
-  - type: issn
-    value: "0967-0661"
+doi: "10.1016/j.ifacol.2025.11.827"
+url: "https://www.sciencedirect.com/science/article/pii/S2405896325025339"
+keywords:
+  - "Greenhouse control"
+  - "reinforcement learning"
+  - "greenhouse modeling"
+notes: >
+  Published in IFAC-PapersOnLine (Volume 59, Issue 23, 2025, pp. 437–442),
+  proceedings of the 8th IFAC Conference on Sensing, Control and Automation Technologies for Agriculture
+  (AGRICONTROL 2025), Davis, California, USA, August 27–29, 2025.
 preferred-citation:
-  type: article
-  title: "Stochastic model predictive control with reinforcement learning for greenhouse production systems under parametric uncertainty"
+  type: conference-paper
+  title: "GreenLight-Gym: Reinforcement learning benchmark environment for control of greenhouse production systems"
   authors:
     - family-names: "van Laatum"
       given-names: "Bart"
-    - family-names: "Msaad"
-      given-names: "Salim"
     - family-names: "van Henten"
       given-names: "Eldert J."
-    - family-names: "McAllister"
-      given-names: "Robert D."
     - family-names: "Boersma"
       given-names: "Sjoerd"
-  journal: "Control Engineering Practice"
-  year: 2026
-  month: 4
-  volume: 169
-  pages: "106787"
-  doi: "10.1016/j.conengprac.2026.106787"
-  url: "https://www.sciencedirect.com/science/article/pii/S0967066126000316"
-  identifiers:
-    - type: issn
-      value: "0967-0661"
+  year: 2025
+  doi: "10.1016/j.ifacol.2025.11.827"
+  journal: "IFAC-PapersOnLine"
+  volume: 59
+  issue: 23
+  start: 437
+  end: 442
+  collection-title: "8th IFAC Conference on Sensing, Control and Automation Technologies for Agriculture (AGRICONTROL 2025)"
+  collection-type: proceedings
