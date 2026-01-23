@@ -455,16 +455,19 @@ We plan to extend GreenLight-Gym with the following features:
 
 ## Citation
 
-If you find this repository and/or its accompanying article usefull, please cite it in your publications.
+If you find this repository and/or its accompanying article useful, please cite it in your publications.
 
 ```bibtex
-@misc{vanlaatum2025greenlightgymreinforcementlearningbenchmark,
-      title={GreenLight-Gym: Reinforcement learning benchmark environment for control of greenhouse production systems}, 
-      author={Bart van Laatum and Eldert J. van Henten and Sjoerd Boersma},
-      year={2025},
-      eprint={2410.05336},
-      archivePrefix={arXiv},
-      primaryClass={eess.SY},
-      url={https://arxiv.org/abs/2410.05336}, 
+@inproceedings{vanLaatum2025GreenLightGym,
+  title        = {GreenLight-Gym: Reinforcement learning benchmark environment for control of greenhouse production systems},
+  author       = {van Laatum, Bart and van Henten, Eldert J. and Boersma, Sjoerd},
+  journal      = {IFAC-PapersOnLine},
+  year         = {2025},
+  volume       = {59},
+  number       = {23},
+  pages        = {437--442},
+  doi          = {10.1016/j.ifacol.2025.11.827},
+  url          = {https://www.sciencedirect.com/science/article/pii/S2405896325025339},
+  note         = {8th IFAC Conference on Sensing, Control and Automation Technologies for Agriculture (AGRICONTROL 2025)}
 }
 ```
