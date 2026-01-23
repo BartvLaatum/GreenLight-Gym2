@@ -34,7 +34,7 @@ It is based on the validated high-tech greenhouse model [GreenLight](https://git
 
 This repository was used in the following accepted conference paper:
 
-📄 [Preprint](https://arxiv.org/abs/2410.05336): [The 8th IFAC Conference on Sensing, Control and Automation Technologies for Agriculture](https://agricontrol25.sf.ucdavis.edu/)
+📄 [Conference Paper](https://doi.org/10.1016/j.ifacol.2025.11.827): [The 8th IFAC Conference on Sensing, Control and Automation Technologies for Agriculture](https://agricontrol25.sf.ucdavis.edu/)
 
 ✏ Author: Bart van Laatum
 
