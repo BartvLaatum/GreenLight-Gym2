@@ -373,7 +373,7 @@ Weather scenarios define the outdoor climate and are identified by a **(location
 
 ### Bundled data
 
-GL-Gym ships with weather CSVs for **Amsterdam** (2001–2020) in `gl_gym/data/weather/`. Additional locations can be fetched from the [NASA POWER](https://power.larc.nasa.gov/) API using the included helper script:
+GL-Gym ships with weather CSVs for **Amsterdam** (2008–2012) in `gl_gym/data/weather/`. Additional years and locations can be fetched from the [NASA POWER](https://power.larc.nasa.gov/) API using the included helper script:
 
 ```bash
 python processing/fetch_weather_nasa.py "London, UK" --output-dir gl_gym/data/weather --start-year 2001 --end-year 2020
