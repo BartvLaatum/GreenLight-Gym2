@@ -33,14 +33,10 @@ This repository was used in the following accepted AgriControl 2025 conference p
 - [Observation Space](#observation-space)
 - [Action Space](#action-space)
 - [Reward Function](#reward-function)
-- [Custom Rewards](#custom-rewards)
-- [Custom Observation Modules](#custom-observation-modules)
-- [Parameter Sampling and Domain Randomization](#parameter-sampling-and-domain-randomization)
-- [Weather Sampling](#weather-sampling)
-- [Using Custom Weather Data](#using-custom-weather-data)
-- [Weather Data Format](#weather-data-format)
+- [Parameter Sampling](#parameter-sampling)
+- [Weather](#weather)
 - [Evaluation Reproducibility](#evaluation-reproducibility)
-- [Reproducing the AgriControl Experiments](#reproducing-the-agricontrol-experiments)
+- [Reproducing the AgriControl Experiments](#Training and evaluating RL agents using Stable Baselines 3)
 - [Rule-Based Baseline Controller](#rule-based-baseline-controller)
 - [Development and Extensibility](#development-and-extensibility)
 - [Citation](#citation)
@@ -212,16 +208,11 @@ env = gym.make(
 )
 ```
 
-Each entry in the list can be:
+Each entry can be a registry string (`"IndoorClimateObservations"`), a class reference, a pre-built instance, or a factory callable.
 
+Custom modules can be created by subclassing `BaseObservations` (`gl_gym.components.observations`) — implement `key`, `space`, and `compute_obs(ctx: StepContext)`. See the built-in modules for reference.
 
-| Type               | Example                                 |
-| ------------------ | --------------------------------------- |
-| Registry string    | `"IndoorClimateObservations"`           |
-| Class reference    | `MyCustomObservations`                  |
-| Pre-built instance | `MyCustomObservations(env)`             |
-| Factory callable   | `lambda env: MyCustomObservations(env)` |
-
+> **Note:** If using the default `GreenhouseReward`, `IndoorClimateObservations` must be included because the reward reads from `ctx.obs["IndoorClimateObservations"]`.
 
 ---
 
@@ -291,9 +282,7 @@ Both profit and penalties are min-max scaled so their contributions are comparab
 | Relative humidity | 50  | 85   | %    |
 
 
-### Selecting a different built-in reward
-
-Pass the reward class name as a string to `reward_fn`:
+### Overriding reward parameters
 
 ```python
 env = gym.make(
@@ -303,141 +292,27 @@ env = gym.make(
 )
 ```
 
-Currently, `GreenhouseReward` is the only built-in reward. Additional built-in rewards may be added in future versions.
+### Custom rewards
+
+Subclass `BaseReward` (`gl_gym.components.rewards`) and implement `compute_reward(ctx: RewardContext) -> tuple[float, dict]`. The `RewardContext` gives access to current/previous state, controls, parameters, weather, observations, and constraint bounds. Pass the class via `reward_fn`:
+
+```python
+env = gym.make("gl_gym/GreenLightTomato-v0", reward_fn=MyReward, reward_kwargs={...})
+```
+
+See `gl_gym/components/rewards.py` for the full `RewardContext` fields and the `GreenhouseReward` implementation.
 
 ---
 
-## Custom Rewards
+## Parameter Sampling
 
-You can provide your own reward function by subclassing `BaseReward`.
+The GreenLight model has 208 parameters. GL-Gym supports three parameter providers via `parameter_provider`:
 
-### Required interface
+- **`"fixed"`** (default) — nominal values. Override at reset: `env.reset(options={"parameter_overrides": {"lamp_power": 200.0}})`.
+- **`"randomized"`** — sample specified parameters from configurable distributions at each `reset()`.
+- **`"set"`** — cycle through a predefined list of parameter vectors for controlled evaluation.
 
-```python
-from gl_gym.components.rewards import BaseReward
-from gl_gym.core.types import RewardContext
-
-class MyReward(BaseReward):
-    def __init__(self, p, dt, **kwargs):
-        # p: model parameter vector (np.ndarray)
-        # dt: solver timestep in seconds (int)
-        ...
-
-    def compute_reward(self, ctx: RewardContext) -> tuple[float, dict[str, float]]:
-        # ctx provides: x, x_prev, u, p, d, obs, timestep, constraints, etc.
-        reward = ...
-        info = {"my_metric": ...}
-        return reward, info
-```
-
-The `RewardContext` dataclass gives access to:
-
-
-| Field              | Type         | Description                                |
-| ------------------ | ------------ | ------------------------------------------ |
-| `t`                | `int`        | Current timestep                           |
-| `dt`               | `int`        | Solver timestep (seconds)                  |
-| `x`                | `np.ndarray` | Current state vector (28,)                 |
-| `x_prev`           | `np.ndarray` | Previous state vector                      |
-| `u`                | `np.ndarray` | Full control input vector (6,)             |
-| `p`                | `np.ndarray` | Model parameter vector (208,)              |
-| `d`                | `np.ndarray` | Weather disturbance matrix (all timesteps) |
-| `obs`              | `dict`       | Current observations dict                  |
-| `day_of_year`      | `float`      | Current day of year                        |
-| `hour_of_day`      | `float`      | Current hour of day                        |
-| `constraints_low`  | `np.ndarray` | Lower climate constraint bounds            |
-| `constraints_high` | `np.ndarray` | Upper climate constraint bounds            |
-
-
-### Injecting a custom reward
-
-Pass a class, instance, or factory callable via `reward_fn`:
-
-```python
-env = gym.make(
-    "gl_gym/GreenLightTomato-v0",
-    reward_fn=MyReward,
-    reward_kwargs={"my_param": 0.5},
-)
-```
-
----
-
-## Custom Observation Modules
-
-### Writing a custom module
-
-Subclass `BaseObservations` from `gl_gym.components.observations`:
-
-```python
-import numpy as np
-from gymnasium import spaces
-from gl_gym.components.observations import BaseObservations
-from gl_gym.core.types import StepContext
-
-class FruitGrowthObservations(BaseObservations):
-    @property
-    def key(self) -> str:
-        return "fruit_growth"
-
-    @property
-    def space(self) -> spaces.Box:
-        return spaces.Box(low=-1e6, high=1e6, shape=(2,), dtype=np.float32)
-
-    def compute_obs(self, ctx: StepContext) -> np.ndarray:
-        fruit_weight = float(ctx.x[25])
-        growth_rate = float(ctx.x[25] - ctx.x_prev[25])
-        return np.array([fruit_weight, growth_rate], dtype=np.float32)
-```
-
-### Required interface
-
-
-| Property/Method    | Returns                | Description                                   |
-| ------------------ | ---------------------- | --------------------------------------------- |
-| `key` (property)   | `str`                  | Unique name used as the Dict key              |
-| `space` (property) | `gymnasium.spaces.Box` | Shape and bounds of this module's observation |
-| `compute_obs(ctx)` | `np.ndarray`           | Observation values for the current step       |
-
-
-The `StepContext` dataclass provides: `t`, `dt`, `Np`, `x`, `x_prev`, `u`, `p`, `d`, `hour_of_day`, `day_of_year`.
-
-### Using custom observation modules
-
-```python
-env = gym.make(
-    "gl_gym/GreenLightTomato-v0",
-    observation_modules=[
-        "IndoorClimateObservations",
-        FruitGrowthObservations,
-        "TimeObservations",
-    ],
-)
-```
-
-> **Note:** If the default `GreenhouseReward` is used, `IndoorClimateObservations` must be included in the observation modules, because the reward reads from `ctx.obs["IndoorClimateObservations"]` to compute climate penalties.
-
----
-
-## Parameter Sampling and Domain Randomization
-
-The GreenLight model has 208 parameters describing the greenhouse structure, crop physiology, and climate physics.
-GL-Gym supports three parameter providers, configured via the `parameter_provider` argument.
-
-### Fixed (default)
-
-All parameters stay at their nominal values. Optionally override specific parameters at reset time:
-
-```python
-env = gym.make("gl_gym/GreenLightTomato-v0", parameter_provider="fixed")
-obs, info = env.reset(options={
-    "parameter_overrides": {"lamp_power": 200.0}
-})
-```
-
-### Randomized
-
-Sample specified parameters from configurable distributions at each `reset()`. Unspecified parameters remain at nominal values:
+### Randomized example
 
 ```python
 env = gym.make(
@@ -447,7 +322,6 @@ env = gym.make(
         "sample_specs": {
             "max_heating_power": {"dist": "relative_uniform", "low_frac": 0.8, "high_frac": 1.2},
             "lamp_power": {"dist": "uniform", "low": 80.0, "high": 200.0},
-            "max_co2_dosing": {"dist": "relative_normal", "mean_frac": 1.0, "std_frac": 0.1},
         }
     },
 )
@@ -466,25 +340,7 @@ env = gym.make(
 | `choice`           | `values`                | Uniformly pick from a list             |
 
 
-### Set (deterministic evaluation)
-
-Cycle through a predefined list of parameter vectors. Useful for controlled ablations:
-
-```python
-env = gym.make(
-    "gl_gym/GreenLightTomato-v0",
-    parameter_provider="set",
-    parameter_provider_kwargs={
-        "parameter_sets": [p_vec_1, p_vec_2, p_vec_3],
-        "default_index": 0,
-    },
-)
-obs, info = env.reset(options={"parameter_set_index": 1})
-```
-
 ### Available named parameters
-
-The default parameter registry (`TOMATO_PARAMETER_REGISTRY`) exposes these named parameters for sampling and overrides:
 
 
 | Name                       | Index | Bounds     | Unit    |
@@ -496,122 +352,49 @@ The default parameter registry (`TOMATO_PARAMETER_REGISTRY`) exposes these named
 | `lamp_power`               | 172   | [50, 400]  | W/m²    |
 
 
-To randomize additional parameters, extend `TOMATO_PARAMETER_REGISTRY` in `gl_gym/configs/greenlight_parameters.py` by adding more `ParameterDef` entries.
+To add more, extend `TOMATO_PARAMETER_REGISTRY` in `gl_gym/configs/greenlight_parameters.py`.
 
 ---
 
-## Weather Sampling
+## Weather
 
-Weather scenarios determine the outdoor climate driving the simulation. A scenario is defined by a **(location, growth_year, start_day)** tuple.
+Weather scenarios define the outdoor climate and are identified by a **(location, growth_year, start_day)** tuple.
 
-### Fixed (default)
+### Bundled data
 
-Every episode uses the same scenario:
+GL-Gym ships with weather CSVs in `gl_gym/data/weather/` for **Amsterdam**, **Beijing**, **Bleiswijk**, **London**, **NewYork**, and **Reykjavik** (years vary by location).
 
-```python
-env = gym.make(
-    "gl_gym/GreenLightTomato-v0",
-    weather_scenario_sampler="fixed",
-    weather_scenario_sampler_kwargs={
-        "location": "Amsterdam",
-        "growth_year": 2010,
-        "start_day": 59,
-    },
-)
-```
+### Weather scenario samplers
 
-### Random
+Configure via `weather_scenario_sampler`:
 
-Sample location, year, and start day uniformly at each `reset()`:
+- **`"fixed"`** (default) — same scenario every episode.
+- **`"random"`** — sample location, year, and start day uniformly at each `reset()`.
+- **`"cycling"`** — deterministically cycle through a fixed list of scenarios.
+
+Any sampler can be overridden at reset: `env.reset(options={"scenario": {"location": "Amsterdam", "growth_year": 2010, "start_day": 59}})`.
 
 ```python
 env = gym.make(
     "gl_gym/GreenLightTomato-v0",
     weather_scenario_sampler="random",
     weather_scenario_sampler_kwargs={
-        "locations": ["Amsterdam", "London", "NewYork"],
-        "growth_years": [2015, 2016, 2017, 2018, 2019],
+        "locations": ["Amsterdam", "London"],
+        "growth_years": [2015, 2016, 2017],
         "start_days": range(1, 120),
     },
 )
 ```
 
-### Cycling
+### Custom weather data
 
-Deterministically cycle through a fixed list of scenarios, useful for reproducible evaluation:
-
-```python
-env = gym.make(
-    "gl_gym/GreenLightTomato-v0",
-    weather_scenario_sampler="cycling",
-    weather_scenario_sampler_kwargs={
-        "scenarios": [
-            {"location": "Amsterdam", "growth_year": 2018, "start_day": 59},
-            {"location": "London", "growth_year": 2019, "start_day": 59},
-            {"location": "NewYork", "growth_year": 2020, "start_day": 59},
-        ]
-    },
-)
-```
-
-### Override at reset
-
-Regardless of the configured sampler, you can force a specific scenario at reset:
-
-```python
-obs, info = env.reset(options={
-    "scenario": {"location": "Beijing", "growth_year": 2015, "start_day": 30}
-})
-```
-
----
-
-## Using Custom Weather Data
-
-### Default bundled data
-
-GL-Gym ships with weather data for several locations under `gl_gym/data/weather/`:
-
-```
-gl_gym/data/weather/
-├── Amsterdam/        # 2001–2020
-├── Beijing/          # 2001–2020
-├── Bleiswijk/        # GL2009, GL2010, KASPRO2023
-├── London/           # 2001–2020
-├── NewYork/          # 2001–2020
-└── Reykjavik/        # 2001–2020
-```
-
-### Pointing to a custom directory
-
-Pass `weather_data_dir` to use your own data:
+Point to your own directory with `weather_data_dir`:
 
 ```python
 env = gym.make(
     "gl_gym/GreenLightTomato-v0",
     weather_data_dir="/path/to/my/weather_data",
-    weather_scenario_sampler_kwargs={
-        "location": "MyCity",
-        "growth_year": 2023,
-        "start_day": 1,
-    },
-)
-```
-
-Alternatively, construct a `WeatherRepository` and pass it directly:
-
-```python
-from gl_gym.components.weather import WeatherRepository
-from gl_gym.environments.utils import load_weather_data
-
-repo = WeatherRepository(
-    weather_data_dir="/path/to/my/weather_data",
-    load_weather_data_fn=load_weather_data,
-)
-
-env = gym.make(
-    "gl_gym/GreenLightTomato-v0",
-    weather_repository=repo,
+    weather_scenario_sampler_kwargs={"location": "MyCity", "growth_year": 2023, "start_day": 1},
 )
 ```
 
@@ -706,9 +489,9 @@ Using fixed weather sets ensures that different policies are evaluated under ide
 
 ---
 
-## Reproducing the AgriControl Experiments
+## Training and evaluating RL agents using Stable Baselines 3
 
-The repository includes the full training and evaluation pipeline used in the [AgriControl conference paper](https://doi.org/10.1016/j.ifacol.2025.11.827). These scripts require the training dependencies:
+The repository includes the full training and evaluation pipeline of RL agents. These scripts require the training dependencies:
 
 ```bash
 pip install -e ".[train]"
@@ -783,6 +566,8 @@ GreenLightEnv:
 
 Configs for `sac` and `recurrentppo` follow the same pattern. See `configs/README.md` for the full reference.
 
+
+> Note: Use the repository branch AgriControl-2025 for the complete experiment/evaluation pipeline used in the [AgriControl conference paper](https://doi.org/10.1016/j.ifacol.2025.11.827).
 ---
 
 ## Rule-Based Baseline Controller
