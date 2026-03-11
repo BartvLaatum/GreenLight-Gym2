@@ -36,7 +36,7 @@ This repository was used in the following accepted AgriControl 2025 conference p
 - [Parameter Sampling](#parameter-sampling)
 - [Weather](#weather)
 - [Evaluation Reproducibility](#evaluation-reproducibility)
-- [Reproducing the AgriControl Experiments](#Training and evaluating RL agents using Stable Baselines 3)
+- [Training and Evaluating RL Agents](#Training-and-evaluating-RL-agents)
 - [Rule-Based Baseline Controller](#rule-based-baseline-controller)
 - [Development and Extensibility](#development-and-extensibility)
 - [Citation](#citation)
@@ -489,7 +489,7 @@ Using fixed weather sets ensures that different policies are evaluated under ide
 
 ---
 
-## Training and evaluating RL agents using Stable Baselines 3
+## Training and evaluating RL agents
 
 The repository includes the full training and evaluation pipeline of RL agents. These scripts require the training dependencies:
 
