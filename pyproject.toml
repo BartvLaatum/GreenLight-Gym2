@@ -56,6 +56,6 @@ include = ["gl_gym*"]
 
 [tool.setuptools.package-data]
 "gl_gym" = [
-  "data/weather/**/*.csv",
+  "data/weather/Amsterdam/*.csv",
   "configs/envs/*.yml",
 ]
