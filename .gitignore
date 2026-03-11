@@ -1,6 +1,7 @@
 .vscode/
 __pycache__/
 build/
+dist/
 data/
 gl_gym.egg-info/
 figures/

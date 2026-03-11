@@ -57,6 +57,12 @@ This repository was used in the following accepted AgriControl 2025 conference p
 - Python >= 3.11
 - Recommended: `conda` or `venv` for environment management.
 
+### Install from PyPI
+
+```bash
+pip install gl-gym
+```
+
 ### Install from source
 
 ```bash
@@ -65,14 +71,12 @@ cd GreenLight-Gym2
 pip install -e .
 ```
 
-This installs `gl_gym` in editable mode with the core dependencies needed to run the environment.
-
 ### Install with training dependencies
 
 To also install [Stable-Baselines3](https://stable-baselines3.readthedocs.io/), PyTorch, W&B, and other training utilities:
 
 ```bash
-pip install -e ".[train]"
+pip install "gl-gym[train]"
 ```
 
 ---
