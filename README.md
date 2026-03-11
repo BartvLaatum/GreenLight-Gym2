@@ -34,6 +34,8 @@ An RL agent controls heating, CO2 dosing, ventilation, thermal and blackout scre
 The underlying crop-climate model is the validated [GreenLight](https://github.com/davkat1/GreenLight) greenhouse model, implemented in [CasADi](https://web.casadi.org/) for fast numerical integration.
 
 
+
+
 | Public envid                 | Task                                                                                              |
 | ---------------------------- | ------------------------------------------------------------------------------------------------- |
 | `gl_gym/GreenLightTomato-v0` | 60-day greenhouse tomato production control with profit-based reward and indoor climate penalties |
@@ -64,6 +66,8 @@ pip install gl-gym
 ```
 
 ### Install from source
+
+Install from the repo, if you want basic usage demos, training and evaluation scripts, as well as access to the a standardized Python script for fetching new weather data.
 
 ```bash
 git clone https://github.com/BartvLaatum/GreenLight-Gym2.git
