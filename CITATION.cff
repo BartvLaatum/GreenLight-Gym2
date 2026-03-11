@@ -1,8 +1,26 @@
-# CITATION.cff
 cff-version: 1.2.0
-message: "If you use this software or refer to this paper in your work, please cite it as below."
+message: "If you use this work, please cite it as below."
+title: "GreenLight-Gym: Reinforcement learning benchmark environment for control of greenhouse production systems"
+type: conference-paper
+authors:
+  - family-names: "van Laatum"
+    given-names: "Bart"
+  - family-names: "van Henten"
+    given-names: "Eldert J."
+  - family-names: "Boersma"
+    given-names: "Sjoerd"
+doi: "10.1016/j.ifacol.2025.11.827"
+url: "https://www.sciencedirect.com/science/article/pii/S2405896325025339"
+keywords:
+  - "Greenhouse control"
+  - "reinforcement learning"
+  - "greenhouse modeling"
+notes: >
+  Published in IFAC-PapersOnLine (Volume 59, Issue 23, 2025, pp. 437–442),
+  proceedings of the 8th IFAC Conference on Sensing, Control and Automation Technologies for Agriculture
+  (AGRICONTROL 2025), Davis, California, USA, August 27–29, 2025.
 preferred-citation:
-  type: Preprint
+  type: conference-paper
   title: "GreenLight-Gym: Reinforcement learning benchmark environment for control of greenhouse production systems"
   authors:
     - family-names: "van Laatum"
@@ -12,11 +30,11 @@ preferred-citation:
     - family-names: "Boersma"
       given-names: "Sjoerd"
   year: 2025
-  month: 5
-  date-published: 2025-05-10
-  eprint: "2410.05336"
-  archive-prefix: "arXiv"
-  primary-class: "eess.SY"
-  url: "https://arxiv.org/abs/2410.05336"
-  languages:
-    - en
+  doi: "10.1016/j.ifacol.2025.11.827"
+  journal: "IFAC-PapersOnLine"
+  volume: 59
+  issue: 23
+  start: 437
+  end: 442
+  collection-title: "8th IFAC Conference on Sensing, Control and Automation Technologies for Agriculture (AGRICONTROL 2025)"
+  collection-type: proceedings
