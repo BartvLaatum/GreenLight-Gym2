@@ -2,7 +2,31 @@
 
 **Gymnasium environment for reinforcement learning control of greenhouse tomato crop production using the GreenLight model.**
 
+<p align="center">
+  <img src="./images/GLGymArchitecture2.svg" alt="GreenLight" width="700"/>
+</p>
 
+
+## Table of Contents
+
+- [Summary](#summary)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Public Environment: GreenLightTomato-v0](#public-environment-greenlighttomato-v0)
+- [Observation Space](#observation-space)
+- [Action Space](#action-space)
+- [Reward Function](#reward-function)
+- [Parameter Sampling](#parameter-sampling)
+- [Weather](#weather)
+- [Evaluation Reproducibility](#evaluation-reproducibility)
+- [Training and Evaluating RL Agents](#training-and-evaluating-RL-agents)
+- [Rule-Based Baseline Controller](#rule-based-baseline-controller)
+- [Development and Extensibility](#development-and-extensibility)
+- [Citation](#citation)
+
+---
+
+## Summary
 
 GL-Gym provides a [Gymnasium](https://gymnasium.farama.org/)-compatible environment that simulates a high-tech greenhouse growing tomatoes.  
 An RL agent controls heating, CO2 dosing, ventilation, thermal and blackout screens, and supplemental lighting to maximise crop profit while respecting indoor climate constraints.
@@ -25,23 +49,6 @@ This repository was used in the following accepted AgriControl 2025 conference p
 
 ---
 
-## Table of Contents
-
-- [Installation](#installation)
-- [Quick Start](#quick-start)
-- [Public Environment: GreenLightTomato-v0](#public-environment-greenlighttomato-v0)
-- [Observation Space](#observation-space)
-- [Action Space](#action-space)
-- [Reward Function](#reward-function)
-- [Parameter Sampling](#parameter-sampling)
-- [Weather](#weather)
-- [Evaluation Reproducibility](#evaluation-reproducibility)
-- [Training and Evaluating RL Agents](#Training-and-evaluating-RL-agents)
-- [Rule-Based Baseline Controller](#rule-based-baseline-controller)
-- [Development and Extensibility](#development-and-extensibility)
-- [Citation](#citation)
-
----
 
 ## Installation
 
