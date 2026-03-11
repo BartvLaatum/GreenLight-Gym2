@@ -1,17 +1,18 @@
 import unittest
 import numpy as np
-from gl_gym.environments.tomato_env import TomatoEnv
-from gl_gym.RL.utils import load_env_params
+from gl_gym.environments.greenlight_env import GreenLightEnv
+from RL.utils import load_env_params, build_env_kwargs
 
-class TestTomatoEnv(unittest.TestCase):
+class TestGreenLightEnv(unittest.TestCase):
     def setUp(self):
         # Set up environment parameters
-        self.env_id = "TomatoEnv"
-        self.env_config_path = "gl_gym/configs/envs/"
-        self.env_base_params, self.env_specific_params = load_env_params(self.env_id, self.env_config_path)
+        self.env_id = "GreenLightEnv"
+        self.env_config_path = "configs/envs/"
+        self.env_kwargs = load_env_params(self.env_id, self.env_config_path)
+        self.env_kwargs, _ = build_env_kwargs(self.env_kwargs)
 
         # Initialize environment
-        self.env = TomatoEnv(base_env_params=self.env_base_params, **self.env_specific_params)
+        self.env = GreenLightEnv(**self.env_kwargs)
         self.env.reset(seed=42)
 
     def test_reward_normalisation(self):
@@ -33,7 +34,12 @@ class TestTomatoEnv(unittest.TestCase):
         """Test environment reset functionality"""
         obs, info = self.env.reset(seed=42)
         # Check observation space
-        self.assertEqual(len(obs), self.env.observation_space.shape[0])
+        total_obs_size = sum(
+            np.prod(space.shape) if hasattr(space, "shape") and space.shape is not None else 1
+            for space in self.env.observation_space.spaces.values()
+        )
+
+        self.assertEqual(len(obs), total_obs_size)
 
         # Check initial state
         self.assertEqual(self.env.timestep, 0)
@@ -46,9 +52,13 @@ class TestTomatoEnv(unittest.TestCase):
         # Take a random action
         action = self.env.action_space.sample()
         obs, reward, terminated, truncated, info = self.env.step(action)
-        
+
         # Check observation
-        self.assertEqual(len(obs), self.env.observation_space.shape[0])
+        total_obs_size = sum(
+            np.prod(space.shape) if hasattr(space, "shape") and space.shape is not None else 1
+            for space in self.env.observation_space.spaces.values()
+        )
+        self.assertEqual(len(obs), total_obs_size)
 
         # Check reward is float
         self.assertIsInstance(reward, (int, float))

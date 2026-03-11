@@ -1,0 +1,60 @@
+GreenLightEnv:
+  ### GreenLight model arguments ###
+  num_params: 208                 # number of model parameters
+  nx: 28                          # number of states
+  nu: 6                           # number of control inputs
+  nd: 10                          # number of weather disturbances
+  u_min: [0, 0, 0, 0, 0, 0]
+  u_max: [1, 1, 1, 1, 1, 1]
+
+  ### GreenLight environment arguments ###
+  dt: 900                         # [s] time step for the underlying GreenLight solver
+  delta_u_max: 0.1                # max change rate in control inputs
+  pred_horizon: 0.5               # [days] number of future weather predictions
+  season_length: 60               # number of days to simulate
+
+  ### GreenLightEnv arguments ###
+  controlled_inputs: ["uBoil", "uCO2", "uThScr", "uVent", "uLamp", "uBlScr"]
+  normalize_actions: True
+
+  observation_modules: [                  # observation modules to use
+    BasicCropObservations, 
+    ControlObservations, 
+    IndoorClimateObservations,   
+    WeatherObservations,
+    TimeObservations,
+  ]
+
+  weather_scenario_sampler: "fixed"
+  weather_scenario_sampler_kwargs:
+    location: Amsterdam
+    growth_year: 2010
+    start_day: 59
+
+  weather_repository_kwargs:
+    weather_data_dir: gl_gym/data/weather/
+    load_weather_data_fn: load_weather_data
+
+  eval_scenarios:
+    - {location: Amsterdam, growth_year: 2010, start_day: 59}
+
+  constraints:
+    co2_min: 300.         # lower bound on CO2 concentration                [ppm]        0
+    co2_max: 1600.        # upper bound on CO2 concentration              [ppm]        2.75e-3
+    temp_min: 15.         # lower bound on temperature                    [°C]         6.5
+    temp_max: 34.         # upper bound on temperature                    [°C]        20
+    rh_min: 50.            # lower bound on relative humidity             [#]          0
+    rh_max: 85.          # upper bound on relative humidity               [#]         70
+  
+  reward_fn: GreenhouseReward       # reward function to use
+  reward_kwargs:
+    elec_price: 0.3             # €/kWh
+    heating_price: 0.09         # €/kWh
+    co2_price: 0.3              # €/kg
+    fruit_price: 1.6            # €/kg
+    dmfm: 0.065                 # dry matter fresh matter ratio
+    pen_lamp: 0.1
+
+  parameter_provider: fixed
+  parameter_provider_kwargs:
+    {}

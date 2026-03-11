@@ -9,7 +9,7 @@ project_name="AgriControl"
 for i in "${!uncertainty_scales[@]}"; do
     scale="${uncertainty_scales[$i]}"
     echo "Evaluating rule-based baseline with uncertainty scale: $scale"
-    python gl_gym/experiments/evaluate_baseline.py --project $project_name --env_id TomatoEnv --mode stochastic --uncertainty_scale "$scale" 
+    python gl_gym/experiments/evaluate_baseline.py --project $project_name --env_id GreenLightEnv --mode stochastic --uncertainty_scale "$scale" 
 done
 
 echo "All evaluations completed!"

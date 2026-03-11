@@ -48,7 +48,7 @@ def load_data(project, mode, algorithm, growth_year, start_day, location, model_
     -------
     >>> data = load_data("project1", "mode1", "algo1", "2023", "day1", "weatherlocationA")
     """
-    base_path = os.path.join("data", project, mode, algorithm)
+    base_path = os.path.join("results", project, mode, algorithm)
     noise_levels = [d for d in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, d))]
     noise_levels.sort(key=lambda x: float(x))
     print(noise_levels)
@@ -73,7 +73,7 @@ def load_data(project, mode, algorithm, growth_year, start_day, location, model_
             print(f"No matching CSV file found in {folder_path}")
     return data_dict
 
-def plot_cumulative_reward(final_metrics, col2plot, ylabel=None):
+def plot_cumulative_reward(final_metrics, col2plot, ylabel=None, shade=False):
 
     fig, ax = plt.subplots(figsize=(WIDTH, HEIGHT), dpi=300)
     colors =[ "#003366", "#A60000", "grey"]
@@ -83,10 +83,27 @@ def plot_cumulative_reward(final_metrics, col2plot, ylabel=None):
                 # ax.errorbar(final_rewards.index, final_rewards[f"Cumulative {col2plot}"], yerr=final_rewards[f"std {col2plot}"], fmt="o-", markersize=4, color=colors[i], label=algorithm.upper(), capsize=5)
 
         mean = final_rewards[f"Cumulative {col2plot}"]
-        std = (final_rewards[f"std {col2plot}"])
+        # Compute the 99% confidence interval (mean ± 2.576 * std)
+        std = 2.576 * final_rewards[f"std {col2plot}"]
         ax.plot(final_rewards.index, mean, '-', color=colors[i], label=labels[i], markersize=4)
-        ax.fill_between(final_rewards.index, mean-std, mean+std, alpha=0.2, color=colors[i])
+        if not shade:
+            ax.fill_between(final_rewards.index, mean-std, mean+std, alpha=0.2, color=colors[i])
     
+    if shade:
+        ppo_rewards = final_metrics["ppo"][f"Cumulative {col2plot}"]
+        sac_rewards = final_metrics["sac"][f"Cumulative {col2plot}"]
+        ax.fill_between(final_rewards.index, ppo_rewards, sac_rewards,
+                        alpha=0.4, color="#DDEAFD")
+    
+        for x_idx in [0, -1]:  # first and last point
+            sac_val = sac_rewards.iloc[x_idx]
+            ppo_val = ppo_rewards.iloc[x_idx]
+            if sac_val != 0:
+                perc_diff = 100 * (ppo_val - sac_val) / sac_val
+                ax.annotate(f"{perc_diff:+.1f}%",
+                            (final_rewards.index[x_idx], ppo_val),
+                            textcoords="offset points", xytext=(10, -20),
+                            ha="center", fontsize=8, color="black",)
     ax.set_xlabel(r"Uncertainty $(\delta)$")
     if ylabel:
         ax.set_ylabel(ylabel)
@@ -95,7 +112,7 @@ def plot_cumulative_reward(final_metrics, col2plot, ylabel=None):
     ax.legend()
     plt.tight_layout()
     plt.show()
-    # fig.savefig(f"figures/AgriControl/stochastic/{col2plot}_cumulative_reward.png")
+    fig.savefig(f"{col2plot}_cumulative_reward.png")
     # fig.savefig(f"figures/AgriControl/stochastic/{col2plot}_cumulative_reward.svg", format="svg", dpi=300)
 
 def compute_cumulative_metrics(data_dict):
@@ -128,7 +145,8 @@ def compute_cumulative_metrics(data_dict):
     return final_rewards
 
 def main(args):
-    algorithms = ["ppo", "sac", "rb_baseline"]
+    # algorithms = ["ppo", "sac", "rb_baseline"]
+    algorithms = ["ppo", "sac"]
     model_names = [["hopeful-wind-295","light-wave-296","ruby-star-297","eager-resonance-298","rural-eon-300","stellar-durian-301","copper-dawn-303"],
                     ["distinctive-frost-299","stoic-moon-302","graceful-dream-304","copper-frog-305","warm-flower-306","sunny-sky-307","leafy-cloud-308"],
                     ["rb_baseline", "rb_baseline", "rb_baseline", "rb_baseline", "rb_baseline", "rb_baseline", "rb_baseline"]]
@@ -140,12 +158,12 @@ def main(args):
         final_metrics[algorithm] = final_rewards
 
     # final_rewards = compute_cumulative_metrics(data_dict)
-    plot_cumulative_reward(final_metrics, col2plot="Rewards", ylabel="Cumulative reward")
-    plot_cumulative_reward(final_metrics, col2plot="EPI", ylabel=r"Cumulative EPI (EU/m$^2$)")
-    plot_cumulative_reward(final_metrics, col2plot="temp_violation")
-    plot_cumulative_reward(final_metrics, col2plot="co2_violation")
-    plot_cumulative_reward(final_metrics, col2plot="rh_violation")
-    plot_cumulative_reward(final_metrics, col2plot="Penalty", ylabel="Cumulative penalty")
+    plot_cumulative_reward(final_metrics, col2plot="Rewards", ylabel="Cumulative reward", shade=False)
+    # plot_cumulative_reward(final_metrics, col2plot="EPI", ylabel=r"Cumulative EPI (EU/m$^2$)")
+    # plot_cumulative_reward(final_metrics, col2plot="temp_violation")
+    # plot_cumulative_reward(final_metrics, col2plot="co2_violation")
+    # plot_cumulative_reward(final_metrics, col2plot="rh_violation")
+    # plot_cumulative_reward(final_metrics, col2plot="Penalty", ylabel="Cumulative penalty")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Plot cost metrics from different models")

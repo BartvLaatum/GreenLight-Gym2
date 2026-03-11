@@ -9,7 +9,6 @@ from pandas._typing import ArrayLike
 import pandas as pd
 from scipy.interpolate import PchipInterpolator
 
-
 def init_state(d0, rhMax=90, time_in_days=0):
     # Initialize the state as a NumPy array of zeros with the appropriate size
     state = np.zeros(28)  # Assuming 28 elements based on the original function
@@ -46,29 +45,29 @@ def init_state(d0, rhMax=90, time_in_days=0):
     return state
 
 def load_weather_data(
-                        weatherDataDir: str,
+                        weather_data_dir: str,
                         location: str,
-                        growthYear: int,
-                        startDay: int,
-                        nDays: int,
-                        predHorizon: int,
+                        growth_year: int,
+                        start_day: int,
+                        n_days: int,
+                        pred_horizon: int,
                         h: float,
-                        nd: int
+                        nd: int,
                     ) -> np.ndarray:
     """
-    Loads in rawweather data from matlab file and converts it to values GreenLight model uses in numpy array.
+    Loads in raw_weather data from matlab file and converts it to values GreenLight model uses in numpy array.
     If the solver requires data on a higher frequency we interpolate between available weather data.
     Time interval of matlab data usually is 5 minutes.
-    The rawweather data is a file with 9 columns, which we convert to 7 columns used by the GreenLight.
+    The raw_weather data is a file with 9 columns, which we convert to 7 columns used by the GreenLight.
 
     Args:
-        weatherDataDir  - path to raw weather data
+        weather_dataDir  - path to raw weather data
         location        - location of the weather data
         growthYear      - start of the growth year of the simulation
         startDay        - at which day of the year do we start the simulation
         nDays           - how many days do we simulate forward in time
         predHorizon     - prediction horizon [days]
-        h               - sample time of the solver in seconds
+        dt               - sample time of the solver in seconds
         nd              - number of weather variables
     
     Returns:
@@ -84,73 +83,73 @@ def load_weather_data(
         d[8]: isDay         Whether it is day or night [0,1]
         d[9]: isDaySmooth   Whether it is day or night [0,1] with a smooth transition
     """
-    weatherDataPath = join(join(weatherDataDir, location), str(growthYear)) + ".csv"
+    weather_data_path = join(weather_data_dir, location, str(growth_year)) + ".csv"
 
     c = 86400      # seconds in a day
     CO2_PPM = 400  # assumed constant outdoor co2 concentration [ppm]
-    rawWeather = pd.read_csv(weatherDataPath, sep=",")
+    raw_weather = pd.read_csv(weather_data_path, sep=",")
 
-    time = rawWeather["time"].values    # time since start of the year in [s]
+    time = raw_weather["time"].values    # time since start of the year in [s]
     dt = np.mean(np.diff(time-time[0])) # sample period of data [s]
-    N0 = int(np.ceil(startDay*c/dt))    # Start index
-    Ns = int(np.ceil(nDays*c/dt))       # Number of samples we need from regular data
-    Np = int(np.ceil(predHorizon*c/dt))+1 # Number of samples into the future we need from regular data
+    N0 = int(np.ceil(start_day*c/dt))    # Start index
+    Ns = int(np.ceil(n_days*c/dt))       # Number of samples we need from regular data
+    Np = int(np.ceil(pred_horizon*c/dt))+1 # Number of samples into the future we need from regular data
 
     # check whether we exceed data length and we are in the final season
     if N0+Ns+Np > len(time):
-        rawWeather = expandWeatherData(weatherDataDir, rawWeather, location, growthYear, time, dt)
-    weatherData = np.zeros((Ns+Np, nd))                                         # preallocate weather data matrix
-    time = rawWeather["time"].values[N0:N0+Ns+Np]                               # time since start of the year in [s]
-    weatherData[:, 0] = rawWeather["global radiation"][N0:N0+Ns+Np]             # iGlob
-    weatherData[:, 1] = rawWeather["air temperature"][N0:N0+Ns+Np]              # tOut
-    vpDensity = rh2vaporDens(weatherData[:, 1], rawWeather["RH"][N0:N0+Ns+Np])  # vp Density
-    weatherData[:,2] = vaporDens2pres(weatherData[:, 1], vpDensity)             # vpOut
-    weatherData[:,3] = co2ppm2dens(weatherData[:, 1], CO2_PPM)*1e6              # co2Out (converted from kg/m^3 to mg/m^3)
-    weatherData[:,4] = rawWeather["wind speed"][N0:N0+Ns+Np]                    # wind
-    weatherData[:,5] = rawWeather["sky temperature"][N0:N0+Ns+Np]               # tSky
-    weatherData[:,6] = soilTempNl(rawWeather["time"][N0:N0+Ns+Np])              # tSoOut
-    weatherData[:, 7] = dailLightSum(time, weatherData[:,0], c)                 # daily sun radiation sum [MJ m^{-2} day^{-1}]
-    weatherData[:, 8], weatherData[:,9] = computeisDay(weatherData[:, 0], dt)   # isDay, isDaySmooth
+        raw_weather = expand_weather_data(weather_data_dir, raw_weather, location, growth_year, time, dt)
+    weather_data = np.zeros((Ns+Np, nd))                                         # preallocate weather data matrix
+    time = raw_weather["time"].values[N0:N0+Ns+Np]                               # time since start of the year in [s]
+    weather_data[:, 0] = raw_weather["global radiation"][N0:N0+Ns+Np]             # iGlob
+    weather_data[:, 1] = raw_weather["air temperature"][N0:N0+Ns+Np]              # tOut
+    vpDensity = rh2vaporDens(weather_data[:, 1], raw_weather["RH"][N0:N0+Ns+Np])  # vp Density
+    weather_data[:,2] = vaporDens2pres(weather_data[:, 1], vpDensity)             # vpOut
+    weather_data[:,3] = co2ppm2dens(weather_data[:, 1], CO2_PPM)*1e6              # co2Out (converted from kg/m^3 to mg/m^3)
+    weather_data[:,4] = raw_weather["wind speed"][N0:N0+Ns+Np]                    # wind
+    weather_data[:,5] = raw_weather["sky temperature"][N0:N0+Ns+Np]               # tSky
+    weather_data[:,6] = soilTempNl(raw_weather["time"][N0:N0+Ns+Np])              # tSoOut
+    weather_data[:, 7] = dailLightSum(time, weather_data[:,0], c)                 # daily sun radiation sum [MJ m^{-2} day^{-1}]
+    weather_data[:, 8], weather_data[:,9] = computeisDay(weather_data[:, 0], dt)   # isDay, isDaySmooth
 
     # number of samples required for the solver
     ns = int((dt/h) * (Ns+Np))
 
     # interpolate and resample
-    interpolation = PchipInterpolator(time, weatherData)
+    interpolation = PchipInterpolator(time, weather_data)
     timeRes = np.linspace(time[0], time[-1], ns)
-    weatherDataResampled = interpolation(timeRes)
+    weather_dataResampled = interpolation(timeRes)
 
     # set small radiation values to zero
-    weatherDataResampled[:,0][weatherDataResampled[:, 0] < 1e-10] = 0
+    weather_dataResampled[:,0][weather_dataResampled[:, 0] < 1e-10] = 0
 
-    return weatherDataResampled
+    return weather_dataResampled
 
-def expandWeatherData(
-                    weatherDataDir: str, 
-                    rawWeather: pd.DataFrame,
+def expand_weather_data(
+                    weather_data_dir: str, 
+                    raw_weather: pd.DataFrame,
                     location: str,
-                    growthYear: int,
+                    growth_year: int,
                     time: ArrayLike,
                     dt: SupportsFloat,
-                    ) -> pd.DataFrame:
+                    ) -> np.ndarray:
     """
     Function that loads in the weather data for the next year and appends it to the current weather data.
     Required when the simulation exceeds the length of the current weather data.
     Args:
-        weatherDataDir  - path to raw weather data
-        rawWeather      - current weather data
+        weather_dataDir  - path to raw weather data
+        raw_weather      - current weather data
         location        - location of the greenhouse
         growthYear      - year of the growth season
         time            - time since start of the year in [s]
         dt              - sample period of weather data [s]
     Returns:
-        rawWeather      - weather data for the next year appended to the current weather data
+        raw_weather      - weather data for the next year appended to the current weather data
     """
-    weatherDataPath = join(join(weatherDataDir, location), str(growthYear+1)) + ".csv"
-    newRawWeather = pd.read_csv(weatherDataPath, sep=",")
-    newRawWeather["time"] += time[-1] + dt
-    rawWeather = pd.concat([rawWeather, newRawWeather.iloc[:, :]])
-    return rawWeather
+    weather_data_path = join(join(weather_data_dir, location), str(growth_year+1)) + ".csv"
+    newRaw_weather = pd.read_csv(weather_data_path, sep=",")
+    newRaw_weather["time"] += time[-1] + dt
+    raw_weather = pd.concat([raw_weather, newRaw_weather.iloc[:, :]])
+    return raw_weather
 
 def days2date(timeInDays: float, referenceDate: str):
     """
@@ -307,20 +306,6 @@ def vaporDens2pres(temp, vaporDens):
     
     return satP*rh
 
-def satVp(temp):
-    # saturated vapor pressure (Pa) at temperature temp (�C)
-    # Calculation based on 
-    #   http://www.conservationphysics.org/atmcalc/atmoclc2.pdf
-    # See also file atmoclc2.pdf
-
-    # parameters used in the conversion
-    # p = [610.78 238.3 17.2694 -6140.4 273 28.916];
-        # default value is [610.78 238.3 17.2694 -6140.4 273 28.916]
-
-        # Saturation vapor pressure of air in given temperature [Pa]
-    return 610.78* np.exp(17.2694*temp/(temp+238.3))
-
-
 def co2ppm2dens(temp, ppm):
     # CO2PPM2DENS Convert CO2 molar concetration [ppm] to density [kg m^{-3}]
 
@@ -358,6 +343,20 @@ def co2dens2ppm(temp, dens):
     P = 101325           # Pressure (assumed to be 1 atm) [Pa]
     
     return 1e6 * R * (temp + C2K) * dens / (P * M_CO2)
+
+def satVp(temp):
+    # saturated vapor pressure (Pa) at temperature temp (C)
+    # Calculation based on 
+    #   http://www.conservationphysics.org/atmcalc/atmoclc2.pdf
+    # See also file atmoclc2.pdf
+
+    # parameters used in the conversion
+    # p = [610.78 238.3 17.2694 -6140.4 273 28.916];
+        # default value is [610.78 238.3 17.2694 -6140.4 273 28.916]
+
+        # Saturation vapor pressure of air in given temperature [Pa]
+    return 610.78* np.exp(17.2694*temp/(temp+238.3))
+
 
 def vaporPres2rh(temp, vaporPres):
     return np.clip(100*vaporPres/satVp(temp), a_min=0., a_max=100.)
