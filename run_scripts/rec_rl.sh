@@ -4,7 +4,7 @@ echo "PYTHONPATH set to: $PYTHONPATH"
 
 # Run the experiment manager with command line arguments
 python gl_gym/RL/experiment_manager.py \
-    --project AgriControl \
+    --project testing \
     --env_id GreenLightEnv \
     --algorithm recurrentppo \
     --group rec-ppo-det \
