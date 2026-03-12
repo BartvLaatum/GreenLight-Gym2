@@ -8,7 +8,8 @@ version = "0.3.1"
 description = "Gymnasium environment for RL-based greenhouse tomato crop production control using the GreenLight model"
 readme = "README.md"
 requires-python = ">=3.11"
-license = "AGPL-3.0-or-later"
+license = { text = "AGPL-3.0-or-later" }
+
 authors = [{ name = "Bart van Laatum", email = "bart.vanlaatum@wur.nl" }]
 keywords = ["reinforcement learning", "greenhouse", "control", "gymnasium", "greenlight", "crop production"]
 classifiers = [
