@@ -185,11 +185,8 @@ class GreenhouseReward(BaseReward):
         Sets lamp_violation to 1 if lamps are on after 20:00,
         otherwise sets it to 0.
         """
-        if ctx.hour_of_day >= 20:
-            if ctx.u[4] > 0:
-                self.lamp_violation = 1
-        lamp_violation = 0
-        return lamp_violation
+        self.lamp_violation = int(ctx.hour_of_day >= 20 and ctx.u[4] > 0)
+        return self.lamp_violation
 
     def _control_penalty(self, ctx: RewardContext) -> tuple[float, dict[str, float]]:
         lamp_violation = self._control_violation(ctx)
