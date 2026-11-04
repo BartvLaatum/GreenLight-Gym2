@@ -111,8 +111,9 @@ def load_weather_data(
     weather_data[:, 7] = dailLightSum(time, weather_data[:,0], c)                 # daily sun radiation sum [MJ m^{-2} day^{-1}]
     weather_data[:, 8], weather_data[:,9] = computeisDay(weather_data[:, 0], dt)   # isDay, isDaySmooth
 
-    # number of samples required for the solver
-    ns = int((dt/h) * (Ns+Np))
+    # number of samples required for the solver; +1 puts the resampled grid exactly on
+    # h-second boundaries and supplies the final row the forecast horizon reads
+    ns = int((dt/h) * (Ns+Np)) + 1
 
     # interpolate and resample
     interpolation = PchipInterpolator(time, weather_data)

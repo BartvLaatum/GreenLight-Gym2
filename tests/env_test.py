@@ -91,13 +91,13 @@ class TestGreenLightEnv(unittest.TestCase):
         # Run until termination
         terminated = False
         steps = 0
-        while not terminated and steps < self.env_base_params["season_length"] * 86400 // self.env_base_params["dt"] + 1:
+        while not terminated and steps < self.env_base_params["season_length"] * 86400 // self.env_base_params["dt"]:
             action = self.env.action_space.sample()
             _, _, terminated, _, _ = self.env.step(action)
             steps += 1
 
         # Check if terminated at correct step
-        expected_steps = self.env_base_params["season_length"] * 86400 // self.env_base_params["dt"] + 1
+        expected_steps = self.env_base_params["season_length"] * 86400 // self.env_base_params["dt"]
         self.assertEqual(steps, expected_steps)
         self.assertTrue(terminated)
 
