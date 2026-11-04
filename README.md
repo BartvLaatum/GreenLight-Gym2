@@ -270,9 +270,11 @@ Where:
 
 - **Profit** = fruit fresh-weight revenue minus operating costs (heating, CO2 dosing, electricity for lighting).
 - **Climate penalties** = violations of indoor temperature, CO2, and relative humidity bounds, scaled to [0, 1].
-- **Lamp penalty** = penalizes lamp usage during restricted hours (after 20:00).
+- **Lamp penalty** = penalizes lamp usage during restricted hours (after 20:00). Disabled by default (see note below).
 
 Both profit and penalties are min-max scaled so their contributions are comparable.
+
+> **Note:** `pen_lamp` defaults to `0.0`. The lamp penalty was not part of the original experiments or the associated conference article, so it ships disabled; set `pen_lamp` to a positive value via `reward_kwargs` to enable it.
 
 ### Default reward parameters
 
@@ -284,7 +286,7 @@ Both profit and penalties are min-max scaled so their contributions are comparab
 | `elec_price`    | 0.3   | EUR/kWh                          |
 | `co2_price`     | 0.3   | EUR/kg                           |
 | `dmfm`          | 0.065 | dry-matter to fresh-matter ratio |
-| `pen_lamp`      | 0.1   | lamp violation weight            |
+| `pen_lamp`      | 0.0   | lamp violation weight (disabled by default) |
 
 
 ### Default climate constraints

@@ -53,7 +53,7 @@ GreenLightEnv:
     co2_price: 0.3              # €/kg
     fruit_price: 1.6            # €/kg
     dmfm: 0.065                 # dry matter fresh matter ratio
-    pen_lamp: 0.1
+    pen_lamp: 0.0                # disabled by default; not used in the original experiments/paper
 
   parameter_provider: fixed
   parameter_provider_kwargs:

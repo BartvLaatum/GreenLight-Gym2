@@ -36,7 +36,7 @@ register(
             "co2_price": 0.3,
             "fruit_price": 1.6,
             "dmfm": 0.065,
-            "pen_lamp": 0.1,
+            "pen_lamp": 0.0,
         },
         "weather_scenario_sampler": "fixed",
         "weather_scenario_sampler_kwargs": {
