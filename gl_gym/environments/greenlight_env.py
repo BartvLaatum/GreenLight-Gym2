@@ -137,6 +137,7 @@ class GreenLightEnv(gym.Env):
         Function that checks whether the simulation has reached a terminal state.
         Terminal states are reached when the simulation has reached the end of the growing season.
         """
+        # timestep counts completed intervals, so it reaches N exactly when the season is done
         if self.timestep >= self.N:
             return True
         return False
@@ -249,6 +250,9 @@ class GreenLightEnv(gym.Env):
             print("Error in ODE approximation")
             self.truncated = True
 
+        # interval [timestep, timestep+1) is integrated, so index and clock advance together
+        self.timestep += 1
+
         # update time
         self.day_of_year += (self.dt/self.c) % 365
         self.hour_of_day +=  (self.dt/3600)
@@ -277,7 +281,6 @@ class GreenLightEnv(gym.Env):
 
         reward, reward_info = self.reward_fn.compute_reward(ctx)
         info = self._get_info(reward_info)
-        self.timestep += 1
 
         return (
                 self.obs,
