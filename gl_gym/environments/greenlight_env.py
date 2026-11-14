@@ -1,6 +1,7 @@
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, Union, SupportsFloat
 from collections import OrderedDict
 from pathlib import Path
+import warnings
 
 import numpy as np
 import casadi as ca
@@ -241,13 +242,16 @@ class GreenLightEnv(gym.Env):
         # convert agent's action to full control input vector that model takes as input
         self.u = self.action_scheme.to_full_control_input(action)
 
+        self.solver_failed = False
         try:
             p_dyn = ca.vertcat(ca.DM(self.weather_data[self.timestep]), self.p)
             res = self.F(x0=ca.DM(self.x), u=ca.DM(self.u), p=p_dyn)
             self.x = res["xf"].full().flatten()
 
-        except:
-            print("Error in ODE approximation")
+        except Exception as e:
+            # a solver failure isn't a terminal state, so the episode is truncated rather than terminated
+            warnings.warn(f"ODE solver failed at step {self.timestep}: {e}", RuntimeWarning)
+            self.solver_failed = True
             self.truncated = True
 
         # interval [timestep, timestep+1) is integrated, so index and clock advance together
@@ -321,6 +325,7 @@ class GreenLightEnv(gym.Env):
         return {
             **reward_info,
             "controls": self.u,
+            "solver_failed": self.solver_failed,
         }
 
     def _resolve_weather_scenario(self, options: Dict[str, Any] | None) -> WeatherScenario:
